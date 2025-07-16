@@ -11,6 +11,7 @@ import Image1 from "@/assets/images/Integral-07.png";
 
 import Head from "next/head";
 import Image from "next/image";
+import { observer } from "mobx-react-lite";
 
 const { TextArea } = Input;
 const MathJaxScript = () => (
@@ -26,8 +27,8 @@ const Equation = () => {
     equationValue: null,
   };
   const [dataRequest, setDataRequest] = useState(baseDataRequest);
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const globalStore = useGlobalStore();
+  const simulationSettingStore = useSimulationSettingStore();
   const textAreaRef = useRef<any>(null);
   const [noBorder, setNoBorder] = useState(false);
 
@@ -39,7 +40,7 @@ const Equation = () => {
         })
         .catch((err: any) => console.error("MathJax rendering error:", err));
     }
-  }, [isOpenModal]);
+  }, [globalStore.equationModalOpen]);
 
   const getCursorPosition = () => {
     if (textAreaRef.current) {
@@ -90,9 +91,14 @@ const Equation = () => {
 
   const handleAddMap = () => {
     const value = window.MathJax.tex2chtml(dataRequest.equationValue).outerHTML;
-    handleClickMapElement(value || "--");
-    setIsOpenModal(false);
-    return setDataRequest(baseDataRequest);
+    if (globalStore.equationDropPosition) {
+      globalStore.setEquationToAdd({ name: value, noBorder, id: Date.now() });
+      // globalStore.setListMapElementSelected(value, noBorder);
+    } else {
+      handleClickMapElement(value || "--");
+    }
+    globalStore.setEquationModalOpen(false);
+    setDataRequest(baseDataRequest);
   };
 
   const renderMath = (label: string) => {
@@ -211,15 +217,15 @@ const Equation = () => {
   return (
     <div id="modal-add-equation">
       <MathJaxScript />
-      <button type="button" className={`${styles["left-item-wrap"]} ${globalStore.simulation ? styles["active"] : null}`} onClick={() => setIsOpenModal(true)}>
+      <button type="button" className={`${styles["left-item-wrap"]} ${globalStore.simulation ? styles["active"] : null}`} onClick={() => globalStore.setEquationModalOpen(true)}>
         <EquationIcon />
       </button>
 
-      {isOpenModal && (
+      {globalStore.equationModalOpen && (
         <Modal
-          open={isOpenModal}
+          open={globalStore.equationModalOpen}
           onCancel={() => {
-            setIsOpenModal(false), setDataRequest(baseDataRequest);
+            globalStore.setEquationModalOpen(false); setDataRequest(baseDataRequest);
           }}
           onOk={() => handleAddMap()}
           title="Select Equation"
@@ -276,4 +282,4 @@ const Equation = () => {
   );
 };
 
-export default Equation;
+export default observer(Equation);

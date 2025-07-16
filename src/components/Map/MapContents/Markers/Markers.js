@@ -175,6 +175,22 @@ const Markers = ({setModal, setModalType}) => {
         }
     }, [globalStore.lock])
 
+    useEffect(() => {
+        if (globalStore.equationDropPosition && globalStore.equationToAdd) {
+            addMarkerMapElement(
+                map,
+                globalStore.equationDropPosition.lat,
+                globalStore.equationDropPosition.lng,
+                globalStore.lock,
+                globalStore.equationToAdd,
+                globalStore.setListMapElementRelate,
+                globalStore.setPositionOfMapElementSelected
+            );
+            globalStore.setEquationDropPosition(null);
+            globalStore.resetEquationToAdd();
+        }
+    }, [globalStore.equationDropPosition, globalStore.equationToAdd]);
+
     let drawnItemsLine = new L.FeatureGroup();
     const drawControlLine = new L.Control.Draw({
         draw: {
@@ -643,19 +659,8 @@ const Markers = ({setModal, setModalType}) => {
                     }
                     globalStore.addIconHandle('');
                 } else if (globalStore.addIcon === 'equation') {
-                    if (globalStore.moreName === 'world-as-function') {
-                        globalStore.setShowErrorInsertPerson(true);
-                    } else if (globalStore.moreName === 'population-view' || globalStore.moreName === 'population-view-with-country' || globalStore.moreName === 'population-view-principle-line') {
-                        globalStore.setShowErrorInsertFunction(true);
-                    } else if (!globalStore.mapElementSelected) {
-                        globalStore.setShowErrorInsertFunction(true);
-                    } else {
-                        addMarkerMapElement(map, latlng.lat, latlng.lng, globalStore.lock, 
-                            globalStore.listMapElementSelected.find(item => item.name === globalStore.mapEquationSelectedPrev), 
-                            globalStore.setListMapElementRelate, 
-                            globalStore.setPositionOfMapElementSelected
-                        );
-                    }
+                    globalStore.setEquationDropPosition(latlng);
+                    globalStore.setEquationModalOpen(true);
                     globalStore.addIconHandle('');
                 }
             }

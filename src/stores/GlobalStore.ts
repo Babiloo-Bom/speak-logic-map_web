@@ -110,9 +110,29 @@ export class GlobalStore {
   statusDisplayItem: number = 0;
   styleText: any = {};
 
+  equationModalOpen: boolean = false;
+  equationDropPosition: { lat: number, lng: number } | null = null;
+  equationToAdd: { name: string, noBorder: boolean, id: number } | null = null;
+
   constructor() {
     makeAutoObservable(this);
   }
+
+  setEquationModalOpen = (open: boolean) => {
+    this.equationModalOpen = open;
+  };
+
+  setEquationDropPosition = (position: { lat: number, lng: number } | null) => {
+    this.equationDropPosition = position;
+  };
+
+  setEquationToAdd = (eq: { name: string, noBorder: boolean, id: number } | null) => {
+    this.equationToAdd = eq;
+  };
+
+  resetEquationToAdd = () => {
+    this.equationToAdd = null;
+  };
 
   setStyleText = (font: string, size: number, color: string, style: string, textAlign: string, textDecoration: string, fontWeight: string) => {
     this.styleText = {
