@@ -78,21 +78,17 @@ import Image50_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_13.svg"
 import Image51_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_14.svg";
 
 
-import Image49 from "@/assets/images/Theory/Theory_Dropdown_1.svg";
-import Image50 from "@/assets/images/Theory/Theory_Dropdown_2.svg";
-import Image51 from "@/assets/images/Theory/Theory_Dropdown_3.svg";
-import Image52 from "@/assets/images/Theory/Theory_Dropdown_4.svg";
-import Image53 from "@/assets/images/Theory/Theory_Dropdown_5.svg";
-import Image54 from "@/assets/images/Theory/Theory_Dropdown_6.svg";
-import Image55 from "@/assets/images/Theory/Theory_Dropdown_7.svg";
-import Image56 from "@/assets/images/Theory/Theory_Dropdown_8.svg";
-import Image57 from "@/assets/images/Theory/Theory_Dropdown_9.svg";
-import Image58 from "@/assets/images/Theory/Theory_Dropdown_10.svg";
-import Image59 from "@/assets/images/Theory/Theory_Dropdown_11.svg";
-import Image60 from "@/assets/images/Theory/Theory_Dropdown_12.svg";
-import Image61 from "@/assets/images/Theory/Theory_Dropdown_13.svg";
-import Image62 from "@/assets/images/Theory/Theory_Dropdown_14.svg";
-import Image63 from "@/assets/images/Theory/Theory_Dropdown_16.svg";
+import Image49 from "@/assets/images/Theory/Theory_1.svg";
+import Image50 from "@/assets/images/Theory/Theory_2.svg";
+import Image51 from "@/assets/images/Theory/Theory_3.svg";
+import Image52 from "@/assets/images/Theory/Theory_4.svg";
+import Image53 from "@/assets/images/Theory/Theory_5.svg";
+import Image54 from "@/assets/images/Theory/Theory_6.svg";
+import Image55 from "@/assets/images/Theory/Theory_7.svg";
+import Image56 from "@/assets/images/Theory/Theory_8.svg";
+import Image57 from "@/assets/images/Theory/Theory_9.svg";
+import Image58 from "@/assets/images/Theory/Theory_10.svg";
+import Image59 from "@/assets/images/Theory/Theory_11.svg";
 
 // Bracket
 import AngleBarImage from "@/assets/images/Bracket/AngleBar.png";
@@ -780,21 +776,17 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "14", label: "f_i(x)", parentId: "function", image: Image25 },
 
   // Theory-related labels
-  { value: "33", label: "T_1", parentId: "theory", image: Image49 },
-  { value: "34", label: "T_2", parentId: "theory", image: Image50 },
-  { value: "35", label: "T_3", parentId: "theory", image: Image51 },
-  { value: "36", label: "T_4", parentId: "theory", image: Image52 },
-  { value: "37", label: "T_5", parentId: "theory", image: Image53 },
-  { value: "38", label: "T_6", parentId: "theory", image: Image54 },
-  { value: "39", label: "T_7", parentId: "theory", image: Image55 },
-  { value: "40", label: "T_8", parentId: "theory", image: Image56 },
-  { value: "41", label: "T_9", parentId: "theory", image: Image57 },
-  { value: "42", label: "T_{10}", parentId: "theory", image: Image58 },
-  { value: "43", label: "T", parentId: "theory", image: Image59 },
-  { value: "44", label: "T_0", parentId: "theory", image: Image60 },
-  { value: "45", label: "A", parentId: "theory", image: Image61 },
-  { value: "46", label: "A'", parentId: "theory", image: Image62 },
-  { value: "47", label: "A'_0", parentId: "theory", image: Image63 },
+  { value: "33", label: '\\large{K}_{\\large{T}}', parentId: "theory", image: Image49 },
+  { value: "34", label: '\\large{i}_{\\large{T}}',   parentId: "theory", image: Image50 },
+  { value: "35", label: '\\large{I_T}', parentId: "theory", image: Image51 },
+  { value: "36", label: '\\large{E_T}', parentId: "theory", image: Image52 },
+  { value: "37", label: '\\large{P_T}', parentId: "theory", image: Image53 },
+  { value: "38", label: '\\large{M_T}', parentId: "theory", image: Image54 },
+  { value: "39", label: '\\large{E_{S_{T}}}', parentId: "theory", image: Image55 },
+  { value: "40", label: '\\large{W_T}', parentId: "theory", image: Image56 },
+  { value: "41", label: '\\large{G_T}', parentId: "theory", image: Image57 },
+  { value: "42", label: '\\large{X_T}', parentId: "theory", image: Image58 },
+  { value: "43", label: '\\large{U_T}', parentId: "theory", image: Image59 },
 
   // Fundamental-related labels
   // { value: "48", label: "K_T", parentId: "fundamental", image: Image38 },
