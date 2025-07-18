@@ -206,11 +206,11 @@ $time-animation: var(--time-animation);
   border: 1px solid black;
   order: none;
   top: -20px;
+  background: transparent;
 }
 
 .map-element-no-border {
   border: none;
-  background: transparent;
 }
 
 .circle-relate {
