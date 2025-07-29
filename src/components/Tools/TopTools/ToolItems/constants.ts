@@ -1447,7 +1447,7 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "551", label: "\\large{t'}", parentId: "timetheory", image: DropdownTime12Image },
 
   // Function Theory
-  { value: "552", label: '\\large{\\class{nimbusScript}L}(\\large{t})', parentId: "functiontheory", image: DropdownFunction1Image },
+  { value: "552", label: '\\mathfrak{L(t)}', parentId: "functiontheory", image: DropdownFunction1Image },
   { value: "553", label: '\\large{h({t})}', parentId: "functiontheory", image: DropdownFunction2Image },
   { value: "554", label: '\\large{u({t})}', parentId: "functiontheory", image: DropdownFunction3Image },
   { value: "555", label: '\\large{h({t})+u({t})}', parentId: "functiontheory", image: DropdownFunction4Image },
