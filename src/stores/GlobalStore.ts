@@ -93,6 +93,7 @@ export class GlobalStore {
   listPositionOfPallet4: any[] = [];
   valueOfImage: string = "";
   mapElementSelected = "";
+  mapEquationSelectedPrev = "";
   listMapElementSelected: any[] = [];
   mapElementRelate = "";
   listMapElementRelate: any[] = [];
@@ -109,9 +110,29 @@ export class GlobalStore {
   statusDisplayItem: number = 0;
   styleText: any = {};
 
+  equationModalOpen: boolean = false;
+  equationDropPosition: { lat: number, lng: number } | null = null;
+  equationToAdd: { name: string, noBorder: boolean, id: number } | null = null;
+
   constructor() {
     makeAutoObservable(this);
   }
+
+  setEquationModalOpen = (open: boolean) => {
+    this.equationModalOpen = open;
+  };
+
+  setEquationDropPosition = (position: { lat: number, lng: number } | null) => {
+    this.equationDropPosition = position;
+  };
+
+  setEquationToAdd = (eq: { name: string, noBorder: boolean, id: number } | null) => {
+    this.equationToAdd = eq;
+  };
+
+  resetEquationToAdd = () => {
+    this.equationToAdd = null;
+  };
 
   setStyleText = (font: string, size: number, color: string, style: string, textAlign: string, textDecoration: string, fontWeight: string) => {
     this.styleText = {
@@ -1006,6 +1027,10 @@ export class GlobalStore {
     this.mapElementSelected = value;
   };
 
+  setMapEquationSelectedPrev = (value: any): void => {
+    this.mapEquationSelectedPrev = value;
+  } 
+
   resetListMapElementSelected = () => {
     this.listMapElementSelected = [];
   };
@@ -1020,7 +1045,7 @@ export class GlobalStore {
     return false;
   };
 
-  setListMapElementSelected = (value: any): void => {
+  setListMapElementSelected = (value: any, noBorder?: boolean): void => {
     let id = this.listMapElementSelected.length;
     this.checkListMapElementSelectedContainElementNotRelate();
     this.listMapElementSelected.push({
@@ -1030,6 +1055,7 @@ export class GlobalStore {
       status: false,
       related: null,
       statusRelate: false,
+      noBorder: noBorder,
     });
   };
   checkMapLayerRelationship = (lat: any, lng: any) => {

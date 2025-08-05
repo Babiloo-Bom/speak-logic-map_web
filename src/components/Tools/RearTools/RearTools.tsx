@@ -11,7 +11,7 @@ import {
   PrincipleLineIcon,
   RelatedIcon,
   RightArrowIcon,
-  SimulationIcon,
+  EquationIcon,
   VectorIcon,
   WelcomeSignIcon,
 } from "@/components/Icons/Icons";
@@ -47,7 +47,7 @@ const RearTools: React.FC = (): JSX.Element => {
     { value: "horizontal-line", Icon: PrincipleLineIcon, name: "Principle Line", ability: true },
     { value: "relate", Icon: RelatedIcon, name: "Relate", ability: true },
     { value: "mobility", Icon: MobilityIcon, name: "Mobility", ability: true },
-    { value: "euqation", Icon: SimulationIcon, name: "Equation", ability: true },
+    { value: "equation", Icon: EquationIcon, name: "Equation", ability: true },
   ];
 
   return (

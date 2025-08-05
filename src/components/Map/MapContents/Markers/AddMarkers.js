@@ -553,7 +553,7 @@ export const addMarkerMapElement = (map, lat, lng, isLocked, mapElement, setMapE
             status: 'add',
         },
         icon: markerMapElementIcon(
-            `${styles['rectangle-fn']} ${styles['map-element']}`,
+            `${styles['rectangle-fn']} ${styles['map-element']} ${mapElement.noBorder ? styles['map-element-no-border'] : ''}`,
             `${mapElement.name}`
         ),
     }).addTo(map)

@@ -175,6 +175,22 @@ const Markers = ({setModal, setModalType}) => {
         }
     }, [globalStore.lock])
 
+    useEffect(() => {
+        if (globalStore.equationDropPosition && globalStore.equationToAdd) {
+            addMarkerMapElement(
+                map,
+                globalStore.equationDropPosition.lat,
+                globalStore.equationDropPosition.lng,
+                globalStore.lock,
+                globalStore.equationToAdd,
+                globalStore.setListMapElementRelate,
+                globalStore.setPositionOfMapElementSelected
+            );
+            globalStore.setEquationDropPosition(null);
+            globalStore.resetEquationToAdd();
+        }
+    }, [globalStore.equationDropPosition, globalStore.equationToAdd]);
+
     let drawnItemsLine = new L.FeatureGroup();
     const drawControlLine = new L.Control.Draw({
         draw: {
@@ -641,6 +657,10 @@ const Markers = ({setModal, setModalType}) => {
                         globalStore.setTypeMobility('path');
                         addPersonInMobility(map, latlng.lat, latlng.lng, globalStore.lock, globalStore.numberPersonMobility, globalStore.setNumberPersonMobility, globalStore.setPositionOfPreviewPerson, globalStore.positionOfPreviewPerson, globalStore.typeMobility);
                     }
+                    globalStore.addIconHandle('');
+                } else if (globalStore.addIcon === 'equation') {
+                    globalStore.setEquationDropPosition(latlng);
+                    globalStore.setEquationModalOpen(true);
                     globalStore.addIconHandle('');
                 }
             }

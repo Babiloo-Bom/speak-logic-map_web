@@ -204,7 +204,13 @@ $time-animation: var(--time-animation);
   font-weight: bold;
   color: black;
   border: 1px solid black;
+  order: none;
   top: -20px;
+}
+
+.map-element-no-border {
+  border: none;
+  background: transparent;
 }
 
 .circle-relate {

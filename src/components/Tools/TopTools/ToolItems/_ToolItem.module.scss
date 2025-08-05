@@ -506,3 +506,7 @@
     opacity: 0;
   }
 }
+
+.ant-collapse-item:first-child {
+  background-color: green;
+}

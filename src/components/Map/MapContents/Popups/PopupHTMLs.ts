@@ -1017,32 +1017,44 @@ export const videoBoundPopupHTML = (objectUrl: string, width: number = 320, heig
 }
 
 export const mapElementPopupHTML = (): string => {
-    return `
+  //   return `
+  //   <div class="${styles['popup-interact-function']} ${styles['popup-wrap']}">
+  //     <div 
+  //       onclick="handleSelectMapRelate('Personal Responsibility')"
+  //       class="${styles['row']} ${styles['on-hover']}"
+  //     >Relate with Personal Responsibility</div>
+  //     <div 
+  //       onclick="handleSelectMapRelate('Self - Contribution')"
+  //       class="${styles['row']} ${styles['on-hover']}"
+  //     >Relate with Self - Contribution</div>
+  //     <div 
+  //       onclick="handleSelectMapRelate('Averaging')"
+  //       class="${styles['row']} ${styles['on-hover']}"
+  //     >Relate with Averaging</div>
+  //     <div 
+  //       onclick="handleSelectMapRelate('Feedback')"
+  //       class="${styles['row']} ${styles['on-hover']}"
+  //     >Relate with Feedback</div>
+  //     <div 
+  //       onclick="handleSelectMapRelate('Correction')"
+  //       class="${styles['row']} ${styles['on-hover']}"
+  //     >Relate with Correction</div>
+  //     <div 
+  //       onclick="handleSelectMapRelate('Function Boundary')"
+  //       class="${styles['row']} ${styles['on-hover']}"
+  //     >Relate with Function Boundary</div>
+  //     <div 
+  //       onclick="deleteEquation()"
+  //       class="${styles['row']} ${styles['on-hover']}"
+  //     >Delete Item </div>
+  //   </div>
+  // `;
+  return `
     <div class="${styles['popup-interact-function']} ${styles['popup-wrap']}">
       <div 
-        onclick="handleSelectMapRelate('Personal Responsibility')"
+        onclick="deleteEquation()"
         class="${styles['row']} ${styles['on-hover']}"
-      >Relate with Personal Responsibility</div>
-      <div 
-        onclick="handleSelectMapRelate('Self - Contribution')"
-        class="${styles['row']} ${styles['on-hover']}"
-      >Relate with Self - Contribution</div>
-      <div 
-        onclick="handleSelectMapRelate('Averaging')"
-        class="${styles['row']} ${styles['on-hover']}"
-      >Relate with Averaging</div>
-      <div 
-        onclick="handleSelectMapRelate('Feedback')"
-        class="${styles['row']} ${styles['on-hover']}"
-      >Relate with Feedback</div>
-      <div 
-        onclick="handleSelectMapRelate('Correction')"
-        class="${styles['row']} ${styles['on-hover']}"
-      >Relate with Correction</div>
-      <div 
-        onclick="handleSelectMapRelate('Function Boundary')"
-        class="${styles['row']} ${styles['on-hover']}"
-      >Relate with Function Boundary</div>
+      >Delete Item </div>
     </div>
   `;
 }

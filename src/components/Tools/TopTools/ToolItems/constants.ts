@@ -39,33 +39,56 @@ import Image35 from "@/assets/images/Words/word_10.svg";
 import Image36 from "@/assets/images/Words/word_13.svg";
 import Image37 from "@/assets/images/Words/word_12.svg";
 
-import Image38 from "@/assets/images/Fundamental/Theory_1.svg";
-import Image39 from "@/assets/images/Fundamental/Theory_2.svg";
-import Image40 from "@/assets/images/Fundamental/Theory_3.svg";
-import Image41 from "@/assets/images/Fundamental/Theory_4.svg";
-import Image42 from "@/assets/images/Fundamental/Theory_5.svg";
-import Image43 from "@/assets/images/Fundamental/Theory_6.svg";
-import Image44 from "@/assets/images/Fundamental/Theory_7.svg";
-import Image45 from "@/assets/images/Fundamental/Theory_8.svg";
-import Image46 from "@/assets/images/Fundamental/Theory_9.svg";
-import Image47 from "@/assets/images/Fundamental/Theory_10.svg";
-import Image48 from "@/assets/images/Fundamental/Theory_11.svg";
+// import Image38 from "@/assets/images/Fundamental/Theory_1.svg";
+// import Image39 from "@/assets/images/Fundamental/Theory_2.svg";
+// import Image40 from "@/assets/images/Fundamental/Theory_3.svg";
+// import Image41 from "@/assets/images/Fundamental/Theory_4.svg";
+// import Image42 from "@/assets/images/Fundamental/Theory_5.svg";
+// import Image43 from "@/assets/images/Fundamental/Theory_6.svg";
+// import Image44 from "@/assets/images/Fundamental/Theory_7.svg";
+// import Image45 from "@/assets/images/Fundamental/Theory_8.svg";
+// import Image46 from "@/assets/images/Fundamental/Theory_9.svg";
+// import Image47 from "@/assets/images/Fundamental/Theory_10.svg";
+// import Image48 from "@/assets/images/Fundamental/Theory_11.svg";
+import Image38 from "@/assets/images/Fundamental1/Fundamental_1.svg";
+import Image39 from "@/assets/images/Fundamental1/Fundamental_2.svg";
+import Image40 from "@/assets/images/Fundamental1/Fundamental_3.svg";
+import Image41 from "@/assets/images/Fundamental1/Fundamental_4.svg";
+import Image42 from "@/assets/images/Fundamental1/Fundamental_5.svg";
+import Image43 from "@/assets/images/Fundamental1/Fundamental_6.svg";
+import Image44 from "@/assets/images/Fundamental1/Fundamental_7.svg";
+import Image45 from "@/assets/images/Fundamental1/Fundamental_8.svg";
+import Image46 from "@/assets/images/Fundamental1/Fundamental_9.svg";
+import Image47 from "@/assets/images/Fundamental1/Fundamental_10.svg";
+import Image48 from "@/assets/images/Fundamental1/Fundamental_11.svg";
 
-import Image49 from "@/assets/images/Theory/Theory_Dropdown_1.svg";
-import Image50 from "@/assets/images/Theory/Theory_Dropdown_2.svg";
-import Image51 from "@/assets/images/Theory/Theory_Dropdown_3.svg";
-import Image52 from "@/assets/images/Theory/Theory_Dropdown_4.svg";
-import Image53 from "@/assets/images/Theory/Theory_Dropdown_5.svg";
-import Image54 from "@/assets/images/Theory/Theory_Dropdown_6.svg";
-import Image55 from "@/assets/images/Theory/Theory_Dropdown_7.svg";
-import Image56 from "@/assets/images/Theory/Theory_Dropdown_8.svg";
-import Image57 from "@/assets/images/Theory/Theory_Dropdown_9.svg";
-import Image58 from "@/assets/images/Theory/Theory_Dropdown_10.svg";
-import Image59 from "@/assets/images/Theory/Theory_Dropdown_11.svg";
-import Image60 from "@/assets/images/Theory/Theory_Dropdown_12.svg";
-import Image61 from "@/assets/images/Theory/Theory_Dropdown_13.svg";
-import Image62 from "@/assets/images/Theory/Theory_Dropdown_14.svg";
-import Image63 from "@/assets/images/Theory/Theory_Dropdown_16.svg";
+import Image38_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_1.svg";
+import Image39_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_2.svg";
+import Image40_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_3.svg";
+import Image41_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_4.svg";
+import Image42_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_5.svg";
+import Image43_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_6.svg";
+import Image44_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_7.svg";
+import Image45_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_8.svg";
+import Image46_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_9.svg";
+import Image47_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_10.svg";
+import Image48_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_11.svg";
+import Image49_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_12.svg";
+import Image50_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_13.svg";
+import Image51_2 from "@/assets/images/Fundamental2/Fundamental_Dropdown_14.svg";
+
+
+import Image49 from "@/assets/images/Theory/Theory_1.svg";
+import Image50 from "@/assets/images/Theory/Theory_2.svg";
+import Image51 from "@/assets/images/Theory/Theory_3.svg";
+import Image52 from "@/assets/images/Theory/Theory_4.svg";
+import Image53 from "@/assets/images/Theory/Theory_5.svg";
+import Image54 from "@/assets/images/Theory/Theory_6.svg";
+import Image55 from "@/assets/images/Theory/Theory_7.svg";
+import Image56 from "@/assets/images/Theory/Theory_8.svg";
+import Image57 from "@/assets/images/Theory/Theory_9.svg";
+import Image58 from "@/assets/images/Theory/Theory_10.svg";
+import Image59 from "@/assets/images/Theory/Theory_11.svg";
 
 // Bracket
 import AngleBarImage from "@/assets/images/Bracket/AngleBar.png";
@@ -80,12 +103,12 @@ import LeftAngleImage from "@/assets/images/Bracket/LeftAngle.png";
 import LeftBarImage from "@/assets/images/Bracket/LeftBar.png";
 import LeftCurlyBracketImage from "@/assets/images/Bracket/LeftCurlyBracket.png";
 import LeftDoubleBarImage from "@/assets/images/Bracket/LeftDoubleBar.png";
-import LeftLeftSquareBracketImage from "@/assets/images/Bracket/LeftLeftSquareBracket.png"; 
+import LeftLeftSquareBracketImage from "@/assets/images/Bracket/LeftLeftSquareBracket.png";
 import LeftParenthesisImage from "@/assets/images/Bracket/LeftParenthesis.png";
 import LeftSquareBarImage from "@/assets/images/Bracket/LeftSquareBar.png";
 import LeftSquareBracketImage from "@/assets/images/Bracket/LeftSquareBracket.png";
 import ParenthesesImage from "@/assets/images/Bracket/Parentheses.png";
-import ParenthesisSquareImage from "@/assets/images/Bracket/ParenthesisSquare.png"; 
+import ParenthesisSquareImage from "@/assets/images/Bracket/ParenthesisSquare.png";
 import PointingAnglesImage from "@/assets/images/Bracket/PointingAngles.png";
 import RightAngleImage from "@/assets/images/Bracket/RightAngle.png";
 import RightBarImage from "@/assets/images/Bracket/RightBar.png";
@@ -345,7 +368,7 @@ import Arrow2Image from "@/assets/images/Arrow/2.png";
 import Arrow3Image from "@/assets/images/Arrow/3.png";
 import Arrow4Image from "@/assets/images/Arrow/4.png";
 import Arrow5Image from "@/assets/images/Arrow/5.png";
-import Arrow6Image from "@/assets/images/Arrow/6.png";  
+import Arrow6Image from "@/assets/images/Arrow/6.png";
 import Arrow7Image from "@/assets/images/Arrow/7.png";
 import Arrow8Image from "@/assets/images/Arrow/8.png";
 import Arrow9Image from "@/assets/images/Arrow/9.png";
@@ -419,7 +442,198 @@ import Arrow76Image from "@/assets/images/Arrow/76.png";
 import Arrow77Image from "@/assets/images/Arrow/77.png";
 import Arrow78Image from "@/assets/images/Arrow/78.png";
 
-export const OPTIONS_EQUATION = [
+import Relationship1Image from "@/assets/images/Relationship/Relationship_1.svg";
+import Relationship2Image from "@/assets/images/Relationship/Relationship_2.svg";
+import Relationship3Image from "@/assets/images/Relationship/Relationship_3.svg";
+import Relationship4Image from "@/assets/images/Relationship/Relationship_4.svg";
+import Relationship5Image from "@/assets/images/Relationship/Relationship_5.svg";
+import Relationship6Image from "@/assets/images/Relationship/Relationship_6.svg";
+import Relationship7Image from "@/assets/images/Relationship/Relationship_7.svg";
+import Relationship8Image from "@/assets/images/Relationship/Relationship_8.svg";
+import Relationship9Image from "@/assets/images/Relationship/Relationship_9.svg";
+import Relationship10Image from "@/assets/images/Relationship/Relationship_10.svg";
+
+import TheoryDropdown1Image from "@/assets/images/Theory2/Theory_Dropdown_1.svg";
+import TheoryDropdown2Image from "@/assets/images/Theory2/Theory_Dropdown_2.svg";
+import TheoryDropdown3Image from "@/assets/images/Theory2/Theory_Dropdown_3.svg";
+import TheoryDropdown4Image from "@/assets/images/Theory2/Theory_Dropdown_4.svg";
+import TheoryDropdown5Image from "@/assets/images/Theory2/Theory_Dropdown_5.svg";
+import TheoryDropdown6Image from "@/assets/images/Theory2/Theory_Dropdown_6.svg";
+import TheoryDropdown7Image from "@/assets/images/Theory2/Theory_Dropdown_7.svg";
+import TheoryDropdown8Image from "@/assets/images/Theory2/Theory_Dropdown_8.svg";
+import TheoryDropdown9Image from "@/assets/images/Theory2/Theory_Dropdown_9.svg";
+import TheoryDropdown10Image from "@/assets/images/Theory2/Theory_Dropdown_10.svg";
+import TheoryDropdown11Image from "@/assets/images/Theory2/Theory_Dropdown_11.svg";
+import TheoryDropdown12Image from "@/assets/images/Theory2/Theory_Dropdown_12.svg";
+import TheoryDropdown13Image from "@/assets/images/Theory2/Theory_Dropdown_13.svg";
+import TheoryDropdown14Image from "@/assets/images/Theory2/Theory_Dropdown_14.svg";
+import TheoryDropdown15Image from "@/assets/images/Theory2/Theory_Dropdown_15.svg";
+import TheoryDropdown16Image from "@/assets/images/Theory2/Theory_Dropdown_16.svg";
+
+import Derivative1Image from "@/assets/images/Derivatives/Derivative_1.svg";
+import Derivative2Image from "@/assets/images/Derivatives/Derivative_2.svg";
+import Derivative3Image from "@/assets/images/Derivatives/Derivative_3.svg";
+import Derivative4Image from "@/assets/images/Derivatives/Derivative_4.svg";
+import Derivative5Image from "@/assets/images/Derivatives/Derivative_5.svg";
+
+import Instrument1Image from "@/assets/images/Instruments/Instrument_1.svg";
+import Instrument2Image from "@/assets/images/Instruments/Instrument_2.svg";
+import Instrument3Image from "@/assets/images/Instruments/Instrument_3.svg";
+import Instrument4Image from "@/assets/images/Instruments/Instrument_4.svg";
+import Instrument5Image from "@/assets/images/Instruments/Instrument_5.svg";
+import Instrument6Image from "@/assets/images/Instruments/Instrument_6.svg";
+import Instrument7Image from "@/assets/images/Instruments/Instrument_7.svg";
+import Instrument8Image from "@/assets/images/Instruments/Instrument_8.svg";
+
+import Stability1Image from "@/assets/images/Stability/Stability_1.svg";
+import Stability2Image from "@/assets/images/Stability/Stability_2.svg";
+import Stability3Image from "@/assets/images/Stability/Stability_3.svg";
+import Stability4Image from "@/assets/images/Stability/Stability_4.svg";
+import Stability5Image from "@/assets/images/Stability/Stability_5.svg";
+import Stability6Image from "@/assets/images/Stability/Stability_6.svg";
+import Stability7Image from "@/assets/images/Stability/Stability_7.svg";
+import Stability8Image from "@/assets/images/Stability/Stability_8.svg";
+import Stability9Image from "@/assets/images/Stability/Stability_9.svg";
+import Stability10Image from "@/assets/images/Stability/Stability_10.svg";
+import Stability11Image from "@/assets/images/Stability/Stability_11.svg";
+import Stability12Image from "@/assets/images/Stability/Stability_12.svg";
+import Stability13Image from "@/assets/images/Stability/Stability_13.svg";
+import Stability14Image from "@/assets/images/Stability/Stability_14.svg";
+import Stability15Image from "@/assets/images/Stability/Stability_15.svg";
+import Stability16Image from "@/assets/images/Stability/Stability_16.svg";
+import Stability17Image from "@/assets/images/Stability/Stability_17.svg";
+import Stability18Image from "@/assets/images/Stability/Stability_18.svg";
+import Stability19Image from "@/assets/images/Stability/Stability_19.svg";
+import Stability20Image from "@/assets/images/Stability/Stability_20.svg";
+import Stability21Image from "@/assets/images/Stability/Stability_21.svg";
+import Stability22Image from "@/assets/images/Stability/Stability_22.svg";
+import Stability23Image from "@/assets/images/Stability/Stability_23.svg";
+import Stability24Image from "@/assets/images/Stability/Stability_24.svg";
+import Stability25Image from "@/assets/images/Stability/Stability_25.svg";
+import Stability26Image from "@/assets/images/Stability/Stability_26.svg";
+import Stability27Image from "@/assets/images/Stability/Stability_27.svg";
+import Stability28Image from "@/assets/images/Stability/Stability_28.svg";
+import Stability29Image from "@/assets/images/Stability/Stability_29.svg";
+import Stability30Image from "@/assets/images/Stability/Stability_30.svg";
+import Stability31Image from "@/assets/images/Stability/Stability_31.svg";
+
+import TheoromDropdown1Image from "@/assets/images/Theorems/Theorem_Dropdown_1.svg";
+import TheoromDropdown2Image from "@/assets/images/Theorems/Theorem_Dropdown_2.svg";
+import TheoromDropdown3Image from "@/assets/images/Theorems/Theorem_Dropdown_3.svg";
+import TheoromDropdown4Image from "@/assets/images/Theorems/Theorem_Dropdown_4.svg";
+import TheoromDropdown5Image from "@/assets/images/Theorems/Theorem_Dropdown_5.svg";
+import TheoromDropdown6Image from "@/assets/images/Theorems/Theorem_Dropdown_6.svg";
+import TheoromDropdown7Image from "@/assets/images/Theorems/Theorem_Dropdown_7.svg";
+import TheoromDropdown8Image from "@/assets/images/Theorems/Theorem_Dropdown_8.svg";
+import TheoromDropdown9Image from "@/assets/images/Theorems/Theorem_Dropdown_9.svg";
+import TheoromDropdown10Image from "@/assets/images/Theorems/Theorem_Dropdown_10.svg";
+import TheoromDropdown11Image from "@/assets/images/Theorems/Theorem_Dropdown_11.svg";
+import TheoromDropdown12Image from "@/assets/images/Theorems/Theorem_Dropdown_12.svg";
+import TheoromDropdown13Image from "@/assets/images/Theorems/Theorem_Dropdown_13.svg";
+import TheoromDropdown14Image from "@/assets/images/Theorems/Theorem_Dropdown_14.svg";
+import TheoromDropdown15Image from "@/assets/images/Theorems/Theorem_Dropdown_15.svg";
+import TheoromDropdown16Image from "@/assets/images/Theorems/Theorem_Dropdown_16.svg";
+import TheoromDropdown17Image from "@/assets/images/Theorems/Theorem_Dropdown_17.svg";
+import TheoromDropdown18Image from "@/assets/images/Theorems/Theorem_Dropdown_18.svg";
+import TheoromDropdown19Image from "@/assets/images/Theorems/Theorem_Dropdown_19.svg";
+import TheoromDropdown20Image from "@/assets/images/Theorems/Theorem_Dropdown_20.svg";
+import TheoromDropdown21Image from "@/assets/images/Theorems/Theorem_Dropdown_21.svg";
+
+// Greeks Capital
+import GreekCapital1Image from "@/assets/images/Greeks/GreekCapital_1.svg";
+import GreekCapital2Image from "@/assets/images/Greeks/GreekCapital_2.svg";
+import GreekCapital3Image from "@/assets/images/Greeks/GreekCapital_3.svg";
+import GreekCapital4Image from "@/assets/images/Greeks/GreekCapital_4.svg";
+import GreekCapital5Image from "@/assets/images/Greeks/GreekCapital_5.svg";
+import GreekCapital6Image from "@/assets/images/Greeks/GreekCapital_6.svg";
+import GreekCapital7Image from "@/assets/images/Greeks/GreekCapital_7.svg";
+import GreekCapital8Image from "@/assets/images/Greeks/GreekCapital_8.svg";
+import GreekCapital9Image from "@/assets/images/Greeks/GreekCapital_9.svg";
+import GreekCapital10Image from "@/assets/images/Greeks/GreekCapital_10.svg";
+import GreekCapital11Image from "@/assets/images/Greeks/GreekCapital_11.svg";
+import GreekCapital12Image from "@/assets/images/Greeks/GreekCapital_12.svg";
+import GreekCapital13Image from "@/assets/images/Greeks/GreekCapital_13.svg";
+import GreekCapital14Image from "@/assets/images/Greeks/GreekCapital_14.svg";
+import GreekCapital15Image from "@/assets/images/Greeks/GreekCapital_15.svg";
+import GreekCapital16Image from "@/assets/images/Greeks/GreekCapital_16.svg";
+import GreekCapital17Image from "@/assets/images/Greeks/GreekCapital_17.svg";
+import GreekCapital18Image from "@/assets/images/Greeks/GreekCapital_18.svg";
+import GreekCapital19Image from "@/assets/images/Greeks/GreekCapital_19.svg";
+import GreekCapital20Image from "@/assets/images/Greeks/GreekCapital_20.svg";
+import GreekCapital21Image from "@/assets/images/Greeks/GreekCapital_21.svg";
+import GreekCapital22Image from "@/assets/images/Greeks/GreekCapital_22.svg";
+import GreekCapital23Image from "@/assets/images/Greeks/GreekCapital_23.svg";
+import GreekCapital24Image from "@/assets/images/Greeks/GreekCapital_24.svg";
+
+// Greek Small
+import GreekSmall1Image from "@/assets/images/GreekSmall/GreekSmall_1.svg";
+import GreekSmall2Image from "@/assets/images/GreekSmall/GreekSmall_2.svg";
+import GreekSmall3Image from "@/assets/images/GreekSmall/GreekSmall_3.svg";
+import GreekSmall4Image from "@/assets/images/GreekSmall/GreekSmall_4.svg";
+import GreekSmall5Image from "@/assets/images/GreekSmall/GreekSmall_5.svg";
+import GreekSmall6Image from "@/assets/images/GreekSmall/GreekSmall_6.svg";
+import GreekSmall7Image from "@/assets/images/GreekSmall/GreekSmall_7.svg";
+import GreekSmall8Image from "@/assets/images/GreekSmall/GreekSmall_8.svg";
+import GreekSmall9Image from "@/assets/images/GreekSmall/GreekSmall_9.svg";
+import GreekSmall10Image from "@/assets/images/GreekSmall/GreekSmall_10.svg";
+import GreekSmall11Image from "@/assets/images/GreekSmall/GreekSmall_11.svg";
+import GreekSmall12Image from "@/assets/images/GreekSmall/GreekSmall_12.svg";
+import GreekSmall13Image from "@/assets/images/GreekSmall/GreekSmall_13.svg";
+import GreekSmall14Image from "@/assets/images/GreekSmall/GreekSmall_14.svg";
+import GreekSmall15Image from "@/assets/images/GreekSmall/GreekSmall_15.svg";
+import GreekSmall16Image from "@/assets/images/GreekSmall/GreekSmall_16.svg";
+import GreekSmall17Image from "@/assets/images/GreekSmall/GreekSmall_17.svg";
+import GreekSmall18Image from "@/assets/images/GreekSmall/GreekSmall_18.svg";
+import GreekSmall19Image from "@/assets/images/GreekSmall/GreekSmall_19.svg";
+import GreekSmall20Image from "@/assets/images/GreekSmall/GreekSmall_20.svg";
+import GreekSmall21Image from "@/assets/images/GreekSmall/GreekSmall_21.svg";
+import GreekSmall22Image from "@/assets/images/GreekSmall/GreekSmall_22.svg";
+import GreekSmall23Image from "@/assets/images/GreekSmall/GreekSmall_23.svg";
+import GreekSmall24Image from "@/assets/images/GreekSmall/GreekSmall_24.svg";
+import GreekSmall25Image from "@/assets/images/GreekSmall/GreekSmall_25.svg";
+
+// DropdownTimes
+import DropdownTime1Image from "@/assets/images/DropdownTimes/Dropdown_Time_1.svg";
+import DropdownTime2Image from "@/assets/images/DropdownTimes/Dropdown_Time_2.svg";
+import DropdownTime3Image from "@/assets/images/DropdownTimes/Dropdown_Time_3.svg";
+import DropdownTime4Image from "@/assets/images/DropdownTimes/Dropdown_Time_4.svg";
+import DropdownTime5Image from "@/assets/images/DropdownTimes/Dropdown_Time_5.svg";
+import DropdownTime6Image from "@/assets/images/DropdownTimes/Dropdown_Time_6.svg";
+import DropdownTime7Image from "@/assets/images/DropdownTimes/Dropdown_Time_7.svg";
+import DropdownTime8Image from "@/assets/images/DropdownTimes/Dropdown_Time_8.svg";
+import DropdownTime9Image from "@/assets/images/DropdownTimes/Dropdown_Time_9.svg";
+import DropdownTime10Image from "@/assets/images/DropdownTimes/Dropdown_Time_10.svg";
+import DropdownTime11Image from "@/assets/images/DropdownTimes/Dropdown_Time_11.svg";
+import DropdownTime12Image from "@/assets/images/DropdownTimes/Dropdown_Time_12.svg";
+
+// Functons
+import function1Image from "@/assets/images/Functions/function_1.svg";
+import function2Image from "@/assets/images/Functions/function_2.svg";
+import function3Image from "@/assets/images/Functions/function_3.svg";
+import function4Image from "@/assets/images/Functions/function_4.svg";
+import function5Image from "@/assets/images/Functions/function_5.svg";
+import function6Image from "@/assets/images/Functions/function_6.svg";
+import function7Image from "@/assets/images/Functions/function_7.svg";
+import function8Image from "@/assets/images/Functions/function_8.svg";
+import function9Image from "@/assets/images/Functions/function_9.svg";
+import function10Image from "@/assets/images/Functions/function_10.svg";
+import function11Image from "@/assets/images/Functions/function_11.svg";
+import function12Image from "@/assets/images/Functions/function_12.svg";
+import function13Image from "@/assets/images/Functions/function_13.svg";
+import function14Image from "@/assets/images/Functions/function_14.svg";
+
+import DropdownFunction1Image from "@/assets/images/DropdownFunctions/Dropdown_Function_1.svg";
+import DropdownFunction2Image from "@/assets/images/DropdownFunctions/Dropdown_Function_2.svg";
+import DropdownFunction3Image from "@/assets/images/DropdownFunctions/Dropdown_Function_3.svg";
+import DropdownFunction4Image from "@/assets/images/DropdownFunctions/Dropdown_Function_4.svg";
+import DropdownFunction5Image from "@/assets/images/DropdownFunctions/Dropdown_Function_5.svg";
+import DropdownFunction6Image from "@/assets/images/DropdownFunctions/Dropdown_Function_6.svg";
+import DropdownFunction7Image from "@/assets/images/DropdownFunctions/Dropdown_Function_7.svg";
+import DropdownFunction8Image from "@/assets/images/DropdownFunctions/Dropdown_Function_8.svg";
+import DropdownFunction9Image from "@/assets/images/DropdownFunctions/Dropdown_Function_9.svg";
+import DropdownFunction10Image from "@/assets/images/DropdownFunctions/Dropdown_Function_10.svg";
+
+export const OPTIONS_EQUATION_COMMUNICATION = [
   {
     value: "function",
     label: "Function",
@@ -433,13 +647,55 @@ export const OPTIONS_EQUATION = [
     label: "Application",
   },
   {
+    value: "relationship",
+    label: "Relationship",
+  },
+];
+
+export const OPTIONS_EQUATION_THEORY = [
+  {
     value: "theory",
-    label: "Theory",
+    label: "Theory 1",
+  },
+  {
+    value: "theory2",
+    label: "Theory 2",
   },
   {
     value: "fundamental",
-    label: "Fundamental",
+    label: "Fundamental 1",
   },
+  {
+    value: "fundamental_2",
+    label: "Fundamental 2",
+  },
+  {
+    value: "functiontheory",
+    label: "Function",
+  },
+  {
+    value: "timetheory",
+    label: "Time",
+  },
+  {
+    value: "derivative",
+    label: "Derivative",
+  },
+  {
+    value: "instrument",
+    label: "Instrument",
+  },
+  {
+    value: "stability",
+    label: "Stability",
+  },
+  {
+    value: "theorem",
+    label: "Theorem",
+  }
+];
+
+export const OPTIONS_EQUATION_OTHER = [
   {
     value: "fraction",
     label: "Fraction & Radical",
@@ -492,6 +748,14 @@ export const OPTIONS_EQUATION = [
     value: "arrow",
     label: "Arrow",
   },
+  {
+    value: "greekcapital",
+    label: "Greek Capital",
+  },
+  {
+    value: "greeksmall",
+    label: "Greek Small",
+  }
 ];
 
 export const OPTIONS_MATHEMATICAL = [
@@ -512,34 +776,126 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "14", label: "f_i(x)", parentId: "function", image: Image25 },
 
   // Theory-related labels
-  { value: "33", label: "T_1", parentId: "theory", image: Image49 },
-  { value: "34", label: "T_2", parentId: "theory", image: Image50 },
-  { value: "35", label: "T_3", parentId: "theory", image: Image51 },
-  { value: "36", label: "T_4", parentId: "theory", image: Image52 },
-  { value: "37", label: "T_5", parentId: "theory", image: Image53 },
-  { value: "38", label: "T_6", parentId: "theory", image: Image54 },
-  { value: "39", label: "T_7", parentId: "theory", image: Image55 },
-  { value: "40", label: "T_8", parentId: "theory", image: Image56 },
-  { value: "41", label: "T_9", parentId: "theory", image: Image57 },
-  { value: "42", label: "T_{10}", parentId: "theory", image: Image58 },
-  { value: "43", label: "T", parentId: "theory", image: Image59 },
-  { value: "44", label: "T_0", parentId: "theory", image: Image60 },
-  { value: "45", label: "A", parentId: "theory", image: Image61 },
-  { value: "46", label: "A'", parentId: "theory", image: Image62 },
-  { value: "47", label: "A'_0", parentId: "theory", image: Image63 },
+  { value: "33", label: '\\large{K}_{\\large{T}}', parentId: "theory", image: Image49 },
+  { value: "34", label: '\\large{i}_{\\large{T}}',   parentId: "theory", image: Image50 },
+  { value: "35", label: '\\large{I_T}', parentId: "theory", image: Image51 },
+  { value: "36", label: '\\large{E_T}', parentId: "theory", image: Image52 },
+  { value: "37", label: '\\large{P_T}', parentId: "theory", image: Image53 },
+  { value: "38", label: '\\large{M_T}', parentId: "theory", image: Image54 },
+  { value: "39", label: '\\large{E_{S_{T}}}', parentId: "theory", image: Image55 },
+  { value: "40", label: '\\large{W_T}', parentId: "theory", image: Image56 },
+  { value: "41", label: '\\large{G_T}', parentId: "theory", image: Image57 },
+  { value: "42", label: '\\large{X_T}', parentId: "theory", image: Image58 },
+  { value: "43", label: '\\large{U_T}', parentId: "theory", image: Image59 },
 
   // Fundamental-related labels
-  { value: "48", label: "K_T", parentId: "fundamental", image: Image38 },
-  { value: "49", label: "i_T", parentId: "fundamental", image: Image39 },
-  { value: "50", label: "I_T", parentId: "fundamental", image: Image40 },
-  { value: "51", label: "E_T", parentId: "fundamental", image: Image41 },
-  { value: "52", label: "P_T", parentId: "fundamental", image: Image42 },
-  { value: "53", label: "M_T", parentId: "fundamental", image: Image43 },
-  { value: "54", label: "Es_T", parentId: "fundamental", image: Image44 },
-  { value: "55", label: "W_T", parentId: "fundamental", image: Image45 },
-  { value: "56", label: "G_T", parentId: "fundamental", image: Image46 },
-  { value: "57", label: "X_T", parentId: "fundamental", image: Image47 },
-  { value: "58", label: "U_T", parentId: "fundamental", image: Image48 },
+  // { value: "48", label: "K_T", parentId: "fundamental", image: Image38 },
+  // { value: "49", label: "i_T", parentId: "fundamental", image: Image39 },
+  // { value: "50", label: "I_T", parentId: "fundamental", image: Image40 },
+  // { value: "51", label: "E_T", parentId: "fundamental", image: Image41 },
+  // { value: "52", label: "P_T", parentId: "fundamental", image: Image42 },
+  // { value: "53", label: "M_T", parentId: "fundamental", image: Image43 },
+  // { value: "54", label: "Es_T", parentId: "fundamental", image: Image44 },
+  // { value: "55", label: "W_T", parentId: "fundamental", image: Image45 },
+  // { value: "56", label: "G_T", parentId: "fundamental", image: Image46 },
+  // { value: "57", label: "X_T", parentId: "fundamental", image: Image47 },
+  // { value: "58", label: "U_T", parentId: "fundamental", image: Image48 },
+  { value: "48", label: 'f_{\\large{K}_{\\large{T}}}', parentId: "fundamental", image: Image38 },
+  {
+    value: "49", label: 'f_{\\large{i}_{\\large{T}}}',
+    parentId: "fundamental", image: Image39
+  },
+  {
+    value: "50", label: 'f_{\\large{I_{T}}}',
+    parentId: "fundamental", image: Image40
+  },
+  {
+    value: "51", label: 'f_{\\large{E_{T}}}',
+    parentId: "fundamental", image: Image41
+  },
+  {
+    value: "52", label: 'f_{\\large{P_{T}}}',
+    parentId: "fundamental", image: Image42
+  },
+  {
+    value: "53", label: 'f_{\\large{M_{T}}}',
+    parentId: "fundamental", image: Image43
+  },
+  {
+    value: "54", label: 'f_{\\large{E_{S_{T}}}}',
+    parentId: "fundamental", image: Image44
+  },
+  {
+    value: "55", label: 'f_{\\large{W_{T}}}',
+    parentId: "fundamental", image: Image45
+  },
+  {
+    value: "56", label: 'f_{\\large{G_{T}}}',
+    parentId: "fundamental", image: Image46
+  },
+  {
+    value: "57", label: 'f_{\\large{X_{T}}}',
+    parentId: "fundamental", image: Image47
+  },
+  {
+    value: "58", label: 'f_{\\large{U_{T}}}',
+    parentId: "fundamental", image: Image48
+  },
+
+  // Fundamental-2
+  { value: "48_2", label: 'f_{\\large{T_{1}}}', parentId: "fundamental_2", image: Image38_2 },
+  {
+    value: "49_2", label: 'f_{\\large{T_{2}}}',
+    parentId: "fundamental_2", image: Image39_2
+  },
+  {
+    value: "50_2", label: 'f_{\\large{T_{3}}}',
+    parentId: "fundamental_2", image: Image40_2
+  },
+  {
+    value: "51_2", label:  'f_{\\large{T_{4}}}',
+    parentId: "fundamental_2", image: Image41_2
+  },
+  {
+    value: "52_2", label: 'f_{\\large{T_{5}}}',
+    parentId: "fundamental_2", image: Image42_2
+  },
+  {
+    value: "53_2", label: 'f_{\\large{T_{6}}}',
+    parentId: "fundamental_2", image: Image43_2
+  },
+  {
+    value: "54_2", label: 'f_{\\large{T_{7}}}',
+    parentId: "fundamental_2", image: Image44_2
+  },
+  {
+    value: "55_2", label: 'f_{\\large{T_{8}}}',
+    parentId: "fundamental_2", image: Image45_2
+  },
+  {
+    value: "56_2", label: 'f_{\\large{T_{9}}}',
+    parentId: "fundamental_2", image: Image46_2
+  },
+  {
+    value: "57_2", label: 'f_{\\large{T_{10}}}',
+    parentId: "fundamental_2", image: Image47_2
+  },
+  {
+    value: "58_2", label: 'f_{\\large{T}}',
+    parentId: "fundamental_2", image: Image48_2
+  },
+  {
+    value: "59_2", label: 'f_{\\large{G_{T}}}',
+    parentId: "fundamental_2", image: Image49_2
+  },
+  {
+    value: "60_2", label: 'f_{\\large{A}}',
+    parentId: "fundamental_2", image: Image50_2
+  },
+  {
+    value: "61_2", label: "f_{\\large{A}'}",
+    parentId: "fundamental_2", image: Image51_2
+  },
 
   // WORD-related labels
   { value: "15", label: "W", parentId: "word", image: Image26 },
@@ -571,7 +927,7 @@ export const OPTIONS_MATHEMATICAL = [
   // { value: "63", label: "x^2", parentId: "fraction" },
 
   // Bracket
-  { value: "64", label:  "\\left\\langle\\large{x}}\\right\\vert", parentId: "bracket", image: AngleBarImage },
+  { value: "64", label: "\\left\\langle\\large{x}}\\right\\vert", parentId: "bracket", image: AngleBarImage },
   { value: "65", label: "\\left\\vert\\large{x}}\\right\\rangle", parentId: "bracket", image: BarAngleImage },
   { value: "66", label: "\\underbrace{\\large{x}}_{\\large{y}}", parentId: "bracket", image: BottomCurlyBracketImage },
   { value: "67", label: "\\left\\lceil\\large{x}\\right\\rceil", parentId: "bracket", image: CeilingImage },
@@ -627,7 +983,7 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "115", label: "\\xleftequilibrium[\\large{x}]{}", parentId: "labeledArrow", image: SmallRightLeftHarpBottomImage },
   { value: "116", label: "\\xleftequilibrium[\\large{x}]{\\large{y}}", parentId: "labeledArrow", image: SmallRightLeftHarpBottomTopImage },
   { value: "117", label: "\\xleftequilibrium[]{\\large{y}}", parentId: "labeledArrow", image: SmallRightLeftHarpTopImage },
-  
+
   // Sum & Products
   { value: "118", label: "\\coprod{\\large{x}}", parentId: "sumproducts", image: coProductImage },
   { value: "119", label: "\\coprod_{\\large{x}}{\\large{y}}", parentId: "sumproducts", image: coProductBottomImage },
@@ -784,7 +1140,7 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "256", label: '\\overset{\\Large{...}}{\\large{x}}', parentId: "accentprime", image: CharacterTopTDotImage },
   { value: "257", label: '\\tilde{\\large{x}} ', parentId: "accentprime", image: CharacterTopTildeImage },
   { value: "258", label: "\\large{x}'''", parentId: "accentprime", image: CharacterTriplePrimeImage },
-  
+
   // Operators
   { value: "259", label: '\u00d7', parentId: "operator", image: Operator1Image },
   { value: "260", label: '\u002D', parentId: "operator", image: Operator2Image },
@@ -804,8 +1160,8 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "274", label: '\u2205', parentId: "operator", image: Operator16Image },
   { value: "275", label: '\u2208', parentId: "operator", image: Operator17Image },
   { value: "276", label: '\u2209', parentId: "operator", image: Operator18Image },
-  { value: "277", label: '\u220B', parentId: "operator", image :Operator19Image },
-  { value : '278' , label :'\u220C' ,parentId :'operator' ,image :Operator20Image},
+  { value: "277", label: '\u220B', parentId: "operator", image: Operator19Image },
+  { value: '278', label: '\u220C', parentId: 'operator', image: Operator20Image },
   { value: "279", label: '\u220F', parentId: "operator", image: Operator21Image },
   { value: "280", label: '\u2210', parentId: "operator", image: Operator22Image },
   { value: "281", label: '\u2211', parentId: "operator", image: Operator23Image },
@@ -818,13 +1174,13 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "288", label: '\u2229', parentId: "operator", image: Operator30Image },
   { value: "289", label: '\u222A', parentId: "operator", image: Operator31Image },
   { value: "290", label: '\u2234', parentId: "operator", image: Operator32Image },
-  { value: "291", label: '\u2235', parentId: "operator", image :Operator33Image},
-  { value : '292' , label :'\u2237' ,parentId :'operator' ,image :Operator34Image},
-  { value : '293' , label :'\u2238' ,parentId :'operator' ,image :Operator35Image},
-  { value : '294' , label :'\u2264' ,parentId :'operator' ,image :Operator36Image},
-  { value : '295' , label :'\u2265' ,parentId :'operator' ,image :Operator37Image},
-  { value : '296' , label :'\u226e' ,parentId :'operator' ,image :Operator38Image},
-  { value : '297' , label :'\u226f' ,parentId :'operator' ,image :Operator39Image},
+  { value: "291", label: '\u2235', parentId: "operator", image: Operator33Image },
+  { value: '292', label: '\u2237', parentId: 'operator', image: Operator34Image },
+  { value: '293', label: '\u2238', parentId: 'operator', image: Operator35Image },
+  { value: '294', label: '\u2264', parentId: 'operator', image: Operator36Image },
+  { value: '295', label: '\u2265', parentId: 'operator', image: Operator37Image },
+  { value: '296', label: '\u226e', parentId: 'operator', image: Operator38Image },
+  { value: '297', label: '\u226f', parentId: 'operator', image: Operator39Image },
   { value: "298", label: '\u25B3', parentId: "operator", image: Operator40Image },
   { value: "299", label: '\u25B7', parentId: "operator", image: Operator41Image },
   { value: "300", label: '\u25BD', parentId: "operator", image: Operator42Image },
@@ -833,12 +1189,12 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "303", label: '\u25CE', parentId: "operator", image: Operator45Image },
   { value: "304", label: '\u25E0', parentId: "operator", image: Operator46Image },
   { value: "305", label: '\u25E1', parentId: "operator", image: Operator47Image },
-  { value: "306", label: '\u25EC', parentId: "operator", image :Operator48Image},
-  { value : '307' , label :'\u211d' ,parentId :'operator' ,image :Operator49Image},
-  { value : '308' , label :'\u2124' ,parentId :'operator' ,image :Operator50Image},
-  { value : '309' , label :'\u2102' ,parentId :'operator' ,image :Operator51Image},
-  { value : '310' , label :'\ud835\udd46' ,parentId :'operator' ,image :Operator52Image},
-  { value : '311' , label :'\u2115' ,parentId :'operator' ,image :Operator53Image},
+  { value: "306", label: '\u25EC', parentId: "operator", image: Operator48Image },
+  { value: '307', label: '\u211d', parentId: 'operator', image: Operator49Image },
+  { value: '308', label: '\u2124', parentId: 'operator', image: Operator50Image },
+  { value: '309', label: '\u2102', parentId: 'operator', image: Operator51Image },
+  { value: '310', label: '\ud835\udd46', parentId: 'operator', image: Operator52Image },
+  { value: '311', label: '\u2115', parentId: 'operator', image: Operator53Image },
 
   // ARROW
   { value: "312", label: '\u2190', parentId: "arrow", image: Arrow1Image },
@@ -847,77 +1203,258 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "315", label: '\u2193', parentId: "arrow", image: Arrow4Image },
   { value: "316", label: '\u2194', parentId: "arrow", image: Arrow5Image },
   { value: "317", label: '\u2195', parentId: "arrow", image: Arrow6Image },
-  { value: "318", label: '\u2196', parentId: "arrow", image :Arrow7Image},
-  { value : '319' , label :'\u2197' ,parentId :'arrow' ,image :Arrow8Image},
-  { value : '320' , label :'\u2198' ,parentId :'arrow' ,image :Arrow9Image},
-  { value : '321' , label :'\u2199' ,parentId :'arrow' ,image :Arrow10Image},
-  { value : '322' , label :'\u219A' ,parentId :'arrow' ,image :Arrow11Image},
-  { value : '323' , label :'\u219B' ,parentId :'arrow' ,image :Arrow12Image},
-  { value : '324' , label :'\u219C' ,parentId :'arrow' ,image :Arrow13Image},
-  { value : '325' , label :'\u219D' ,parentId :'arrow' ,image :Arrow14Image},
-  { value : '326' , label :'\u219E' ,parentId :'arrow' ,image :Arrow15Image},
-  { value : '327' , label :'\u219F' ,parentId :'arrow' ,image :Arrow16Image},
-  { value : '328' , label :'\u21A0' ,parentId :'arrow' ,image :Arrow17Image},
-  { value : '329' , label :'\u21A1' ,parentId :'arrow' ,image :Arrow18Image},
-  { value : '330' , label :'\u21A2' ,parentId :'arrow' ,image :Arrow19Image},
+  { value: "318", label: '\u2196', parentId: "arrow", image: Arrow7Image },
+  { value: '319', label: '\u2197', parentId: 'arrow', image: Arrow8Image },
+  { value: '320', label: '\u2198', parentId: 'arrow', image: Arrow9Image },
+  { value: '321', label: '\u2199', parentId: 'arrow', image: Arrow10Image },
+  { value: '322', label: '\u219A', parentId: 'arrow', image: Arrow11Image },
+  { value: '323', label: '\u219B', parentId: 'arrow', image: Arrow12Image },
+  { value: '324', label: '\u219C', parentId: 'arrow', image: Arrow13Image },
+  { value: '325', label: '\u219D', parentId: 'arrow', image: Arrow14Image },
+  { value: '326', label: '\u219E', parentId: 'arrow', image: Arrow15Image },
+  { value: '327', label: '\u219F', parentId: 'arrow', image: Arrow16Image },
+  { value: '328', label: '\u21A0', parentId: 'arrow', image: Arrow17Image },
+  { value: '329', label: '\u21A1', parentId: 'arrow', image: Arrow18Image },
+  { value: '330', label: '\u21A2', parentId: 'arrow', image: Arrow19Image },
   { value: "331", label: '\u21A3', parentId: "arrow", image: Arrow20Image },
   { value: "332", label: '\u21A4', parentId: "arrow", image: Arrow21Image },
   { value: "333", label: '\u21A5', parentId: "arrow", image: Arrow22Image },
   { value: "334", label: '\u21A6', parentId: "arrow", image: Arrow23Image },
   { value: "335", label: '\u21A7', parentId: "arrow", image: Arrow24Image },
-  { value: "336", label: '\u21A8', parentId: "arrow", image :Arrow25Image},
-  { value : '337' , label :'\u21A9' ,parentId :'arrow' ,image :Arrow26Image},
-  { value : '338' , label :'\u21AA' ,parentId :'arrow' ,image :Arrow27Image},
-  { value : '339' , label :'\u21AB' ,parentId :'arrow' ,image :Arrow28Image},
-  { value : '340' , label :'\u21AC' ,parentId :'arrow' ,image :Arrow29Image},
-  { value : '341' , label :'\u21AD' ,parentId :'arrow' ,image :Arrow30Image},
-  { value : '342' , label :'\u21AE' ,parentId :'arrow' ,image :Arrow31Image},
-  { value : '343' , label :'\u21AF' ,parentId :'arrow' ,image :Arrow32Image},
-  { value : '344' , label :'\u21B0' ,parentId :'arrow' ,image :Arrow33Image},
-  { value : '345' , label :'\u21B1' ,parentId :'arrow' ,image :Arrow34Image},
-  { value : '346' , label :'\u21B2' ,parentId :'arrow' ,image :Arrow35Image},
-  { value : '347' , label :'\u21B3' ,parentId :'arrow' ,image :Arrow36Image},
-  { value : '348' , label :'\u21B4' ,parentId :'arrow' ,image :Arrow37Image},
-  { value : '349' , label :'\u21B5' ,parentId :'arrow' ,image :Arrow38Image},
+  { value: "336", label: '\u21A8', parentId: "arrow", image: Arrow25Image },
+  { value: '337', label: '\u21A9', parentId: 'arrow', image: Arrow26Image },
+  { value: '338', label: '\u21AA', parentId: 'arrow', image: Arrow27Image },
+  { value: '339', label: '\u21AB', parentId: 'arrow', image: Arrow28Image },
+  { value: '340', label: '\u21AC', parentId: 'arrow', image: Arrow29Image },
+  { value: '341', label: '\u21AD', parentId: 'arrow', image: Arrow30Image },
+  { value: '342', label: '\u21AE', parentId: 'arrow', image: Arrow31Image },
+  { value: '343', label: '\u21AF', parentId: 'arrow', image: Arrow32Image },
+  { value: '344', label: '\u21B0', parentId: 'arrow', image: Arrow33Image },
+  { value: '345', label: '\u21B1', parentId: 'arrow', image: Arrow34Image },
+  { value: '346', label: '\u21B2', parentId: 'arrow', image: Arrow35Image },
+  { value: '347', label: '\u21B3', parentId: 'arrow', image: Arrow36Image },
+  { value: '348', label: '\u21B4', parentId: 'arrow', image: Arrow37Image },
+  { value: '349', label: '\u21B5', parentId: 'arrow', image: Arrow38Image },
   { value: "350", label: '\u21B6', parentId: "arrow", image: Arrow39Image },
   { value: "351", label: '\u21B7', parentId: "arrow", image: Arrow40Image },
   { value: "352", label: '\u21B8', parentId: "arrow", image: Arrow41Image },
   { value: "353", label: '\u21B9', parentId: "arrow", image: Arrow42Image },
   { value: "354", label: '\u21BA', parentId: "arrow", image: Arrow43Image },
-  { value: "355", label: '\u21BB', parentId: "arrow", image :Arrow44Image},
-  { value : '356' , label :'\u21BC' ,parentId :'arrow' ,image :Arrow45Image},
-  { value : '357' , label :'\u21BD' ,parentId :'arrow' ,image :Arrow46Image},
-  { value : '358' , label :'\u21BE' ,parentId :'arrow' ,image :Arrow47Image},
-  { value : '359' , label :'\u21BF' ,parentId :'arrow' ,image :Arrow48Image},
-  { value : '360' , label :'\u21C0' ,parentId :'arrow' ,image :Arrow49Image},
-  { value : '361' , label :'\u21C1' ,parentId :'arrow' ,image :Arrow50Image},
-  { value : '362' , label :'\u21C2' ,parentId :'arrow' ,image :Arrow51Image},
-  { value : '363' , label :'\u21C3' ,parentId :'arrow' ,image :Arrow52Image},
-  { value : '364' , label :'\u21C4' ,parentId :'arrow' ,image :Arrow53Image},
-  { value : '365' , label :'\u21C5' ,parentId :'arrow' ,image :Arrow54Image},
-  { value : '366' , label :'\u21C6' ,parentId :'arrow' ,image :Arrow55Image},
-  { value : '367' , label :'\u21C7' ,parentId :'arrow' ,image :Arrow56Image},
-  { value : '368' , label :'\u21C8' ,parentId :'arrow' ,image :Arrow57Image},
+  { value: "355", label: '\u21BB', parentId: "arrow", image: Arrow44Image },
+  { value: '356', label: '\u21BC', parentId: 'arrow', image: Arrow45Image },
+  { value: '357', label: '\u21BD', parentId: 'arrow', image: Arrow46Image },
+  { value: '358', label: '\u21BE', parentId: 'arrow', image: Arrow47Image },
+  { value: '359', label: '\u21BF', parentId: 'arrow', image: Arrow48Image },
+  { value: '360', label: '\u21C0', parentId: 'arrow', image: Arrow49Image },
+  { value: '361', label: '\u21C1', parentId: 'arrow', image: Arrow50Image },
+  { value: '362', label: '\u21C2', parentId: 'arrow', image: Arrow51Image },
+  { value: '363', label: '\u21C3', parentId: 'arrow', image: Arrow52Image },
+  { value: '364', label: '\u21C4', parentId: 'arrow', image: Arrow53Image },
+  { value: '365', label: '\u21C5', parentId: 'arrow', image: Arrow54Image },
+  { value: '366', label: '\u21C6', parentId: 'arrow', image: Arrow55Image },
+  { value: '367', label: '\u21C7', parentId: 'arrow', image: Arrow56Image },
+  { value: '368', label: '\u21C8', parentId: 'arrow', image: Arrow57Image },
   { value: "369", label: '\u21C9', parentId: "arrow", image: Arrow58Image },
   { value: "370", label: '\u21CA', parentId: "arrow", image: Arrow59Image },
   { value: "371", label: '\u21CB', parentId: "arrow", image: Arrow60Image },
   { value: "372", label: '\u21CC', parentId: "arrow", image: Arrow61Image },
-  { value: "373", label: '\u21CD', parentId: "arrow", image :Arrow62Image},
-  { value : '374' , label :'\u21CE' ,parentId :'arrow' ,image :Arrow63Image},
-  { value : '375' , label :'\u21CF' ,parentId :'arrow' ,image :Arrow64Image},
-  { value : '376' , label :'\u21D0' ,parentId :'arrow' ,image :Arrow65Image},
-  { value : '377' , label :'\u21D1' ,parentId :'arrow' ,image :Arrow66Image},
-  { value : '378' , label :'\u21D2' ,parentId :'arrow' ,image :Arrow67Image},
-  { value : '379' , label :'\u21D3' ,parentId :'arrow' ,image :Arrow68Image},
-  { value : '380' , label :'\u21D4' ,parentId :'arrow' ,image :Arrow69Image},
-  { value : '381' , label :'\u21D5' ,parentId :'arrow' ,image :Arrow70Image},
-  { value : '382' , label :'\u21D6' ,parentId :'arrow' ,image :Arrow71Image},
-  { value : '383' , label :'\u21D7' ,parentId :'arrow' ,image :Arrow72Image},
+  { value: "373", label: '\u21CD', parentId: "arrow", image: Arrow62Image },
+  { value: '374', label: '\u21CE', parentId: 'arrow', image: Arrow63Image },
+  { value: '375', label: '\u21CF', parentId: 'arrow', image: Arrow64Image },
+  { value: '376', label: '\u21D0', parentId: 'arrow', image: Arrow65Image },
+  { value: '377', label: '\u21D1', parentId: 'arrow', image: Arrow66Image },
+  { value: '378', label: '\u21D2', parentId: 'arrow', image: Arrow67Image },
+  { value: '379', label: '\u21D3', parentId: 'arrow', image: Arrow68Image },
+  { value: '380', label: '\u21D4', parentId: 'arrow', image: Arrow69Image },
+  { value: '381', label: '\u21D5', parentId: 'arrow', image: Arrow70Image },
+  { value: '382', label: '\u21D6', parentId: 'arrow', image: Arrow71Image },
+  { value: '383', label: '\u21D7', parentId: 'arrow', image: Arrow72Image },
   { value: "384", label: '\u21D8', parentId: "arrow", image: Arrow73Image },
   { value: "385", label: '\u21D8', parentId: "arrow", image: Arrow74Image },
   { value: "386", label: '\u21D9', parentId: "arrow", image: Arrow75Image },
   { value: "387", label: '\u21DA', parentId: "arrow", image: Arrow76Image },
   { value: "388", label: '\u21DB', parentId: "arrow", image: Arrow77Image },
   { value: "389", label: '\u21DC', parentId: "arrow", image: Arrow78Image },
+
+  // Relationship
+  { value: "400", label: '\\sim', parentId: "relationship", image: Relationship1Image },
+  { value: "401", label: '\\alpha', parentId: "relationship", image: Relationship2Image },
+  { value: "402", label: '\\Rightarrow', parentId: "relationship", image: Relationship3Image },
+  { value: "403", label: '\\Leftarrow', parentId: "relationship", image: Relationship4Image },
+  { value: "404", label: '\\Leftrightarrow', parentId: "relationship", image: Relationship5Image },
+  { value: "405", label: '\\geq', parentId: "relationship", image: Relationship6Image },
+  { value: "406", label: '\\gt', parentId: "relationship", image: Relationship7Image },
+  { value: "407", label: '\\lt', parentId: "relationship", image: Relationship8Image },
+  { value: "408", label: '=', parentId: "relationship", image: Relationship9Image },
+  { value: "409", label: '\\leq', parentId: "relationship", image: Relationship10Image },
+
+  // Theory2
+  { value: "410", label: '\\large{T_1}', parentId: "theory2", image: TheoryDropdown1Image },
+  { value: "411", label: '\\large{T_2}', parentId: "theory2", image: TheoryDropdown2Image },
+  { value: "412", label: '\\large{T_3}', parentId: "theory2", image: TheoryDropdown3Image },
+  { value: "413", label: '\\large{T_4}', parentId: "theory2", image: TheoryDropdown4Image },
+  { value: "414", label: '\\large{T_5}', parentId: "theory2", image: TheoryDropdown5Image },
+  { value: "415", label: '\\large{T_6}', parentId: "theory2", image: TheoryDropdown6Image },
+  { value: "416", label: '\\large{T_7}', parentId: "theory2", image: TheoryDropdown7Image },
+  { value: "417", label: '\\large{T_8}', parentId: "theory2", image: TheoryDropdown8Image },
+  { value: "418", label: '\\large{T_9}', parentId: "theory2", image: TheoryDropdown9Image },
+  { value: "419", label: '\\large{T_{10}}', parentId: "theory2", image: TheoryDropdown10Image },
+  { value: "420", label: '\\large{T}', parentId: "theory2", image: TheoryDropdown11Image },
+  { value: "421", label: '\\large{T}_{\\large{x}}', parentId: "theory2", image: TheoryDropdown12Image },
+  { value: "422", label: '\\large{A}', parentId: "theory2", image: TheoryDropdown13Image },
+  { value: "423", label: "\\large{A}'", parentId: "theory2", image: TheoryDropdown14Image },
+  { value: "424", label: "\\large{A}'|_{\\Large{t_{x}}}", parentId: "theory2", image: TheoryDropdown15Image },
+  { value: "425", label: "\\large{A}'_{\\Large{x}}", parentId: "theory2", image: TheoryDropdown16Image },
+
+  // Derivative
+  { value: "426", label: '\\frac{\\large{d{a}}}{\\large{dx}}', parentId: "derivative", image: Derivative1Image },
+  { value: "427", label: '\\frac{\\large{dI}}{\\large{dT}}', parentId: "derivative", image: Derivative2Image },
+  { value: "428", label: '\\frac{\\large{dM}}{\\large{dT}}', parentId: "derivative", image: Derivative3Image },
+  { value: "429", label: '\\large{NE}', parentId: "derivative", image: Derivative4Image },
+  { value: "430", label: '\\large{IE}', parentId: "derivative", image: Derivative5Image },
+
+  // Instrument
+  { value: "431", label: '\\large{I}', parentId: "instrument", image: Instrument1Image },
+  { value: "432", label: '\\large{M}', parentId: "instrument", image: Instrument2Image },
+  { value: "433", label: 'Tr\\left\\{{T}\\right\\}', parentId: "instrument", image: Instrument3Image },
+  { value: "434", label: 'Tr\\left\\{{\\large{x}}\\right\\}', parentId: "instrument", image: Instrument4Image },
+  { value: "435", label: '\\large{I}[\\large{u(t)}]', parentId: "instrument", image: Instrument5Image },
+  { value: "436", label: '\\large{M}[\\large{u(t)}]', parentId: "instrument", image: Instrument6Image },
+  { value: "437", label: 'I[u_{\\large{x}}(t)]', parentId: "instrument", image: Instrument7Image },
+  { value: "438", label: 'M[u_{\\large{x}}(t)]', parentId: "instrument", image: Instrument8Image },
+
+  // Stability
+  { value: "439", label: '\\large{k}', parentId: "stability", image: Stability1Image },
+  { value: "440", label: '\\large{x}', parentId: "stability", image: Stability2Image },
+  { value: "441", label: '\\large{y}', parentId: "stability", image: Stability3Image },
+  { value: "442", label: '\\large{x}_{\\large{x}}', parentId: "stability", image: Stability4Image },
+  { value: "443", label: '\\large{y}_{\\large{x}}', parentId: "stability", image: Stability5Image },
+  { value: "444", label: '\\large{xy}', parentId: "stability", image: Stability6Image },
+  { value: "445", label: '\\large{x}_{\\large{x}}\\large{y}_{\\large{y}}', parentId: "stability", image: Stability7Image },
+  { value: "446", label: '\\large{S}', parentId: "stability", image: Stability8Image },
+  { value: "447", label: '\\large{S}_{\\large{x}}', parentId: "stability", image: Stability9Image },
+  { value: "448", label: '\\Delta{\\large{x}}', parentId: "stability", image: Stability10Image },
+  { value: "449", label: '\\bar{\\large{T}}', parentId: "stability", image: Stability11Image },
+  { value: "450", label: '\\large{L}', parentId: "stability", image: Stability12Image },
+  { value: "451", label: '\\large{G}', parentId: "stability", image: Stability13Image },
+  { value: "452", label: '\\Delta{L}', parentId: "stability", image: Stability14Image },
+  { value: "453", label: 'L_{\\large{x}}', parentId: "stability", image: Stability15Image },
+  { value: "454", label: 'G_{\\large{x}}', parentId: "stability", image: Stability16Image },
+  { value: "455", label: 'L|_{t_{\\large{x}}}', parentId: "stability", image: Stability17Image },
+  { value: "456", label: 'G|_{t_{\\large{x}}}', parentId: "stability", image: Stability18Image },
+  { value: "457", label: '\\Delta{G}', parentId: "stability", image: Stability19Image },
+  { value: "458", label: '\\Delta{t}', parentId: "stability", image: Stability20Image },
+  { value: "459", label: '\\frac{\\Delta{L}}{\\Delta{t}}', parentId: "stability", image: Stability21Image },
+  { value: "460", label: '\\frac{\\Delta{G}}{\\Delta{t}} ', parentId: "stability", image: Stability22Image },
+  { value: "461", label: 'Q', parentId: "stability", image: Stability23Image },
+  { value: "462", label: 'q', parentId: "stability", image: Stability24Image },
+  { value: "463", label: 'Q|_{t_{\\large{x}}}', parentId: "stability", image: Stability25Image },
+  { value: "464", label: 'd', parentId: "stability", image: Stability26Image },
+  { value: "465", label: 'd_{\\large{x}}', parentId: "stability", image: Stability27Image },
+  { value: "466", label: '\\Delta{t}', parentId: "stability", image: Stability28Image },
+  { value: "467", label: '\\Delta{t}_{u}', parentId: "stability", image: Stability29Image },
+  { value: "468", label: '\\Delta{t}_{d}', parentId: "stability", image: Stability30Image },
+  { value: "469", label: '\\Delta{t}_{\\large{x}}', parentId: "stability", image: Stability31Image },
+
+  // Theorem
+  { value: "470", label: '\\large{Th}', parentId: "theorem", image: TheoromDropdown1Image },
+  { value: "471", label: '\\large{K_{Th}}', parentId: "theorem", image: TheoromDropdown2Image },
+  { value: "472", label: '\\large{i_{Th}}', parentId: "theorem", image: TheoromDropdown3Image },
+  { value: "473", label: '\\large{I_{Th}}', parentId: "theorem", image: TheoromDropdown4Image },
+  { value: "474", label: '\\large{M_{Th}}', parentId: "theorem", image: TheoromDropdown5Image },
+  { value: "475", label: '\\large{E_{S_{Th}}}', parentId: "theorem", image: TheoromDropdown6Image },
+  { value: "476", label: '\\large{W_{Th}}', parentId: "theorem", image: TheoromDropdown7Image },
+  { value: "477", label: '\\large{G_{Th}}', parentId: "theorem", image: TheoromDropdown8Image },
+  { value: "478", label: '\\large{Th_{n}}', parentId: "theorem", image: TheoromDropdown9Image },
+  { value: "479", label: '\\large{K}_{\\large{Th}_{\\large{x}}}', parentId: "theorem", image: TheoromDropdown10Image },
+  { value: "480", label: '\\large{i}_{\\large{Th}_{\\large{x}}}', parentId: "theorem", image: TheoromDropdown11Image },
+  { value: "481", label: '\\large{I}_{\\large{Th}_{\\large{x}}}', parentId: "theorem", image: TheoromDropdown12Image },
+  { value: "482", label: '\\large{M}_{\\large{Th}_{\\large{x}}}', parentId: "theorem", image: TheoromDropdown13Image },
+  { value: "483", label: '\\large{E}_{\\large{S}_{\\large{Th}_{\\large{x}}}}', parentId: "theorem", image: TheoromDropdown14Image },
+  { value: "484", label: '\\large{W}_{\\large{Th}_{\\large{x}}}', parentId: "theorem", image: TheoromDropdown15Image },
+  { value: "485", label: '\\large{G}_{\\large{Th}_{\\large{x}}}', parentId: "theorem", image: TheoromDropdown16Image },
+  { value: "486", label: '\\large{Th}', parentId: "theorem", image: TheoromDropdown17Image },
+  { value: "487", label: '\\large{Th}_{\\large{x}}', parentId: "theorem", image: TheoromDropdown18Image },
+  { value: "488", label: '\\large{Th}|_{\\large{t}_{\\large{x}}}', parentId: "theorem", image: TheoromDropdown19Image },
+  { value: "489", label: '\\large{Th}_{\\large{g}}', parentId: "theorem", image: TheoromDropdown20Image },
+  { value: "490", label: '\\large{Th}_{\\large{g}}|_{\\large{t}_{\\large{x}}}', parentId: "theorem", image: TheoromDropdown21Image },
+
+  // Greek Capital
+  { value: "491", label: '\u0391', parentId: "greekcapital", image: GreekCapital1Image },
+  { value: "492", label: '\u0392', parentId: "greekcapital", image: GreekCapital2Image },
+  { value: "493", label: '\u0393', parentId: "greekcapital", image: GreekCapital3Image },
+  { value: "494", label: '\u0394', parentId: "greekcapital", image: GreekCapital4Image },
+  { value: "495", label: '\u0395', parentId: "greekcapital", image: GreekCapital5Image },
+  { value: "496", label: '\u0396', parentId: "greekcapital", image: GreekCapital6Image },
+  { value: "497", label: '\u0397', parentId: "greekcapital", image: GreekCapital7Image },
+  { value: "498", label: '\u0398', parentId: "greekcapital", image: GreekCapital8Image },
+  { value: "499", label: '\u0399', parentId: "greekcapital", image: GreekCapital9Image },
+  { value: "500", label: '\u039A', parentId: "greekcapital", image: GreekCapital10Image },
+  { value: "501", label: '\u039B', parentId: "greekcapital", image: GreekCapital11Image },
+  { value: "502", label: '\u039C', parentId: "greekcapital", image: GreekCapital12Image },
+  { value: "503", label: '\u039D', parentId: "greekcapital", image: GreekCapital13Image },
+  { value: "504", label: '\u039E', parentId: "greekcapital", image: GreekCapital14Image },
+  { value: "505", label: '\u039F', parentId: "greekcapital", image: GreekCapital15Image },
+  { value: "506", label: '\u03A0', parentId: "greekcapital", image: GreekCapital16Image },
+  { value: "507", label: '\u03A1', parentId: "greekcapital", image: GreekCapital17Image },
+  { value: "508", label: '\u03A3', parentId: "greekcapital", image: GreekCapital18Image },
+  { value: "509", label: '\u03A4', parentId: "greekcapital", image: GreekCapital19Image },
+  { value: "510", label: '\u03A5', parentId: "greekcapital", image: GreekCapital20Image },
+  { value: "511", label: '\u03A6', parentId: "greekcapital", image: GreekCapital21Image },
+  { value: "512", label: '\u03A7', parentId: "greekcapital", image: GreekCapital22Image },
+  { value: "513", label: '\u03A8', parentId: "greekcapital", image: GreekCapital23Image },
+  { value: "514", label: '\u03A9', parentId: "greekcapital", image: GreekCapital24Image },
+
+  // Greek Small
+  { value: "515", label: '\u03B1', parentId: "greeksmall", image: GreekSmall1Image },
+  { value: "516", label: '\u03B2', parentId: "greeksmall", image: GreekSmall2Image },
+  { value: "517", label: '\u03B3', parentId: "greeksmall", image: GreekSmall3Image },
+  { value: "518", label: '\u03B4', parentId: "greeksmall", image: GreekSmall4Image },
+  { value: "519", label: '\u03B5', parentId: "greeksmall", image: GreekSmall5Image },
+  { value: "520", label: '\u03B6', parentId: "greeksmall", image: GreekSmall6Image },
+  { value: "521", label: '\u03B7', parentId: "greeksmall", image: GreekSmall7Image },
+  { value: "522", label: '\u03B8', parentId: "greeksmall", image: GreekSmall8Image },
+  { value: "523", label: '\u03B9', parentId: "greeksmall", image: GreekSmall9Image },
+  { value: "524", label: '\u03BA', parentId: "greeksmall", image: GreekSmall10Image },
+  { value: "525", label: '\u03BB', parentId: "greeksmall", image: GreekSmall11Image },
+  { value: "526", label: '\u03BC', parentId: "greeksmall", image: GreekSmall12Image },
+  { value: "527", label: '\u03BD', parentId: "greeksmall", image: GreekSmall13Image },
+  { value: "528", label: '\u03BE', parentId: "greeksmall", image: GreekSmall14Image },
+  { value: "529", label: '\u03BF', parentId: "greeksmall", image: GreekSmall15Image },
+  { value: "530", label: '\u03C0', parentId: "greeksmall", image: GreekSmall16Image },
+  { value: "531", label: '\u03C1', parentId: "greeksmall", image: GreekSmall17Image },
+  { value: "532", label: '\u03C2', parentId: "greeksmall", image: GreekSmall18Image },
+  { value: "533", label: '\u03C3', parentId: "greeksmall", image: GreekSmall19Image },
+  { value: "534", label: '\u03C4', parentId: "greeksmall", image: GreekSmall20Image },
+  { value: "535", label: '\u03C5', parentId: "greeksmall", image: GreekSmall21Image },
+  { value: "536", label: '\u03C6', parentId: "greeksmall", image: GreekSmall22Image },
+  { value: "537", label: '\u03C7', parentId: "greeksmall", image: GreekSmall23Image },
+  { value: "538", label: '\u03C8', parentId: "greeksmall", image: GreekSmall24Image },
+  { value: "539", label: '\u03C9', parentId: "greeksmall", image: GreekSmall25Image },
+
+  // Time Theory
+  { value: "540", label: '\\large{t_{0}}', parentId: "timetheory", image: DropdownTime1Image },
+  { value: "541", label: '\\large{t_{0+}}', parentId: "timetheory", image: DropdownTime2Image },
+  { value: "542", label: '\\large{t_{0++}}', parentId: "timetheory", image: DropdownTime3Image },
+  { value: "543", label: '\\large{t_{1}}', parentId: "timetheory", image: DropdownTime4Image },
+  { value: "544", label: '\\large{t_{1}}+{\\large{x}}', parentId: "timetheory", image: DropdownTime5Image },
+  { value: "545", label: '\\large{t_{2}}', parentId: "timetheory", image: DropdownTime6Image },
+  { value: "546", label: '\\large{t_{2}}+{\\large{x}}', parentId: "timetheory", image: DropdownTime7Image },
+  { value: "547", label: '\\large{t_{3}}', parentId: "timetheory", image: DropdownTime8Image },
+  { value: "548", label: '\\large{t_{3}}+{\\large{x}}', parentId: "timetheory", image: DropdownTime9Image },
+  { value: "549", label: '\\large{t_{4}}', parentId: "timetheory", image: DropdownTime10Image },
+  { value: "550", label: '\\large{t_{4}}+{\\large{x}}', parentId: "timetheory", image: DropdownTime11Image },
+  { value: "551", label: "\\large{t'}", parentId: "timetheory", image: DropdownTime12Image },
+
+  // Function Theory
+  { value: "552", label: '\\large{\\class{nimbusScript}L}(\\large{t})}', parentId: "functiontheory", image: DropdownFunction1Image },
+  { value: "553", label: '\\large{h({t})}', parentId: "functiontheory", image: DropdownFunction2Image },
+  { value: "554", label: '\\large{u({t})}', parentId: "functiontheory", image: DropdownFunction3Image },
+  { value: "555", label: '\\large{h({t})+u({t})}', parentId: "functiontheory", image: DropdownFunction4Image },
+  { value: "556", label: '\\sum\\limits_{\\large{n=1}}^{\\large{\\infty}}{\\large{h_{n}(t)}}', parentId: "functiontheory", image: DropdownFunction5Image },
+  { value: "557", label: '\\sum\\limits_{\\large{m=0}}^{\\large{M}}{\\large{u_{m}(t)}}', parentId: "functiontheory", image: DropdownFunction6Image },
+  { value: "558", label: 'Int\\left\\{{\\large{x}}\\right\\}', parentId: "functiontheory", image: DropdownFunction7Image },
+  { value: "559", label: '\\bar{\\large{u}}(t)', parentId: "functiontheory", image: DropdownFunction8Image },
+  { value: "560", label: '\\bar{\\large{u}}_{\\large{x}}(t)', parentId: "functiontheory", image: DropdownFunction9Image },
+  { value: "561", label: '\\large{h}_{\\large{x}}(t)', parentId: "functiontheory", image: DropdownFunction10Image },
 ];
-  

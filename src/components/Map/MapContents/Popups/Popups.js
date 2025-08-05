@@ -1872,13 +1872,18 @@ export const mapElementPopup = (map, e, setMapElementRelate, id) => {
     clearAllPopups(map);
     const popup = L.popup([e.latlng.lat, e.latlng.lng], {
         content: mapElementPopupHTML(),
-        offset: L.point(0, e.latlng.lat < 20 ? -10 : 200)
+        // offset: L.point(0, e.latlng.lat < 20 ? -10 : 200)
     });
     popup.addTo(map);
 
     window.handleSelectMapRelate = (value) => {
         setMapElementRelate(value, id);
         map.removeLayer(popup);
+    }
+
+    window.deleteEquation = () => {
+        map.removeLayer(popup);
+        map.removeLayer(e.target);
     }
 }
 
