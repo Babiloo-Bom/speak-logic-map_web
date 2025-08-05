@@ -953,6 +953,10 @@ const Markers = ({setModal, setModalType}) => {
                         markerGivenSet[0]++;
                     }
                     globalStore.addIconHandle('');
+                } else if (globalStore.addIcon === 'equation') {
+                    globalStore.setEquationDropPosition(e.latlng);
+                    globalStore.setEquationModalOpen(true);
+                    globalStore.addIconHandle('');
                 }
             }
 

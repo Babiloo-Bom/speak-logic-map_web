@@ -927,12 +927,12 @@ export const OPTIONS_MATHEMATICAL = [
   // { value: "63", label: "x^2", parentId: "fraction" },
 
   // Bracket
-  { value: "64", label: "\\left\\langle\\large{x}}\\right\\vert", parentId: "bracket", image: AngleBarImage },
-  { value: "65", label: "\\left\\vert\\large{x}}\\right\\rangle", parentId: "bracket", image: BarAngleImage },
+  { value: "64", label: '\\left\\langle\\large{x}\\right\\vert', parentId: "bracket", image: AngleBarImage },
+  { value: "65", label: '\\left\\vert\\large{x}\\right\\rangle', parentId: "bracket", image: BarAngleImage },
   { value: "66", label: "\\underbrace{\\large{x}}_{\\large{y}}", parentId: "bracket", image: BottomCurlyBracketImage },
   { value: "67", label: "\\left\\lceil\\large{x}\\right\\rceil", parentId: "bracket", image: CeilingImage },
   { value: "68", label: "\\left\\{\\large{x}\\right\\}", parentId: "bracket", image: CurlyBracketImage },
-  { value: "69", label: "\\left\\langle\\large{x}|\\large{y}}\\right\\rangle", parentId: "bracket", image: DoubleArrowBarBracketImage },
+  { value: "69", label: '\\left\\langle\\large{x}|\\large{y}\\right\\rangle', parentId: "bracket", image: DoubleArrowBarBracketImage },
   { value: "70", label: "\\left\\|\\large{x}\\right\\|", parentId: "bracket", image: DoubleBarImage },
   { value: "71", label: "\\left\\lfloor\\large{x}\\right\\rfloor", parentId: "bracket", image: FloorImage },
   { value: "72", label: "\\langle\\large{x}", parentId: "bracket", image: LeftAngleImage },
@@ -948,7 +948,7 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "82", label: "\\left\\langle\\large{x}\\right\\rangle", parentId: "bracket", image: PointingAnglesImage },
   { value: "83", label: "\\large{x}\\rangle", parentId: "bracket", image: RightAngleImage },
   { value: "84", label: "\\large{x}|", parentId: "bracket", image: RightBarImage },
-  { value: "85", label: "\\large{x}}", parentId: "bracket", image: RightCurlyBracketImage },
+  { value: "85", label: "\\large{x}\\}", parentId: "bracket", image: RightCurlyBracketImage },
   { value: "86", label: "\\left\\|\\large{x}\\right\\|", parentId: "bracket", image: RightDoubleBarImage },
   { value: "87", label: "]\\large{x}[", parentId: "bracket", image: RightLeftSquareBracketImage },
   { value: "88", label: "\\large{x})", parentId: "bracket", image: RightParenthesisImage },
@@ -1447,7 +1447,7 @@ export const OPTIONS_MATHEMATICAL = [
   { value: "551", label: "\\large{t'}", parentId: "timetheory", image: DropdownTime12Image },
 
   // Function Theory
-  { value: "552", label: '\\large{\\class{nimbusScript}L}(\\large{t})}', parentId: "functiontheory", image: DropdownFunction1Image },
+  { value: "552", label: '\\mathfrak{L(t)}', parentId: "functiontheory", image: DropdownFunction1Image },
   { value: "553", label: '\\large{h({t})}', parentId: "functiontheory", image: DropdownFunction2Image },
   { value: "554", label: '\\large{u({t})}', parentId: "functiontheory", image: DropdownFunction3Image },
   { value: "555", label: '\\large{h({t})+u({t})}', parentId: "functiontheory", image: DropdownFunction4Image },
