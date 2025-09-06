@@ -1,0 +1,231 @@
+{
+  "designSystem": {
+    "name": "Function Provider Design System",
+    "version": "1.0.0",
+    "brand": {
+      "name": "Function Provider",
+      "tagline": "Function Solves Problem",
+      "logo": {
+        "style": "geometric",
+        "elements": ["letter F", "letter P", "rectangular containers"],
+        "colors": ["primary blue", "white"],
+        "placement": "top-left corner"
+      }
+    },
+    "colorPalette": {
+      "primary": {
+        "blue": "#4A5FBF",
+        "description": "Deep blue used for primary actions, logos, and key elements"
+      },
+      "neutral": {
+        "white": "#FFFFFF",
+        "lightGray": "#F5F5F7",
+        "mediumGray": "#8E8E93",
+        "darkGray": "#1D1D1F",
+        "description": "Grayscale palette for text, backgrounds, and subtle elements"
+      },
+      "accent": {
+        "purple": "#E8E5F3",
+        "description": "Light purple/lavender for decorative backgrounds"
+      }
+    },
+    "typography": {
+      "hierarchy": {
+        "h1": {
+          "size": "32-36px",
+          "weight": "600-700",
+          "color": "darkGray",
+          "usage": "Main page titles"
+        },
+        "h2": {
+          "size": "18-20px",
+          "weight": "500-600",
+          "color": "darkGray",
+          "usage": "Section headers, form labels"
+        },
+        "body": {
+          "size": "14-16px",
+          "weight": "400",
+          "color": "mediumGray",
+          "usage": "Form descriptions, helper text"
+        },
+        "button": {
+          "size": "16px",
+          "weight": "500-600",
+          "color": "white",
+          "usage": "Button labels"
+        }
+      },
+      "fontFamily": "Modern sans-serif (similar to Inter, SF Pro, or system fonts)"
+    },
+    "layout": {
+      "structure": "Two-column asymmetric layout",
+      "leftColumn": {
+        "width": "40-45%",
+        "background": "light purple gradient or solid",
+        "content": ["decorative elements", "abstract shapes", "illustrations"],
+        "purpose": "Visual interest and brand reinforcement"
+      },
+      "rightColumn": {
+        "width": "55-60%",
+        "background": "white",
+        "content": ["forms", "main content", "interactive elements"],
+        "purpose": "Primary user interaction area"
+      },
+      "spacing": {
+        "containerPadding": "40-60px",
+        "elementSpacing": "20-30px",
+        "formFieldGap": "16-20px"
+      }
+    },
+    "components": {
+      "buttons": {
+        "primary": {
+          "background": "primary blue",
+          "color": "white",
+          "borderRadius": "8px",
+          "padding": "12px 24px",
+          "fontSize": "16px",
+          "fontWeight": "500-600",
+          "width": "100% on mobile, auto on desktop",
+          "height": "48px",
+          "states": ["default", "hover", "active", "disabled"]
+        },
+        "secondary": {
+          "background": "white",
+          "color": "primary blue",
+          "border": "1px solid lightGray",
+          "borderRadius": "8px",
+          "padding": "12px 24px"
+        },
+        "social": {
+          "background": "white",
+          "border": "1px solid lightGray",
+          "borderRadius": "8px",
+          "padding": "12px 24px",
+          "display": "flex",
+          "alignItems": "center",
+          "gap": "12px",
+          "iconPosition": "left"
+        }
+      },
+      "forms": {
+        "inputFields": {
+          "background": "lightGray",
+          "border": "none",
+          "borderRadius": "8px",
+          "padding": "16px",
+          "fontSize": "16px",
+          "placeholder": {
+            "color": "mediumGray",
+            "text": "Descriptive placeholder (e.g., 'Name', 'Email')"
+          },
+          "focus": {
+            "outline": "primary blue",
+            "outlineWidth": "2px"
+          }
+        },
+        "labels": {
+          "fontSize": "16px",
+          "fontWeight": "500",
+          "color": "darkGray",
+          "marginBottom": "8px"
+        },
+        "layout": {
+          "fieldSpacing": "20px",
+          "labelInputGap": "8px"
+        }
+      },
+      "icons": {
+        "style": "Outlined or filled",
+        "size": "20-24px for UI elements, larger for decorative",
+        "usage": ["security (locks, shields)", "communication (email, verification)", "social media logos"],
+        "treatment": "Monochromatic, consistent stroke width"
+      },
+      "cards": {
+        "background": "white",
+        "borderRadius": "12-16px",
+        "padding": "40px",
+        "shadow": "subtle drop shadow",
+        "maxWidth": "400-500px"
+      }
+    },
+    "illustrations": {
+      "style": "Minimalist, geometric",
+      "elements": [
+        "Security themed (locks, shields, checkmarks)",
+        "Communication themed (envelopes, documents)",
+        "Abstract geometric shapes"
+      ],
+      "colorScheme": "Primary blue with white accents",
+      "treatment": "Flat design with subtle gradients",
+      "size": "Large, prominent, typically 150-200px"
+    },
+    "decorativeElements": {
+      "backgroundShapes": {
+        "style": "Organic, flowing shapes",
+        "colors": ["light purple", "very light blue"],
+        "opacity": "20-40%",
+        "placement": "Left column background",
+        "purpose": "Visual interest without distraction"
+      }
+    },
+    "patterns": {
+      "authentication": {
+        "flow": ["Sign In", "Sign Up", "Verify Email", "Reset Password"],
+        "consistency": "Same layout and styling across all auth screens",
+        "progression": "Clear step-by-step visual hierarchy"
+      },
+      "socialLogin": {
+        "providers": ["Google", "Facebook", "Apple"],
+        "styling": "Consistent button treatment with provider logos",
+        "layout": "Stacked vertically with equal spacing"
+      },
+      "verification": {
+        "pattern": "Email-based verification with code input",
+        "feedback": "Clear status messages and resend options"
+      }
+    },
+    "spacing": {
+      "scale": "8px base unit",
+      "common": {
+        "xs": "4px",
+        "sm": "8px",
+        "md": "16px",
+        "lg": "24px",
+        "xl": "32px",
+        "xxl": "48px"
+      }
+    },
+    "accessibility": {
+      "contrast": "High contrast between text and backgrounds",
+      "focusStates": "Clear focus indicators on interactive elements",
+      "textSize": "Minimum 16px for body text",
+      "clickTargets": "Minimum 44px height for buttons and inputs"
+    },
+    "responsive": {
+      "mobile": {
+        "layout": "Single column",
+        "padding": "20px",
+        "buttonWidth": "100%",
+        "stackOrder": "Logo, illustration, form content"
+      },
+      "tablet": {
+        "layout": "Maintains two-column on larger tablets",
+        "adjusts": "Proportional scaling of elements"
+      },
+      "desktop": {
+        "layout": "Two-column asymmetric",
+        "maxWidth": "1200px",
+        "centered": true
+      }
+    },
+    "principles": {
+      "clarity": "Clear visual hierarchy and intuitive user flows",
+      "trust": "Security-focused imagery and professional appearance",
+      "simplicity": "Minimal, uncluttered interface design",
+      "consistency": "Repeated patterns and standardized components",
+      "accessibility": "Inclusive design with proper contrast and sizing"
+    }
+  }
+}
