@@ -157,7 +157,7 @@ const SignInForm: React.FC = () => {
         </Link>
 
         <div className={styles.linkGroup}>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/auth/sign-up" className={styles.link}>
             Sign up
           </Link>

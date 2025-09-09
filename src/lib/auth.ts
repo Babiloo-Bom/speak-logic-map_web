@@ -11,6 +11,10 @@ export interface User {
   created_at: Date;
 }
 
+export interface UserWithPassword extends User {
+  password_hash: string;
+}
+
 export interface UserProfile {
   user_id: number;
   first_name?: string;
@@ -91,7 +95,7 @@ export const createUser = async (email: string, password: string): Promise<User>
   }
 };
 
-export const findUserByEmail = async (email: string): Promise<User | null> => {
+export const findUserByEmail = async (email: string): Promise<UserWithPassword | null> => {
   const client = await pool.connect();
   
   try {
