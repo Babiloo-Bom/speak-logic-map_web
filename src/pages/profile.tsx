@@ -1,46 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import React from 'react';
 import Head from 'next/head';
 import UserProfile from '@/components/Profile/UserProfile';
+import withAuth from '@/components/Auth/withAuth';
 
 const ProfilePage: React.FC = () => {
-  const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Check if user is authenticated
-    const token = localStorage.getItem('accessToken');
-    const user = localStorage.getItem('user');
-    
-    if (!token || !user) {
-      router.push('/auth/sign-in');
-      return;
-    }
-    
-    setIsAuthenticated(true);
-    setIsLoading(false);
-  }, [router]);
-
-  if (isLoading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '16px',
-        color: '#8E8E93'
-      }}>
-        Loading...
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null; // Will redirect to sign in
-  }
-
   return (
     <>
       <Head>
@@ -53,6 +16,9 @@ const ProfilePage: React.FC = () => {
   );
 };
 
-export default ProfilePage;
+// Protect the profile page - require authentication and email verification
+export default withAuth(ProfilePage, {
+  requireEmailVerification: true
+});
 
 

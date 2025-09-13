@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import AuthLayout from './AuthLayout';
 import styles from './_Auth.module.scss';
+import { useUserStore } from '@/providers/RootStoreProvider';
+import { observer } from 'mobx-react-lite';
 
 interface FormData {
   firstName: string;
@@ -164,7 +166,7 @@ const SignUpForm: React.FC = () => {
 
         <div className={styles.formGroup}>
           <label htmlFor="firstName" className={styles.label}>
-            Full Name
+            First Name
           </label>
           <input
             type="text"
@@ -181,7 +183,10 @@ const SignUpForm: React.FC = () => {
           )}
         </div>
 
-        {/* <div className={styles.formGroup}>
+        <div className={styles.formGroup}>
+        <label htmlFor="firstName" className={styles.label}>
+            Last Name
+          </label>
           <input
             type="text"
             id="lastName"
@@ -195,7 +200,7 @@ const SignUpForm: React.FC = () => {
           {errors.lastName && (
             <span className={styles.errorMessage}>{errors.lastName}</span>
           )}
-        </div> */}
+        </div>
 
         <div className={styles.formGroup}>
           <label htmlFor="email" className={styles.label}>
@@ -311,6 +316,6 @@ const SignUpForm: React.FC = () => {
   );
 };
 
-export default SignUpForm;
+export default observer(SignUpForm);
 
 

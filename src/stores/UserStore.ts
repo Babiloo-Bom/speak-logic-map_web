@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+import { isTokenExpired, getStoredAuthData, storeAuthData, clearAuthStorage } from '@/utils/authHelpers';
 
 interface User {
   id: number;
@@ -38,21 +39,22 @@ export class UserStore {
   // Initialize user data from localStorage
   initializeFromStorage = (): void => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('accessToken');
-      const userData = localStorage.getItem('user');
+      const { user, accessToken, profile } = getStoredAuthData();
       
-      if (token && userData) {
-        try {
-          this.accessToken = token;
-          this.user = JSON.parse(userData);
-          this.isAuthenticated = true;
-          
-          // Set legacy username for backward compatibility
-          this.username = this.user?.email || '';
-        } catch (error) {
-          console.error('Error parsing user data from localStorage:', error);
+      if (accessToken && user) {
+        // Check if token is expired
+        if (isTokenExpired(accessToken)) {
           this.clearAuth();
+          return;
         }
+
+        this.accessToken = accessToken;
+        this.user = user;
+        this.profile = profile;
+        this.isAuthenticated = true;
+        
+        // Set legacy username for backward compatibility
+        this.username = user.email || '';
       }
     }
   };
@@ -64,21 +66,27 @@ export class UserStore {
   };
 
   // New authentication methods
-  setAuthData = (user: User, accessToken: string): void => {
+  setAuthData = (user: User, accessToken: string, profile?: Profile): void => {
     this.user = user;
     this.accessToken = accessToken;
     this.isAuthenticated = true;
     this.username = user.email; // For backward compatibility
     
-    // Store in localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('user', JSON.stringify(user));
+    if (profile) {
+      this.profile = profile;
     }
+    
+    // Store in localStorage using helper
+    storeAuthData(user, accessToken, profile);
   };
 
   setProfile = (profile: Profile): void => {
     this.profile = profile;
+    
+    // Update profile in localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('profile', JSON.stringify(profile));
+    }
   };
 
   updateUserRole = (newRole: string): void => {
@@ -116,11 +124,8 @@ export class UserStore {
     this.username = '';
     this.password = '';
     
-    // Clear localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-    }
+    // Clear localStorage using helper
+    clearAuthStorage();
   };
 
   // Token refresh

@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import AuthLayout from './AuthLayout';
 import styles from './_Auth.module.scss';
+import { useUserStore } from '@/providers/RootStoreProvider';
+import { observer } from 'mobx-react-lite';
 
 interface FormData {
   email: string;
@@ -17,6 +19,7 @@ interface FormErrors {
 
 const SignInForm: React.FC = () => {
   const router = useRouter();
+  const userStore = useUserStore();
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -71,11 +74,8 @@ const SignInForm: React.FC = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Store access token
-        localStorage.setItem('accessToken', data.accessToken);
-        
-        // Store user data
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // Use UserStore to manage authentication
+        userStore.setAuthData(data.user, data.accessToken, data.profile);
         
         // Redirect to dashboard
         router.push('/');
@@ -214,6 +214,6 @@ const SignInForm: React.FC = () => {
   );
 };
 
-export default SignInForm;
+export default observer(SignInForm);
 
 
