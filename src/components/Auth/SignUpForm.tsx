@@ -317,5 +317,3 @@ const SignUpForm: React.FC = () => {
 };
 
 export default observer(SignUpForm);
-
-

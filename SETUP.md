@@ -52,6 +52,18 @@ FROM_EMAIL=your-email@gmail.com
 # Application Configuration
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-nextauth-secret-here
+
+# Social Login Configuration
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+APPLE_CLIENT_ID=
+APPLE_TEAM_ID=
+APPLE_KEY_ID=
+APPLE_PRIVATE_KEY=
+
+FACEBOOK_CLIENT_ID=
+FACEBOOK_CLIENT_SECRET=
 ```
 
 ### 3. Initialize Database Schema
@@ -221,5 +233,3 @@ The system creates the following tables:
 - Email functionality is optional for testing
 
 For additional help, check the browser console and server logs for detailed error messages.
-
-

@@ -215,6 +215,81 @@ export const createOrUpdateProfile = async (profile: UserProfile): Promise<UserP
   }
 };
 
+// Social login support
+export const findOrCreateUserFromSocialLogin = async (
+  email: string,
+  firstName?: string,
+  lastName?: string
+): Promise<{ user: User; profile: UserProfile | null }> => {
+  const normalizedEmail = email.toLowerCase();
+  const existingUser = await findUserByEmail(normalizedEmail);
+
+  let user: User;
+
+  if (!existingUser) {
+    const client = await pool.connect();
+
+    try {
+      const placeholderPassword = await hashPassword(generateRandomToken());
+      const result = await client.query(
+        `INSERT INTO users (email, password_hash, role, status)
+         VALUES ($1, $2, 'user', 'active')
+         RETURNING id, email, role, status, created_at`,
+        [normalizedEmail, placeholderPassword]
+      );
+
+      user = result.rows[0];
+    } finally {
+      client.release();
+    }
+  } else {
+    user = {
+      id: existingUser.id,
+      email: existingUser.email,
+      role: existingUser.role,
+      status: existingUser.status,
+      created_at: existingUser.created_at,
+    };
+
+    if (user.status !== 'active') {
+      const client = await pool.connect();
+
+      try {
+        const result = await client.query(
+          `UPDATE users
+           SET status = 'active'
+           WHERE id = $1
+           RETURNING id, email, role, status, created_at`,
+          [user.id]
+        );
+
+        user = result.rows[0];
+      } finally {
+        client.release();
+      }
+    }
+  }
+
+  let profile = await getUserProfile(user.id);
+
+  if (firstName || lastName) {
+    const profileToPersist: UserProfile = {
+      user_id: user.id,
+      first_name: firstName ?? profile?.first_name,
+      last_name: lastName ?? profile?.last_name,
+      title: profile?.title,
+      function: profile?.function,
+      geo_id: profile?.geo_id,
+      avatar_id: profile?.avatar_id,
+      pen_name: profile?.pen_name,
+    };
+
+    profile = await createOrUpdateProfile(profileToPersist);
+  }
+
+  return { user, profile };
+};
+
 // Token management
 export const storeRefreshToken = async (userId: number, refreshToken: string): Promise<void> => {
   const client = await pool.connect();
@@ -349,5 +424,4 @@ export const requireAuth = (roles: string[] = []) => {
 export const generateRandomToken = (): string => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 };
-
 

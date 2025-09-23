@@ -420,6 +420,12 @@ const UserProfile: React.FC = () => {
                 >
                   Premium
                 </button>
+                  <button
+                      onClick={() => handleChangeRole('provider')}
+                      className={`${styles.roleButton} ${user.role === 'provider' ? styles.active : ''}`}
+                  >
+                      Provider
+                  </button>
               </div>
             </div>
           </div>

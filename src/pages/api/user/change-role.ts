@@ -5,7 +5,7 @@ interface ChangeRoleRequest {
   role: string;
 }
 
-const VALID_ROLES = ['user', 'admin', 'moderator', 'premium'];
+const VALID_ROLES = ['user', 'admin', 'moderator', 'premium', 'provider'];
 
 async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   if (req.method !== 'PUT') {
