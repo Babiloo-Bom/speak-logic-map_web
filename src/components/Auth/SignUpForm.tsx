@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import AuthLayout from './AuthLayout';
@@ -35,6 +35,14 @@ const SignUpForm: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [appleEmail, setEmail] = useState('');
+
+  useEffect(() => {
+    if (router.query.email) {
+      setEmail(decodeURIComponent(router.query.email));
+      formData.email = router.query.email
+    }
+  }, [router.query]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -210,11 +218,12 @@ const SignUpForm: React.FC = () => {
             type="email"
             id="email"
             name="email"
-            value={formData.email}
+            value={appleEmail || formData.email}
+            readOnly={!!appleEmail}
             onChange={handleInputChange}
             placeholder="Email"
             className={`${styles.input} ${errors.email ? styles.error : ''}`}
-            disabled={isLoading}
+            disabled={!!appleEmail || isLoading}
           />
           {errors.email && (
             <span className={styles.errorMessage}>{errors.email}</span>

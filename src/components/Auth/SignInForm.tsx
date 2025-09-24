@@ -117,10 +117,10 @@ const SignInForm: React.FC = () => {
             return;
         }
 
-        // if (provider === 'Apple') {
-        //     redirectToProvider('/api/auth/apple');
-        //     return;
-        // }
+        if (provider === 'Apple') {
+            redirectToProvider('/api/auth/apple');
+            return;
+        }
 
         alert(`${provider} login is not available yet`);
     };
@@ -175,6 +175,21 @@ const SignInForm: React.FC = () => {
                     )}
                 </div>
 
+                <button
+                    type="submit"
+                    className={`${styles.primaryButton} ${styles.small} mb-4`}
+                    disabled={isLoading}
+                > 
+                    {isLoading ? (
+                        <span className={styles.loading}>
+                            <span className={styles.spinner} />
+                            Signing In...
+                        </span>
+                    ) : (
+                        'Sign In'
+                    )}
+                </button>
+
                 <div className={styles.additionalSection}>
                     <Link href="/auth/forgot-password" className={styles.forgotPassword}>
                         Forgot your password?
@@ -187,21 +202,6 @@ const SignInForm: React.FC = () => {
                         </Link>
                     </div>
                 </div>
-
-                <button
-                    type="submit"
-                    className={styles.primaryButton}
-                    disabled={isLoading}
-                >
-                    {isLoading ? (
-                        <span className={styles.loading}>
-              <span className={styles.spinner}/>
-              Signing In...
-            </span>
-                    ) : (
-                        'Sign In'
-                    )}
-                </button>
 
                 <div className={styles.divider}>
                     <span className={styles.dividerText}>OR</span>

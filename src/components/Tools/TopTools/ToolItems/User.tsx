@@ -71,7 +71,7 @@ const User: React.FC = (): JSX.Element => {
                 <Image src={IMG_USER} alt='user' width={30} height={30}/>
                 <div className={`${styles['info']}`}>
                     <div className={`${styles['avatar']}`} onClick={() => {
-                        router.push('/profile')
+                        router.push('/userprofile')
                     }}>
                         <Image src={IMG_USER} alt='user' width={50} height={50}/>
                     </div>

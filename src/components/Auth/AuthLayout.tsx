@@ -1,5 +1,8 @@
 import React from 'react';
 import styles from './_Auth.module.scss';
+import Image from "next/image";
+import BackgoundAuth from "@/assets/images/BackgoundAuth.png";
+import IMG_LOGOEEXAMPLE from "@/assets/images/LogoExample.png";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -41,25 +44,28 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, illustration, title, 
 
   return (
     <div className={styles.authLayout}>
-      <div className={styles.leftColumn}>
+      <div className={styles.leftColumn} style={{ backgroundImage: `url(${BackgoundAuth.src})` }}>
         {/* Logo */}
-        <div className={styles.logo}>
+        {/* <div className={styles.logo}>
           <div className={styles.logoIcon}>FP</div>
           <div className={styles.logoText}>
             <div className={styles.logoTitle}>Function Provider</div>
             <div className={styles.logoTagline}>Function Solves Problem</div>
           </div>
+        </div> */}
+        <div>
+            <Image src={IMG_LOGOEEXAMPLE} alt="Logo" width={300} />
         </div>
 
         {/* Decorative shapes */}
-        <div className={styles.backgroundShape + ' ' + styles.shape1} />
+        {/* <div className={styles.backgroundShape + ' ' + styles.shape1} />
         <div className={styles.backgroundShape + ' ' + styles.shape2} />
-        <div className={styles.backgroundShape + ' ' + styles.shape3} />
+        <div className={styles.backgroundShape + ' ' + styles.shape3} /> */}
 
         {/* Illustration */}
-        <div className={styles.illustration}>
+        {/* <div className={styles.illustration}>
           {renderIllustration()}
-        </div>
+        </div> */}
       </div>
 
       <div className={styles.rightColumn}>
