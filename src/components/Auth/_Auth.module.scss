@@ -1,9 +1,9 @@
 // Variables from design system
-$primary-blue: #4A5FBF;
+$primary-blue: #324899;
 $white: #FFFFFF;
 $light-gray: #F5F5F7;
-$medium-gray: #8E8E93;
-$dark-gray: #1D1D1F;
+$medium-gray: #1D2A44;
+$dark-gray: #333333;
 $light-purple: #E8E5F3;
 
 // Layout structure
@@ -11,14 +11,14 @@ $light-purple: #E8E5F3;
   min-height: 100vh;
   display: flex;
   background: $white;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
   }
 }
 
 .leftColumn {
-  width: 40%;
+  width: 45%;
   // background: linear-gradient(135deg, $light-purple 0%, rgba(232, 229, 243, 0.6) 100%);
   background-repeat: unset;
   background-size: cover;
@@ -27,7 +27,8 @@ $light-purple: #E8E5F3;
   justify-content: center;
   position: relative;
   padding: 80px;
-  
+  background-color: #F4F8FF;
+
   @media (max-width: 768px) {
     width: 100%;
     min-height: 200px;
@@ -36,13 +37,13 @@ $light-purple: #E8E5F3;
 }
 
 .rightColumn {
-  width: 60%;
+  width: 55%;
   display: flex;
   // align-items: center;
   justify-content: center;
   padding: 40px;
   background: $white;
-  
+
   @media (max-width: 768px) {
     width: 100%;
     order: 1;
@@ -58,7 +59,7 @@ $light-purple: #E8E5F3;
   display: flex;
   align-items: center;
   gap: 12px;
-  
+
   @media (max-width: 768px) {
     position: static;
     justify-content: center;
@@ -104,7 +105,7 @@ $light-purple: #E8E5F3;
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   @media (max-width: 768px) {
     width: 150px;
     height: 150px;
@@ -131,7 +132,7 @@ $light-purple: #E8E5F3;
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   &::before {
     content: '🔒';
     font-size: 24px;
@@ -150,7 +151,7 @@ $light-purple: #E8E5F3;
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   &::before {
     content: '✓';
     color: $white;
@@ -168,13 +169,13 @@ $light-purple: #E8E5F3;
   align-items: center;
   justify-content: center;
   position: relative;
-  
+
   &::before {
     content: '✉';
     color: $white;
     font-size: 32px;
   }
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -202,14 +203,15 @@ $light-purple: #E8E5F3;
 // Typography
 .title {
   font-size: 32px;
-  font-weight: 600;
+  font-weight: 700;
   color: $dark-gray;
   margin-bottom: 8px;
   text-align: left;
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: 24px;
+  font-weight: 500;
   color: $medium-gray;
   text-align: center;
   margin-bottom: 32px;
@@ -217,9 +219,9 @@ $light-purple: #E8E5F3;
 }
 
 // Form elements
-.formGroup {
-  margin-bottom: 20px;
-}
+// .formGroup {
+//   margin-bottom: 20px;
+// }
 
 .label {
   display: block;
@@ -231,24 +233,24 @@ $light-purple: #E8E5F3;
 
 .input {
   width: 100%;
-  padding: 16px;
-  font-size: 16px;
+  padding: 10px;
+  font-size: 14px;
   background: $light-gray;
   border: none;
   border-radius: 8px;
   color: $dark-gray;
   transition: all 0.2s ease;
-  
+
   &::placeholder {
     color: $medium-gray;
   }
-  
+
   &:focus {
     outline: 2px solid $primary-blue;
     outline-offset: 0;
     background: $white;
   }
-  
+
   &.error {
     outline: 2px solid #FF3B30;
     background: rgba(255, 59, 48, 0.05);
@@ -265,7 +267,7 @@ $light-purple: #E8E5F3;
 // Buttons
 .primaryButton {
   width: 100%;
-  padding: 16px 24px;
+  padding: 12px 40px;
   font-size: 16px;
   font-weight: 600;
   color: $white;
@@ -274,27 +276,27 @@ $light-purple: #E8E5F3;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-bottom: 16px;
-  
+  // margin-bottom: 16px;
+
   &:hover:not(:disabled) {
     background: darken($primary-blue, 8%);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(74, 95, 191, 0.3);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
 
   &.small {
-    width: auto;       
-    padding: 12px 32px; 
-    font-size: 14px;   
+    width: auto;
+    padding: 12px 32px;
+    font-size: 14px;
   }
 }
 
@@ -310,12 +312,12 @@ $light-purple: #E8E5F3;
   cursor: pointer;
   transition: all 0.2s ease;
   margin-bottom: 16px;
-  
+
   &:hover:not(:disabled) {
     border-color: $primary-blue;
     background: rgba(74, 95, 191, 0.05);
   }
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -333,17 +335,16 @@ $light-purple: #E8E5F3;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  
+
   &:hover:not(:disabled) {
     border-color: $medium-gray;
     background: $light-gray;
   }
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -361,7 +362,7 @@ $light-purple: #E8E5F3;
   display: flex;
   align-items: center;
   margin: 24px 0;
-  
+
   &::before,
   &::after {
     content: '';
@@ -389,7 +390,7 @@ $light-purple: #E8E5F3;
   text-decoration: none;
   font-weight: 500;
   font-size: 14px;
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -400,7 +401,7 @@ $light-purple: #E8E5F3;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
-} 
+}
 
 .forgotPassword {
   display: block;
@@ -410,7 +411,7 @@ $light-purple: #E8E5F3;
   font-size: 14px;
   color: $primary-blue;
   text-decoration: none;
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -425,8 +426,8 @@ $light-purple: #E8E5F3;
 }
 
 .spinner {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border: 2px solid transparent;
   border-top: 2px solid currentColor;
   border-radius: 50%;
@@ -469,11 +470,11 @@ $light-purple: #E8E5F3;
     box-shadow: none;
     border-radius: 0;
   }
-  
+
   .title {
     font-size: 28px;
   }
-  
+
   .subtitle {
     font-size: 14px;
     margin-bottom: 24px;
@@ -515,5 +516,3 @@ $light-purple: #E8E5F3;
   border-radius: 50%;
   transform: translateY(-50%);
 }
-
-

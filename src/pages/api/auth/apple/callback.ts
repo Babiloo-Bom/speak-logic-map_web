@@ -106,25 +106,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       process.env.NODE_ENV === 'production' ? '; Secure' : ''
     }`;
 
-    const existingUser = await findUserByEmail(normalizedEmail);
-    if (!existingUser) {
-      res.setHeader('Set-Cookie', [clearStateCookie]);
-      const encodedEmail = encodeURIComponent(normalizedEmail);
-      return res.redirect(`/auth/sign-up?email=${encodedEmail}`);
-    }
+    // const existingUser = await findUserByEmail(normalizedEmail);
+    // if (!existingUser) {
+    //   res.setHeader('Set-Cookie', [clearStateCookie]);
+    //   const encodedEmail = encodeURIComponent(normalizedEmail);
+    //   return res.redirect(`/auth/sign-up?email=${encodedEmail}&sc=1`);
+    // }
 
-    if (existingUser.status === 'pending') {
-      res.setHeader('Set-Cookie', clearStateCookie);
-      return res.redirect(buildErrorRedirect(baseUrl, 'account_pending'));
-    }
+    // if (existingUser.status === 'pending') {
+    //   res.setHeader('Set-Cookie', clearStateCookie);
+    //   return res.redirect(buildErrorRedirect(baseUrl, 'account_pending'));
+    // }
 
-    if (existingUser.status === 'suspended') {
-      res.setHeader('Set-Cookie', clearStateCookie);
-      return res.redirect(buildErrorRedirect(baseUrl, 'account_suspended'));
-    }
+    // if (existingUser.status === 'suspended') {
+    //   res.setHeader('Set-Cookie', clearStateCookie);
+    //   return res.redirect(buildErrorRedirect(baseUrl, 'account_suspended'));
+    // }
+
+    // const { user, profile } = await findOrCreateUserFromSocialLogin(
+    //   existingUser.email,
+    // );
 
     const { user, profile } = await findOrCreateUserFromSocialLogin(
-      existingUser.email,
+      normalizedEmail,
     );
 
     const tokens = generateTokens(user);

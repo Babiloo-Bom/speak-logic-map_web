@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import AuthLayout from './AuthLayout';
+import ForgotPasswordLayout from './ForgotPasswordLayout';
 import styles from './_Auth.module.scss';
 
 interface FormData {
@@ -35,7 +35,7 @@ const ResetPasswordForm: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear field error when user starts typing
     if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
@@ -65,7 +65,7 @@ const ResetPasswordForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -102,33 +102,50 @@ const ResetPasswordForm: React.FC = () => {
     }
   };
 
-  if (success) {
-    return (
-      <AuthLayout
-        illustration="check"
-        title="Password Reset Successfully"
-        subtitle="Your password has been updated. You can now sign in with your new password."
-      >
-        <div className={styles.successMessage}>
-          {success}
-        </div>
-        <p style={{ textAlign: 'center', marginBottom: '24px', color: '#8E8E93' }}>
-          Redirecting to sign in page in a few seconds...
-        </p>
-        <Link href="/auth/sign-in" className={styles.primaryButton}>
-          Continue to Sign In
-        </Link>
-      </AuthLayout>
-    );
+  const validateToken = (token: string): string | null => {
+    if (!token) {
+      setErrors({ general: 'The token invalid!' });
+    }
+    const SECRET = process.env.JWT_SECRET || "93191c50041fd5d5fd66d09f0";
+    const [base, sig] = token.split(".");
+    const expectedSig = crypto.createHmac("sha256", SECRET).update(base).digest("base64");
+    if (sig !== expectedSig) {
+      setErrors({ general: 'Invalid signature' });
+    }
+    const payload = JSON.parse(Buffer.from(base, "base64").toString());
+    if (payload.exp < Date.now()) {
+      setErrors({ general: 'Token expired' });
+    }
+    return payload.email;
   }
 
+  // if (success) {
+  //   return (
+  //     <ForgotPasswordLayout
+  //       illustration="check"
+  //       title="Password Reset Successfully"
+  //       subtitle="Your password has been updated. You can now sign in with your new password."
+  //     >
+  //       <div className={styles.successMessage}>
+  //         {success}
+  //       </div>
+  //       <p style={{ textAlign: 'center', marginBottom: '24px', color: '#8E8E93' }}>
+  //         Redirecting to sign in page in a few seconds...
+  //       </p>
+  //       <Link href="/auth/sign-in" className={styles.primaryButton}>
+  //         Continue to Sign In
+  //       </Link>
+  //     </ForgotPasswordLayout>
+  //   );
+  // }
+
   return (
-    <AuthLayout
-      illustration="lock"
+    <ForgotPasswordLayout
+      illustration="reset"
       title="Reset Password"
-      subtitle="Your new password must be different from your old password."
+      subtitle="Your New Password Must Be Different From Your Old Password"
     >
-      <form onSubmit={handleSubmit}>
+      <form className="w-full flex flex-col gap-8" onSubmit={handleSubmit}>
         {errors.general && (
           <div className={styles.errorBanner}>
             {errors.general}
@@ -187,14 +204,8 @@ const ResetPasswordForm: React.FC = () => {
             'Save'
           )}
         </button>
-
-        <div className={styles.linkGroup}>
-          <Link href="/auth/sign-in" className={styles.link}>
-            Back to Sign In
-          </Link>
-        </div>
       </form>
-    </AuthLayout>
+    </ForgotPasswordLayout>
   );
 };
 

@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './_Auth.module.scss';
 import Image from "next/image";
 import BackgoundAuth from "@/assets/images/BackgoundAuth.png";
-import IMG_LOGOEEXAMPLE from "@/assets/images/LogoExample.png";
+import IMG_LOGO from "@/assets/images/Logo.png";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -54,7 +54,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, illustration, title, 
           </div>
         </div> */}
         <div>
-            <Image src={IMG_LOGOEEXAMPLE} alt="Logo" width={300} />
+            <Image src={IMG_LOGO} alt="Logo" width={272} height={106} />
         </div>
 
         {/* Decorative shapes */}
@@ -69,8 +69,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, illustration, title, 
       </div>
 
       <div className={styles.rightColumn}>
-        <div className={styles.formContainer}>
-          <h1 className={styles.title}>{title}</h1>
+        <div className={`${styles.formContainer} flex flex-col gap-8`}>
+            <h1 className={styles.title}>{title}</h1>
           {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
           {children}
         </div>

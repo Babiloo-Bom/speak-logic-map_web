@@ -1,10 +1,14 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {useRouter} from 'next/router';
+import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import AuthLayout from './AuthLayout';
 import styles from './_Auth.module.scss';
-import {useUserStore} from '@/providers/RootStoreProvider';
-import {observer} from 'mobx-react-lite';
+import { useUserStore } from '@/providers/RootStoreProvider';
+import { observer } from 'mobx-react-lite';
+import Image from "next/image";
+import ICON_GOOGLE from "@/assets/icons/icon-google.png";
+import ICON_FACEBOOK from "@/assets/icons/icon-facebook.png";
+import ICON_APPLE from "@/assets/icons/icon-apple.png";
 
 interface FormData {
     email: string;
@@ -29,12 +33,12 @@ const SignInForm: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
-        setFormData(prev => ({...prev, [name]: value}));
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
 
         // Clear field error when user starts typing
         if (errors[name as keyof FormErrors]) {
-            setErrors(prev => ({...prev, [name]: undefined}));
+            setErrors(prev => ({ ...prev, [name]: undefined }));
         }
     };
 
@@ -83,15 +87,15 @@ const SignInForm: React.FC = () => {
                 router.push('/');
             } else {
                 if (data.code === 'ACCOUNT_PENDING') {
-                    setErrors({general: data.error});
+                    setErrors({ general: data.error });
                 } else if (data.code === 'ACCOUNT_SUSPENDED') {
-                    setErrors({general: data.error});
+                    setErrors({ general: data.error });
                 } else {
-                    setErrors({general: data.error || 'Login failed'});
+                    setErrors({ general: data.error || 'Login failed' });
                 }
             }
         } catch (error) {
-            setErrors({general: 'Network error. Please try again.'});
+            setErrors({ general: 'Network error. Please try again.' });
         } finally {
             setIsLoading(false);
         }
@@ -130,7 +134,7 @@ const SignInForm: React.FC = () => {
             illustration="lock"
             title="Sign In"
         >
-            <form onSubmit={handleSubmit}>
+            <form className="w-full flex flex-col gap-8" onSubmit={handleSubmit}>
                 {errors.general && (
                     <div className={styles.errorBanner}>
                         {errors.general}
@@ -179,7 +183,7 @@ const SignInForm: React.FC = () => {
                     type="submit"
                     className={`${styles.primaryButton} ${styles.small} mb-4`}
                     disabled={isLoading}
-                > 
+                >
                     {isLoading ? (
                         <span className={styles.loading}>
                             <span className={styles.spinner} />
@@ -213,6 +217,7 @@ const SignInForm: React.FC = () => {
                     onClick={() => handleSocialLogin('Google')}
                     disabled={isLoading}
                 >
+                    <Image src={ICON_GOOGLE} alt="IconGoogle" width={25} height={25} />
                     Continue with Google
                 </button>
 
@@ -222,6 +227,7 @@ const SignInForm: React.FC = () => {
                     onClick={() => handleSocialLogin('Facebook')}
                     disabled={isLoading}
                 >
+                    <Image src={ICON_FACEBOOK} alt="IconFacebook" width={25} height={25} />
                     Continue with Facebook
                 </button>
 
@@ -231,6 +237,7 @@ const SignInForm: React.FC = () => {
                     onClick={() => handleSocialLogin('Apple')}
                     disabled={isLoading}
                 >
+                    <Image src={ICON_APPLE} alt="IconApple" width={25} height={25} />
                     Continue with Apple
                 </button>
             </form>

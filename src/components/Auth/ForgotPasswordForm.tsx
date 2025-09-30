@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
-import AuthLayout from './AuthLayout';
+import ForgotPasswordLayout from './ForgotPasswordLayout';
 import styles from './_Auth.module.scss';
+import crypto from "crypto";
 
 interface FormData {
   email: string;
@@ -13,6 +15,7 @@ interface FormErrors {
 }
 
 const ForgotPasswordForm: React.FC = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     email: '',
   });
@@ -23,7 +26,7 @@ const ForgotPasswordForm: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear field error when user starts typing
     if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
@@ -45,7 +48,7 @@ const ForgotPasswordForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -53,7 +56,7 @@ const ForgotPasswordForm: React.FC = () => {
     setSuccess('');
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
+      const response = await fetch('/api/auth/verify-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,46 +67,33 @@ const ForgotPasswordForm: React.FC = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess(data.message);
+        const SECRET = process.env.JWT_SECRET || "93191c50041fd5d5fd66d09f0";
+        const email = formData.email;
+        const exp = Date.now() + 15 * 60 * 1000;
+        const payload = JSON.stringify({ email, exp });
+        const base = Buffer.from(payload).toString("base64");
+        const sig = crypto.createHmac("sha256", SECRET).update(base).digest("base64"); 
+        const token = `${base}.${sig}`;
+        router.push(`/auth/verify?token=${token}`);
       } else {
         setErrors({ general: data.error || 'Failed to send reset email' });
       }
     } catch (error) {
+      console.error(error);
+      console.log(error);
       setErrors({ general: 'Network error. Please try again.' });
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (success) {
-    return (
-      <AuthLayout
-        illustration="email"
-        title="Check Your Email"
-        subtitle="We've sent a password reset link to your email address."
-      >
-        <div className={styles.successMessage}>
-          {success}
-        </div>
-        <p style={{ textAlign: 'center', marginBottom: '24px', color: '#8E8E93' }}>
-          If you don&apos;t see the email in your inbox, please check your spam folder.
-        </p>
-        <div className={styles.linkGroup}>
-          <Link href="/auth/sign-in" className={styles.link}>
-            Back to Sign In
-          </Link>
-        </div>
-      </AuthLayout>
-    );
-  }
-
   return (
-    <AuthLayout
-      illustration="lock"
-      title="Forgot Password"
-      subtitle="Enter your email address and we'll send you a link to reset your password."
+    <ForgotPasswordLayout
+      illustration="forgot"
+      title="Verify"
+      subtitle="Please Enter Your Email Address To Receive a Verification Code"
     >
-      <form onSubmit={handleSubmit}>
+      <form className="w-full flex flex-col gap-8" onSubmit={handleSubmit}>
         {errors.general && (
           <div className={styles.errorBanner}>
             {errors.general}
@@ -111,7 +101,7 @@ const ForgotPasswordForm: React.FC = () => {
         )}
 
         <div className={styles.formGroup}>
-          <label htmlFor="email" className={styles.label}>
+          <label htmlFor="email" className="text-base font-medium text-[#1D2A44]">
             Email
           </label>
           <input
@@ -120,7 +110,7 @@ const ForgotPasswordForm: React.FC = () => {
             name="email"
             value={formData.email}
             onChange={handleInputChange}
-            placeholder="Enter your email address"
+            placeholder="Email"
             className={`${styles.input} ${errors.email ? styles.error : ''}`}
             disabled={isLoading}
           />
@@ -128,7 +118,9 @@ const ForgotPasswordForm: React.FC = () => {
             <span className={styles.errorMessage}>{errors.email}</span>
           )}
         </div>
-
+        <div className='text-center'>
+          <a href='#' className='text-base font-medium text-[#324899] underline'>Try another way</a>
+        </div>
         <button
           type="submit"
           className={styles.primaryButton}
@@ -140,18 +132,11 @@ const ForgotPasswordForm: React.FC = () => {
               Sending...
             </span>
           ) : (
-            'Send Reset Link'
+            'Send'
           )}
         </button>
-
-        <div className={styles.linkGroup}>
-          Remember your password?{' '}
-          <Link href="/auth/sign-in" className={styles.link}>
-            Sign in
-          </Link>
-        </div>
       </form>
-    </AuthLayout>
+    </ForgotPasswordLayout>
   );
 };
 

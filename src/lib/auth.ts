@@ -80,15 +80,15 @@ export const verifyRefreshToken = (token: string): { userId: number } | null => 
 // Database user operations
 export const createUser = async (email: string, password: string): Promise<User> => {
   const client = await pool.connect();
-  
+
   try {
     const hashedPassword = await hashPassword(password);
-    
+
     const result = await client.query(
       'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, role, status, created_at',
       [email, hashedPassword]
     );
-    
+
     return result.rows[0];
   } finally {
     client.release();
@@ -97,13 +97,13 @@ export const createUser = async (email: string, password: string): Promise<User>
 
 export const findUserByEmail = async (email: string): Promise<UserWithPassword | null> => {
   const client = await pool.connect();
-  
+
   try {
     const result = await client.query(
       'SELECT id, email, password_hash, role, status, created_at FROM users WHERE email = $1',
       [email]
     );
-    
+
     return result.rows[0] || null;
   } finally {
     client.release();
@@ -112,13 +112,13 @@ export const findUserByEmail = async (email: string): Promise<UserWithPassword |
 
 export const findUserById = async (id: number): Promise<User | null> => {
   const client = await pool.connect();
-  
+
   try {
     const result = await client.query(
       'SELECT id, email, role, status, created_at FROM users WHERE id = $1',
       [id]
     );
-    
+
     return result.rows[0] || null;
   } finally {
     client.release();
@@ -127,7 +127,7 @@ export const findUserById = async (id: number): Promise<User | null> => {
 
 export const updateUserStatus = async (id: number, status: string): Promise<void> => {
   const client = await pool.connect();
-  
+
   try {
     await client.query(
       'UPDATE users SET status = $1 WHERE id = $2',
@@ -140,7 +140,7 @@ export const updateUserStatus = async (id: number, status: string): Promise<void
 
 export const updateUserRole = async (id: number, role: string): Promise<void> => {
   const client = await pool.connect();
-  
+
   try {
     await client.query(
       'UPDATE users SET role = $1 WHERE id = $2',
@@ -153,7 +153,7 @@ export const updateUserRole = async (id: number, role: string): Promise<void> =>
 
 export const updateUserPassword = async (id: number, newPassword: string): Promise<void> => {
   const client = await pool.connect();
-  
+
   try {
     const hashedPassword = await hashPassword(newPassword);
     await client.query(
@@ -168,13 +168,13 @@ export const updateUserPassword = async (id: number, newPassword: string): Promi
 // Profile operations
 export const getUserProfile = async (userId: number): Promise<UserProfile | null> => {
   const client = await pool.connect();
-  
+
   try {
     const result = await client.query(
       'SELECT * FROM profiles WHERE user_id = $1',
       [userId]
     );
-    
+
     return result.rows[0] || null;
   } finally {
     client.release();
@@ -183,7 +183,7 @@ export const getUserProfile = async (userId: number): Promise<UserProfile | null
 
 export const createOrUpdateProfile = async (profile: UserProfile): Promise<UserProfile> => {
   const client = await pool.connect();
-  
+
   try {
     const result = await client.query(`
       INSERT INTO profiles (user_id, first_name, last_name, title, function, geo_id, avatar_id, pen_name)
@@ -208,7 +208,7 @@ export const createOrUpdateProfile = async (profile: UserProfile): Promise<UserP
       profile.avatar_id,
       profile.pen_name
     ]);
-    
+
     return result.rows[0];
   } finally {
     client.release();
@@ -293,10 +293,10 @@ export const findOrCreateUserFromSocialLogin = async (
 // Token management
 export const storeRefreshToken = async (userId: number, refreshToken: string): Promise<void> => {
   const client = await pool.connect();
-  
+
   try {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-    
+
     await client.query(
       'INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES ($1, $2, $3)',
       [userId, refreshToken, expiresAt]
@@ -308,13 +308,13 @@ export const storeRefreshToken = async (userId: number, refreshToken: string): P
 
 export const validateRefreshToken = async (refreshToken: string): Promise<number | null> => {
   const client = await pool.connect();
-  
+
   try {
     const result = await client.query(
       'SELECT user_id FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()',
       [refreshToken]
     );
-    
+
     return result.rows[0]?.user_id || null;
   } finally {
     client.release();
@@ -323,7 +323,7 @@ export const validateRefreshToken = async (refreshToken: string): Promise<number
 
 export const invalidateRefreshToken = async (refreshToken: string): Promise<void> => {
   const client = await pool.connect();
-  
+
   try {
     await client.query(
       'DELETE FROM refresh_tokens WHERE token = $1',
@@ -337,10 +337,10 @@ export const invalidateRefreshToken = async (refreshToken: string): Promise<void
 // Verification tokens
 export const createVerificationToken = async (userId: number, token: string, type: string): Promise<void> => {
   const client = await pool.connect();
-  
+
   try {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    
+
     await client.query(
       'INSERT INTO user_tokens (token, user_id, token_type, expires_at) VALUES ($1, $2, $3, $4)',
       [token, userId, type, expiresAt]
@@ -352,23 +352,48 @@ export const createVerificationToken = async (userId: number, token: string, typ
 
 export const validateVerificationToken = async (token: string, type: string): Promise<number | null> => {
   const client = await pool.connect();
-  
+
   try {
     const result = await client.query(
       'SELECT user_id FROM user_tokens WHERE token = $1 AND token_type = $2 AND expires_at > NOW()',
       [token, type]
     );
-    
+
     if (result.rows[0]) {
       // Delete the token after successful validation
       await client.query(
         'DELETE FROM user_tokens WHERE token = $1',
         [token]
       );
-      
+
       return result.rows[0].user_id;
     }
-    
+
+    return null;
+  } finally {
+    client.release();
+  }
+};
+
+export const removeCodeUserToken = async (user_id: number): Promise<number | null> => {
+  const client = await pool.connect();
+
+  try {
+    const result = await client.query(
+      'SELECT user_id FROM user_tokens WHERE user_id = $1 AND token_type = $2',
+      [user_id, 'verify_password']
+    );
+
+    if (result.rows[0]) {
+      // Delete the token after successful validation
+      await client.query(
+        'DELETE FROM user_tokens WHERE user_id = $1',
+        [user_id]
+      );
+
+      return result.rows[0].user_id;
+    }
+
     return null;
   } finally {
     client.release();
@@ -385,31 +410,31 @@ export const requireAuth = (roles: string[] = []) => {
     return async (req: AuthenticatedRequest, res: NextApiResponse) => {
       try {
         const token = req.headers.authorization?.replace('Bearer ', '');
-        
+
         if (!token) {
           return res.status(401).json({ error: 'No token provided' });
         }
-        
+
         const payload = verifyToken(token);
-        
+
         if (!payload) {
           return res.status(401).json({ error: 'Invalid token' });
         }
-        
+
         const user = await findUserById(payload.userId);
-        
+
         if (!user) {
           return res.status(401).json({ error: 'User not found' });
         }
-        
+
         if (user.status !== 'active') {
           return res.status(401).json({ error: 'Account not activated' });
         }
-        
+
         if (roles.length > 0 && !roles.includes(user.role)) {
           return res.status(403).json({ error: 'Insufficient permissions' });
         }
-        
+
         req.user = user;
         return handler(req, res);
       } catch (error) {
@@ -423,5 +448,13 @@ export const requireAuth = (roles: string[] = []) => {
 // Generate random tokens
 export const generateRandomToken = (): string => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
+
+// Generate random code
+export const generateRandomCode = (): string => {
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  const code = array[0] % 1_000_000;
+  return code.toString().padStart(6, "0");
 };
 

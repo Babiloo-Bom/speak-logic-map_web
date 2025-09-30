@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Image from "next/image";
-import IMG_LOGOEEXAMPLE from "@/assets/images/LogoExample.png";
+import IMG_LOGO from "@/assets/images/Logo.png";
 import ICONUSER from "@/assets/images/IconUser.png";
 import ICONBELL from "@/assets/images/IconBell.png";
 
@@ -27,7 +27,7 @@ const Header: React.FC = () => {
             <div className="bg-[#F2F2F2]">
                 <div className="max-w-[1440px] mx-auto flex justify-between items-center px-16 py-4">
                     <div>
-                        <Image src={IMG_LOGOEEXAMPLE} alt="Logo" />
+                        <Image src={IMG_LOGO} alt="Logo" />
                     </div>
                     <ul className="flex space-x-8">
                         <li><a href="#" className="font-bold text-gray-800">Provider</a></li>

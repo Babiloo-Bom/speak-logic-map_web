@@ -1,10 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import AuthLayout from './AuthLayout';
 import styles from './_Auth.module.scss';
 import { useUserStore } from '@/providers/RootStoreProvider';
 import { observer } from 'mobx-react-lite';
+import Image from "next/image";
+import ICON_GOOGLE from "@/assets/icons/icon-google.png";
+import ICON_FACEBOOK from "@/assets/icons/icon-facebook.png";
+import ICON_APPLE from "@/assets/icons/icon-apple.png";
 
 interface FormData {
   firstName: string;
@@ -36,18 +40,23 @@ const SignUpForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [appleEmail, setEmail] = useState('');
+  const [isSocial, setIsSocial] = useState(false);
 
   useEffect(() => {
     if (router.query.email) {
       setEmail(decodeURIComponent(router.query.email));
       formData.email = router.query.email
+
+      if (router.query.sc) {
+        setIsSocial(true)
+      }
     }
   }, [router.query]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear field error when user starts typing
     if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
@@ -91,7 +100,7 @@ const SignUpForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -109,6 +118,7 @@ const SignUpForm: React.FC = () => {
           password: formData.password,
           firstName: formData.firstName,
           lastName: formData.lastName,
+          isSocial: isSocial
         }),
       });
 
@@ -165,7 +175,7 @@ const SignUpForm: React.FC = () => {
       illustration="lock"
       title="Sign Up"
     >
-      <form onSubmit={handleSubmit}>
+      <form className="w-full flex flex-col gap-8" onSubmit={handleSubmit}>
         {errors.general && (
           <div className={styles.errorBanner}>
             {errors.general}
@@ -192,7 +202,7 @@ const SignUpForm: React.FC = () => {
         </div>
 
         <div className={styles.formGroup}>
-        <label htmlFor="firstName" className={styles.label}>
+          <label htmlFor="firstName" className={styles.label}>
             Last Name
           </label>
           <input
@@ -293,6 +303,7 @@ const SignUpForm: React.FC = () => {
           onClick={() => handleSocialSignUp('Google')}
           disabled={isLoading}
         >
+          <Image src={ICON_GOOGLE} alt="IconGoogle" width={25} height={25} />
           Continue with Google
         </button>
 
@@ -302,6 +313,7 @@ const SignUpForm: React.FC = () => {
           onClick={() => handleSocialSignUp('Facebook')}
           disabled={isLoading}
         >
+          <Image src={ICON_FACEBOOK} alt="IconFacebook" width={25} height={25} />
           Continue with Facebook
         </button>
 
@@ -311,6 +323,7 @@ const SignUpForm: React.FC = () => {
           onClick={() => handleSocialSignUp('Apple')}
           disabled={isLoading}
         >
+          <Image src={ICON_APPLE} alt="IconApple" width={25} height={25} />
           Continue with Apple
         </button>
 

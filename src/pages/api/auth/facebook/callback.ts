@@ -122,25 +122,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }`;
 
     const normalizedEmail = userInfo.email.toLowerCase();
-    const existingUser = await findUserByEmail(normalizedEmail);
+    // const existingUser = await findUserByEmail(normalizedEmail);
 
-    if (!existingUser) {
-      res.setHeader('Set-Cookie', clearStateCookie);
-      return res.redirect('/auth/sign-up');
-    }
+    // if (!existingUser) {
+    //   res.setHeader('Set-Cookie', clearStateCookie);
+    //   const encodedEmail = encodeURIComponent(normalizedEmail);
+    //   return res.redirect(`/auth/sign-up?email=${encodedEmail}&sc=1`);
+    // }
 
-    if (existingUser.status === 'pending') {
-      res.setHeader('Set-Cookie', clearStateCookie);
-      return res.redirect(buildErrorRedirect('account_pending'));
-    }
+    // if (existingUser.status === 'pending') {
+    //   res.setHeader('Set-Cookie', clearStateCookie);
+    //   return res.redirect(buildErrorRedirect('account_pending'));
+    // }
 
-    if (existingUser.status === 'suspended') {
-      res.setHeader('Set-Cookie', clearStateCookie);
-      return res.redirect(buildErrorRedirect('account_suspended'));
-    }
+    // if (existingUser.status === 'suspended') {
+    //   res.setHeader('Set-Cookie', clearStateCookie);
+    //   return res.redirect(buildErrorRedirect('account_suspended'));
+    // }
+
+    // const { user, profile } = await findOrCreateUserFromSocialLogin(
+    //   existingUser.email,
+    // );
 
     const { user, profile } = await findOrCreateUserFromSocialLogin(
-      existingUser.email,
+      normalizedEmail,
     );
 
     const tokens = generateTokens(user);

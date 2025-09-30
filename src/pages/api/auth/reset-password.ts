@@ -24,7 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Validate token
     const userId = await validateVerificationToken(token, 'password_reset');
-
+    console.log(userId);
+    console.log(token);
     if (!userId) {
       return res.status(400).json({ error: 'Invalid or expired reset token' });
     }

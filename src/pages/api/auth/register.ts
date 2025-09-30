@@ -7,6 +7,7 @@ interface RegisterRequest {
   password: string;
   firstName?: string;
   lastName?: string;
+  isSocial?: string;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -15,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { email, password, firstName, lastName }: RegisterRequest = req.body;
+    const { email, password, firstName, lastName, isSocial }: RegisterRequest = req.body;
 
     // Validate input
     if (!email || !password) {
