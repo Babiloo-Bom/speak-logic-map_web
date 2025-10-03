@@ -35,6 +35,7 @@ export const initDatabase = async () => {
         last_name VARCHAR(48),
         title VARCHAR(120),
         function VARCHAR(120),
+        location VARCHAR(255),
         geo_id BIGINT,
         avatar_id BIGINT,
         pen_name VARCHAR(120),
@@ -112,6 +113,12 @@ export const initDatabase = async () => {
       CREATE INDEX IF NOT EXISTS idx_user_tokens_user_id ON user_tokens(user_id);
       CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
       CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
+    `);
+
+    // Ensure new columns exist when migrating existing databases
+    await client.query(`
+      ALTER TABLE profiles
+      ADD COLUMN IF NOT EXISTS location VARCHAR(255);
     `);
 
     console.log('Database initialized successfully');

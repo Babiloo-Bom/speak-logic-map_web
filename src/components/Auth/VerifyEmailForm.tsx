@@ -11,7 +11,7 @@ const VerifyEmailForm: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [resendLoading, setResendLoading] = useState(false);
-  console.error("here");
+
   useEffect(() => {
     if (token && typeof token === 'string') {
       verifyEmail(token);

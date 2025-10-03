@@ -75,7 +75,6 @@ const User: React.FC = (): JSX.Element => {
                     }}>
                         <Image src={IMG_USER} alt='user' width={50} height={50}/>
                     </div>
-                    {/*<h3 className={`${styles['name']}`}>Pham Mai Huong</h3>*/}
                     <h3 className={`${styles['name']}`}>{userStore.getDisplayName()}</h3>
 
                     <div className={`${styles['profile']}`}>

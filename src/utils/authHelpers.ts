@@ -1,4 +1,4 @@
-import { JWTPayload, getUserProfile } from '@/lib/auth';
+import type { JWTPayload } from '@/lib/auth';
 
 /**
  * Parse JWT token to get payload
@@ -103,7 +103,7 @@ export const getStoredAuthData = (): { user: any | null; accessToken: string | n
     const profileStr = localStorage.getItem('profile');
 
     const user = userStr ? JSON.parse(userStr) : null;
-    const profile = profileStr ? JSON.parse(profileStr) : getUserProfile;
+    const profile = profileStr ? JSON.parse(profileStr) : null;
 
     return { user, accessToken, profile };
   } catch (error) {

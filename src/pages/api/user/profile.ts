@@ -1,11 +1,12 @@
 import type { NextApiResponse } from 'next';
-import { AuthenticatedRequest, requireAuth, getUserProfile, createOrUpdateProfile, findUserById } from '@/lib/auth';
+import { AuthenticatedRequest, requireAuth, getUserProfile, createOrUpdateProfile, findUserById, getFileAssetById } from '@/lib/auth';
 
 interface ProfileUpdateRequest {
   firstName?: string;
   lastName?: string;
   title?: string;
   function?: string;
+  location?: string;
   geoId?: number;
   avatarId?: number;
   penName?: string;
@@ -16,7 +17,12 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     try {
       const user = req.user!;
       const profile = await getUserProfile(user.id);
-      
+      let avatarUrl: string | null = null;
+      if (profile?.avatar_id) {
+        const asset = await getFileAssetById(profile.avatar_id);
+        avatarUrl = asset?.url || null;
+      }
+
       res.status(200).json({
         user: {
           id: user.id,
@@ -25,7 +31,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
           status: user.status,
           created_at: user.created_at,
         },
-        profile,
+        profile: profile ? { ...profile, avatar_url: avatarUrl } : null,
       });
     } catch (error) {
       console.error('Get profile error:', error);
@@ -39,20 +45,23 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
         lastName,
         title,
         function: userFunction,
+        location,
         geoId,
         avatarId,
         penName,
       }: ProfileUpdateRequest = req.body;
 
+      const existing = await getUserProfile(user.id);
       const updatedProfile = await createOrUpdateProfile({
         user_id: user.id,
-        first_name: firstName,
-        last_name: lastName,
-        title,
-        function: userFunction,
-        geo_id: geoId,
-        avatar_id: avatarId,
-        pen_name: penName,
+        first_name: firstName ?? existing?.first_name,
+        last_name: lastName ?? existing?.last_name,
+        title: title ?? existing?.title,
+        function: userFunction ?? existing?.function,
+        location: location ?? existing?.location,
+        geo_id: geoId ?? existing?.geo_id,
+        avatar_id: avatarId ?? existing?.avatar_id,
+        pen_name: penName ?? existing?.pen_name,
       });
 
       res.status(200).json({
