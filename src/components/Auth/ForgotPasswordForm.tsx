@@ -74,7 +74,7 @@ const ForgotPasswordForm: React.FC = () => {
         const base = Buffer.from(payload).toString("base64");
         const sig = crypto.createHmac("sha256", SECRET).update(base).digest("base64"); 
         const token = `${base}.${sig}`;
-        router.push(`/auth/verify?token=${token}`);
+        router.push(`/auth/verify-password?token=${token}`);
       } else {
         setErrors({ general: data.error || 'Failed to send reset email' });
       }

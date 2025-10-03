@@ -175,7 +175,7 @@ const SignUpForm: React.FC = () => {
       illustration="lock"
       title="Sign Up"
     >
-      <form className="w-full flex flex-col gap-8" onSubmit={handleSubmit}>
+      <form className="w-full flex flex-col gap-6" onSubmit={handleSubmit}>
         {errors.general && (
           <div className={styles.errorBanner}>
             {errors.general}

@@ -15,6 +15,7 @@ interface Profile {
   last_name?: string;
   title?: string;
   function?: string;
+  location?: string;
   geo_id?: number;
   avatar_id?: number;
   pen_name?: string;
@@ -168,6 +169,7 @@ export class UserStore {
 
   // Get user display name
   getDisplayName = (): string => {
+    console.log(this.profile);
     if (this.profile?.first_name && this.profile?.last_name) {
       return `${this.profile.first_name} ${this.profile.last_name}`;
     }

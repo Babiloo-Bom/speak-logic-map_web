@@ -21,6 +21,7 @@ export interface UserProfile {
   last_name?: string;
   title?: string;
   function?: string;
+  location?: string;
   geo_id?: number;
   avatar_id?: number;
   pen_name?: string;
@@ -32,6 +33,13 @@ export interface JWTPayload {
   role: string;
   iat?: number;
   exp?: number;
+}
+
+interface UploadFile {
+  url?: string;
+  mime_type?: string;
+  size_bytes?: number;
+  uploader_id?: number;
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
@@ -186,17 +194,18 @@ export const createOrUpdateProfile = async (profile: UserProfile): Promise<UserP
 
   try {
     const result = await client.query(`
-      INSERT INTO profiles (user_id, first_name, last_name, title, function, geo_id, avatar_id, pen_name)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO profiles (user_id, first_name, last_name, title, function, location, geo_id, avatar_id, pen_name)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       ON CONFLICT (user_id) 
       DO UPDATE SET 
         first_name = $2,
         last_name = $3,
         title = $4,
         function = $5,
-        geo_id = $6,
-        avatar_id = $7,
-        pen_name = $8
+        location = $6,
+        geo_id = $7,
+        avatar_id = $8,
+        pen_name = $9
       RETURNING *
     `, [
       profile.user_id,
@@ -204,6 +213,7 @@ export const createOrUpdateProfile = async (profile: UserProfile): Promise<UserP
       profile.last_name,
       profile.title,
       profile.function,
+      profile.location,
       profile.geo_id,
       profile.avatar_id,
       profile.pen_name
@@ -458,3 +468,68 @@ export const generateRandomCode = (): string => {
   return code.toString().padStart(6, "0");
 };
 
+export const uploadFile = async (updateFile: UploadFile): Promise<UploadFile> => {
+  const client = await pool.connect();
+
+  try {
+    const result = await client.query(`
+      INSERT INTO file_assets (url, mime_type, size_bytes, uploader_id)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id;
+    `, [updateFile.url, updateFile.mime_type, updateFile.size_bytes, updateFile.uploader_id]);
+
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
+};
+
+export interface FileAsset {
+  id: number;
+  url: string;
+  mime_type?: string;
+  size_bytes?: number;
+  uploader_id?: number;
+  created_at?: Date;
+}
+
+export const getFileAssetById = async (id: number): Promise<FileAsset | null> => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      'SELECT id, url, mime_type, size_bytes, uploader_id, created_at FROM file_assets WHERE id = $1',
+      [id]
+    );
+    return result.rows[0] || null;
+  } finally {
+    client.release();
+  }
+};
+
+export const updateFileAsset = async (
+  id: number,
+  updateFile: UploadFile & { uploader_id?: bigint }
+): Promise<FileAsset | null> => {
+  const client = await pool.connect();
+  console.log('Updating file asset:', updateFile);
+
+  try {
+    const uploaderId = updateFile.uploader_id
+      ? updateFile.uploader_id.toString()
+      : null;
+
+    const result = await client.query(
+      `UPDATE file_assets
+       SET url = COALESCE($2, url),
+           mime_type = COALESCE($3, mime_type),
+           size_bytes = COALESCE($4, size_bytes)
+       WHERE id = $1 AND ($5::bigint IS NULL OR uploader_id = $5::bigint)
+       RETURNING id, url, mime_type, size_bytes, uploader_id, created_at`,
+      [id, updateFile.url, updateFile.mime_type, updateFile.size_bytes, uploaderId]
+    );
+
+    return result.rows[0] || null;
+  } finally {
+    client.release();
+  }
+};

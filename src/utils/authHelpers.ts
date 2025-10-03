@@ -1,4 +1,4 @@
-import { JWTPayload } from '@/lib/auth';
+import type { JWTPayload } from '@/lib/auth';
 
 /**
  * Parse JWT token to get payload
@@ -13,7 +13,7 @@ export const parseJWTToken = (token: string): JWTPayload | null => {
         .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join('')
     );
-    
+
     return JSON.parse(jsonPayload);
   } catch (error) {
     console.error('Error parsing JWT token:', error);
@@ -29,7 +29,7 @@ export const isTokenExpired = (token: string): boolean => {
   if (!payload || !payload.exp) {
     return true;
   }
-  
+
   // Check if token is expired (with 1 minute buffer)
   const now = Math.floor(Date.now() / 1000);
   return payload.exp < (now + 60);
@@ -43,7 +43,7 @@ export const getTokenExpiryTime = (token: string): number => {
   if (!payload || !payload.exp) {
     return 0;
   }
-  
+
   const now = Math.floor(Date.now() / 1000);
   return Math.max(0, payload.exp - now);
 };
