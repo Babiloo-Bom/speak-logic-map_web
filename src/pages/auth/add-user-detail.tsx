@@ -2,7 +2,7 @@ import React from 'react';
 import Head from 'next/head';
 import AddUserDetailForm from '@/components/Auth/AddUserDetailForm';
 
-const SignInPage: React.FC = () => {
+const AddUserDetailPage: React.FC = () => {
   return (
     <>
       <Head>
@@ -15,6 +15,6 @@ const SignInPage: React.FC = () => {
   );
 };
 
-export default SignInPage;
+export default AddUserDetailPage;
 
 

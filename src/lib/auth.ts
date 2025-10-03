@@ -34,6 +34,13 @@ export interface JWTPayload {
   exp?: number;
 }
 
+interface UploadFile {
+  url?: string;
+  mime_type?: string;
+  size_bytes?: number;
+  uploader_id?: string;
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key';
 
@@ -456,5 +463,21 @@ export const generateRandomCode = (): string => {
   crypto.getRandomValues(array);
   const code = array[0] % 1_000_000;
   return code.toString().padStart(6, "0");
+};
+
+export const uploadFile = async (updateFile: UploadFile): Promise<UploadFile> => {
+  const client = await pool.connect();
+
+  try {
+    const result = await client.query(`
+      INSERT INTO file_assets (url, mime_type, size_bytes, uploader_id)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id;
+    `, [updateFile.url, updateFile.mime_type, updateFile.size_bytes, updateFile.uploader_id]);
+
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
 };
 
