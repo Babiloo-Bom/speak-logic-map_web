@@ -169,6 +169,7 @@ export class UserStore {
 
   // Get user display name
   getDisplayName = (): string => {
+    console.log(this.profile);
     if (this.profile?.first_name && this.profile?.last_name) {
       return `${this.profile.first_name} ${this.profile.last_name}`;
     }
