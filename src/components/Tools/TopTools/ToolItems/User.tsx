@@ -1,15 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import IMG_USER from '@/assets/images/user.jpg';
 import styles from './_ToolItem.module.scss';
 import Image from 'next/image';
-import {observer} from 'mobx-react-lite';
-import {useGlobalStore, useUserStore} from '@/providers/RootStoreProvider';
+import { observer } from 'mobx-react-lite';
+import { useGlobalStore, useUserStore } from '@/providers/RootStoreProvider';
 import ModalWrap from '@/components/Modals/ModalWrap';
 import DefaultLocationM from '@/components/Modals/ModalContents/DefaultLocationM';
-import {getLocation} from '@/utils/get_geolocation';
-import {useRouter} from "next/router";
-import {tree} from "next/dist/build/webpack/loaders/next-route-loader/templates/app-page";
+import { getLocation } from '@/utils/get_geolocation';
+import { useRouter } from "next/router";
+import { tree } from "next/dist/build/webpack/loaders/next-route-loader/templates/app-page";
 import SwitchComp from "@/components/Switch/SwitchComp";
 
 
@@ -27,7 +27,7 @@ const User: React.FC = (): JSX.Element => {
         let user = localStorage.getItem('user')
         if (user && user.length) {
             user = JSON.parse(user);
-            const updatedUser = {...user, role: role};
+            const updatedUser = { ...user, role: role };
             localStorage.setItem('user', JSON.stringify(updatedUser));
             userStore.updateUserRole(role)
         }
@@ -45,7 +45,7 @@ const User: React.FC = (): JSX.Element => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({role: newRole}),
+                body: JSON.stringify({ role: newRole }),
             });
 
             if (!response.ok) {
@@ -64,16 +64,16 @@ const User: React.FC = (): JSX.Element => {
         <div className={`${styles['user-wrap']}`}>
             {toggleLocationModal && (
                 <ModalWrap setToggleModal={setToggleLocationModal}>
-                    <DefaultLocationM setToggleModal={setToggleLocationModal}/>
+                    <DefaultLocationM setToggleModal={setToggleLocationModal} />
                 </ModalWrap>
             )}
             <div className={`${styles['user']}`}>
-                <Image src={IMG_USER} alt='user' width={30} height={30}/>
+                <Image src={IMG_USER} alt='user' width={30} height={30} />
                 <div className={`${styles['info']}`}>
                     <div className={`${styles['avatar']}`} onClick={() => {
                         router.push('/userprofile')
                     }}>
-                        <Image src={IMG_USER} alt='user' width={50} height={50}/>
+                        <Image src={IMG_USER} alt='user' width={50} height={50} />
                     </div>
                     <h3 className={`${styles['name']}`}>{userStore.getDisplayName()}</h3>
 
@@ -81,7 +81,7 @@ const User: React.FC = (): JSX.Element => {
                         <h4>Role:</h4>
                         <SwitchComp
                             checked={userStore.hasRole("user")}
-                            title={{on: 'User', off: 'Provider'}}
+                            title={{ on: 'User', off: 'Provider' }}
                             handleOnChange={onSwitchRole}
                         /></div>
                     <div className={`${styles['profile']}`}>

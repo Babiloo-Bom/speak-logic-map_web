@@ -14,7 +14,12 @@ interface SocialLoginPayload {
 
 const decodePayload = (encoded: string): SocialLoginPayload | null => {
   try {
-    const json = typeof window !== 'undefined' ? window.atob(encoded) : Buffer.from(encoded, 'base64').toString('utf-8');
+    let json;
+    if (typeof window !== 'undefined') {
+      json = decodeURIComponent(escape(window.atob(encoded)));
+    } else {
+      json = Buffer.from(encoded, 'base64').toString('utf-8');
+    }
     return JSON.parse(json);
   } catch (error) {
     console.error('Failed to decode social login payload:', error);

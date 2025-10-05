@@ -8,7 +8,7 @@ import {
 } from '@/lib/auth';
 
 const TOKEN_ENDPOINT = 'https://appleid.apple.com/auth/token';
-const USERINFO_ENDPOINT = 'https://appleid.apple.com/auth/keys'; 
+const USERINFO_ENDPOINT = 'https://appleid.apple.com/auth/keys';
 
 const parseCookies = (cookieHeader?: string): Record<string, string> => {
   if (!cookieHeader) return {};
@@ -101,10 +101,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const normalizedEmail = decoded.email.toLowerCase();
-    
-    const clearStateCookie = `apple_oauth_state=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax${
-      process.env.NODE_ENV === 'production' ? '; Secure' : ''
-    }`;
+
+    const clearStateCookie = `apple_oauth_state=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''
+      }`;
 
     // const existingUser = await findUserByEmail(normalizedEmail);
     // if (!existingUser) {
@@ -134,9 +133,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const tokens = generateTokens(user);
     await storeRefreshToken(user.id, tokens.refreshToken);
 
-    const refreshCookie = `refreshToken=${tokens.refreshToken}; HttpOnly; Path=/; Max-Age=${
-      7 * 24 * 60 * 60
-    }; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+    const refreshCookie = `refreshToken=${tokens.refreshToken}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60
+      }; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
 
     res.setHeader('Set-Cookie', [refreshCookie, clearStateCookie]);
 
