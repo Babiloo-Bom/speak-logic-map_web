@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 
-  const { code, state } = req.body;
+  const { code, state, user } = req.body;
 
   if (typeof code !== 'string' || typeof state !== 'string') {
     return res.redirect(buildErrorRedirect(baseUrl, 'apple_invalid_response'));
@@ -102,6 +102,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const normalizedEmail = decoded.email.toLowerCase();
 
+    let firstName;
+    let lastName;
+    if (user) {
+      let parsedUser = typeof user === 'string' ? JSON.parse(user) : user;
+      if (parsedUser.name) {
+        firstName = parsedUser.name.firstName;
+        lastName = parsedUser.name.lastName;
+      }
+    }
+    console.log(firstName);
+    console.log(lastName);
     const clearStateCookie = `apple_oauth_state=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''
       }`;
 
@@ -126,12 +137,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //   existingUser.email,
     // );
 
-    const { user, profile } = await findOrCreateUserFromSocialLogin(
-      normalizedEmail,
+    const { user: createdUser, profile } = await findOrCreateUserFromSocialLogin(
+      normalizedEmail, firstName, lastName
     );
 
-    const tokens = generateTokens(user);
-    await storeRefreshToken(user.id, tokens.refreshToken);
+    const tokens = generateTokens(createdUser);
+    await storeRefreshToken(createdUser.id, tokens.refreshToken);
 
     const refreshCookie = `refreshToken=${tokens.refreshToken}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60
       }; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
@@ -140,7 +151,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const payload = {
       accessToken: tokens.accessToken,
-      user,
+      user: createdUser,
       profile,
     };
 
