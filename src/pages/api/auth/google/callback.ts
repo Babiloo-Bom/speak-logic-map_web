@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import {
-    createOrUpdateProfile, findOrCreateUserFromSocialLogin,
-    findUserByEmail,
-    generateTokens,
-    getUserProfile,
-    storeRefreshToken,
+  createOrUpdateProfile, findOrCreateUserFromSocialLogin,
+  findUserByEmail,
+  generateTokens,
+  getUserProfile,
+  storeRefreshToken,
 } from '@/lib/auth';
 
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!clientId || !clientSecret) {
     console.error('Google OAuth environment variables are not configured.');
-    return res.redirect(buildErrorRedirect(baseUrl, 'google_config')); 
+    return res.redirect(buildErrorRedirect(baseUrl, 'google_config'));
   }
 
   const { code, state } = req.query;
@@ -113,9 +113,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const normalizedEmail = userInfo.email.toLowerCase();
-    const clearStateCookie = `google_oauth_state=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax${
-      process.env.NODE_ENV === 'production' ? '; Secure' : ''
-    }`;
+    const clearStateCookie = `google_oauth_state=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''
+      }`;
 
     // const existingUser = await findUserByEmail(normalizedEmail);
 
@@ -140,15 +139,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // );
 
     const { user, profile } = await findOrCreateUserFromSocialLogin(
-      normalizedEmail,
+      normalizedEmail, userInfo.given_name, userInfo.family_name
     );
 
     const tokens = generateTokens(user);
     await storeRefreshToken(user.id, tokens.refreshToken);
 
-    const refreshCookie = `refreshToken=${tokens.refreshToken}; HttpOnly; Path=/; Max-Age=${
-      7 * 24 * 60 * 60
-    }; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+    const refreshCookie = `refreshToken=${tokens.refreshToken}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60
+      }; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
 
     res.setHeader('Set-Cookie', [refreshCookie, clearStateCookie]);
 

@@ -41,7 +41,7 @@ export class UserStore {
   initializeFromStorage = (): void => {
     if (typeof window !== 'undefined') {
       const { user, accessToken, profile } = getStoredAuthData();
-      
+
       if (accessToken && user) {
         // Check if token is expired
         if (isTokenExpired(accessToken)) {
@@ -53,7 +53,7 @@ export class UserStore {
         this.user = user;
         this.profile = profile;
         this.isAuthenticated = true;
-        
+
         // Set legacy username for backward compatibility
         this.username = user.email || '';
       }
@@ -72,18 +72,18 @@ export class UserStore {
     this.accessToken = accessToken;
     this.isAuthenticated = true;
     this.username = user.email; // For backward compatibility
-    
+
     if (profile) {
       this.profile = profile;
     }
-    
+
     // Store in localStorage using helper
     storeAuthData(user, accessToken, profile);
   };
 
   setProfile = (profile: Profile): void => {
     this.profile = profile;
-    
+
     // Update profile in localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem('profile', JSON.stringify(profile));
@@ -93,7 +93,7 @@ export class UserStore {
   updateUserRole = (newRole: string): void => {
     if (this.user) {
       this.user = { ...this.user, role: newRole };
-      
+
       // Update localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('user', JSON.stringify(this.user));
@@ -124,7 +124,7 @@ export class UserStore {
     this.isAuthenticated = false;
     this.username = '';
     this.password = '';
-    
+
     // Clear localStorage using helper
     clearAuthStorage();
   };
@@ -169,7 +169,6 @@ export class UserStore {
 
   // Get user display name
   getDisplayName = (): string => {
-    console.log(this.profile);
     if (this.profile?.first_name && this.profile?.last_name) {
       return `${this.profile.first_name} ${this.profile.last_name}`;
     }

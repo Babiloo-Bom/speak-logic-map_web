@@ -117,9 +117,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.redirect(buildErrorRedirect('facebook_email_missing'));
     }
 
-    const clearStateCookie = `facebook_oauth_state=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax${
-      process.env.NODE_ENV === 'production' ? '; Secure' : ''
-    }`;
+    const clearStateCookie = `facebook_oauth_state=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''
+      }`;
 
     const normalizedEmail = userInfo.email.toLowerCase();
     // const existingUser = await findUserByEmail(normalizedEmail);
@@ -145,15 +144,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // );
 
     const { user, profile } = await findOrCreateUserFromSocialLogin(
-      normalizedEmail,
+      normalizedEmail, userInfo.first_name, userInfo.last_name
     );
 
     const tokens = generateTokens(user);
     await storeRefreshToken(user.id, tokens.refreshToken);
 
-    const refreshCookie = `refreshToken=${tokens.refreshToken}; HttpOnly; Path=/; Max-Age=${
-      7 * 24 * 60 * 60
-    }; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+    const refreshCookie = `refreshToken=${tokens.refreshToken}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60
+      }; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
 
     res.setHeader('Set-Cookie', [refreshCookie, clearStateCookie]);
 
