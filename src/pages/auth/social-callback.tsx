@@ -50,7 +50,7 @@ const SocialCallback: React.FC = () => {
     }
 
     userStore.setAuthData(payload.user, payload.accessToken, payload.profile);
-    router.replace('/');
+    router.replace('/auth/add-user-detail');
   }, [providerName, router, userStore]);
 
   if (error) {
