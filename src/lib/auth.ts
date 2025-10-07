@@ -514,6 +514,16 @@ export const updateFileAsset = async (
   console.log('Updating file asset:', updateFile);
 
   try {
+    const checkFile = await client.query(
+      `SELECT id FROM file_assets WHERE id = $1 AND ($2::bigint IS NULL OR uploader_id = $2::bigint)`,
+      [id, updateFile.uploader_id ? updateFile.uploader_id.toString() : null]
+    );
+
+    if (!checkFile.rows[0]) {
+      const result = uploadFile(updateFile);
+      return result;
+    }
+
     const uploaderId = updateFile.uploader_id
       ? updateFile.uploader_id.toString()
       : null;

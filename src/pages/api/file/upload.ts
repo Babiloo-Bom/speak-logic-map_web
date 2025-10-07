@@ -90,7 +90,8 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     const mime_type = file.mimetype || "application/octet-stream";
     const size_bytes = file.size;
 
-    // Update existing file or create new one
+    // Update or create file
+    let fileAsset: FileAsset;
     if (existingId) {
       const fileId = parseInt(existingId, 10);
       if (isNaN(fileId)) {
@@ -112,39 +113,36 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
           error: "File not found or not owned by user"
         });
       }
-
+      fileAsset = updated;
       return res.status(200).json({
-        id: updated.id,
-        url: updated.url,
-        message: "File updated successfully"
+        id: fileAsset.id,
+        url: fileAsset.url,
+        message: "File updated successfully",
       });
     } else {
-      // Create new file record
-      const created = await uploadFile({
+      fileAsset = await uploadFile({
         url,
         mime_type,
         size_bytes,
-        uploader_id: user.id,
+        uploader_id: Number(user.id),
       });
-
       return res.status(201).json({
-        id: created.id,
-        url,
-        message: "File uploaded successfully"
+        id: fileAsset.id,
+        url: fileAsset.url,
+        message: "File uploaded successfully",
       });
     }
   } catch (err: any) {
     console.error("Upload error:", err);
 
-    // Return appropriate error message
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(413).json({
-        error: "File size exceeds the maximum limit of 10MB"
+        error: "File size exceeds the maximum limit of 10MB",
       });
     }
 
     return res.status(500).json({
-      error: err.message || "Internal server error"
+      error: err.message || "Internal server error",
     });
   }
 }
