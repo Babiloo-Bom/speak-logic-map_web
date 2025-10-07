@@ -244,7 +244,7 @@ const AddUserDetailForm: React.FC = () => {
     : null;
 
   return (
-    <AuthLayout illustration="lock" title="Add User Detail">
+    <AuthLayout illustration="lock" title="User Profile Detail">
       <form className="w-full flex flex-col gap-6" onSubmit={handleSubmit}>
         {errors.general && (
           <div className={styles.errorBanner}>{errors.general}</div>
