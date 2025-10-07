@@ -226,7 +226,7 @@ const AddUserDetailForm: React.FC = () => {
         throw new Error(profileJson.error || "Profile update failed");
 
       if (profileJson.profile) userStore.setProfile(profileJson.profile);
-      router.push("/");
+      router.push("/userprofile");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Network error";
       setErrors({ general: message });

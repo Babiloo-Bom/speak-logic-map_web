@@ -24,6 +24,7 @@ interface Profile {
   function?: string;
   geo_id?: number;
   avatar_id?: number;
+  avatar_url?: string;
   pen_name?: string;
 }
 
@@ -54,6 +55,10 @@ const ProfilePage: React.FC = () => {
   const [functionValue, setFunctionValue] = useState(formData.function || "");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleValue, setTitleValue] = useState(formData.title || "");
+
+  const [existingAvatarUrl, setExistingAvatarUrl] = useState<string | null>(
+    null
+  );
 
   const dfCountryCode = localStorage.getItem('dfCountryCode');
 
@@ -93,6 +98,10 @@ const ProfilePage: React.FC = () => {
             function: data.profile.function || '',
             penName: data.profile.pen_name || '',
           });
+
+          if (data.profile.avatar_url) {
+            setExistingAvatarUrl(data.profile.avatar_url);
+          }
         }
       } else {
         const errorData = await response.json();
@@ -181,6 +190,14 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const resolvedAvatarUrl = existingAvatarUrl
+    ? existingAvatarUrl.startsWith("http")
+      ? existingAvatarUrl
+      : typeof window !== "undefined"
+        ? `${window.location.origin}${existingAvatarUrl}`
+        : existingAvatarUrl
+    : null;
+
   return (
     <>
       <Head>
@@ -193,11 +210,19 @@ const ProfilePage: React.FC = () => {
         <div className="container max-w-5xl mx-auto flex flex-col items-center">
           <h2 className="text-3xl font-semibold mb-6">User Profile</h2>
           <div className="flex flex-col items-center">
-            <Image
-              src={IMG_ICONUSEREXAMPLE}
-              alt="User avatar"
-              className="w-32 h-32 rounded-full border-4 border-solid border-[#324899] mb-6"
-            />
+            {resolvedAvatarUrl ? (
+              <img
+                src={resolvedAvatarUrl}
+                alt="Current avatar"
+                className="w-32 h-32 rounded-full border-4 border-solid border-[#324899] mb-6"
+              />
+            ) : (
+              <Image
+                src={IMG_ICONUSEREXAMPLE}
+                alt="User avatar"
+                className="w-32 h-32 rounded-full border-4 border-solid border-[#324899] mb-6"
+              />
+            )}
             <h3 className="text-2xl font-bold text-[#324899] mb-6">{formData.firstName + ' ' + formData.lastName}</h3>
           </div>
           <div className="w-full border border-solid border-[#D0DAEE] rounded-lg px-48 py-6 bg-white">
