@@ -26,6 +26,7 @@ interface Profile {
   avatar_id?: number;
   avatar_url?: string;
   pen_name?: string;
+  location?: string;
 }
 
 interface ApiResponse {
@@ -41,6 +42,7 @@ const ProfilePage: React.FC = () => {
     title: '',
     function: '',
     penName: '',
+    location: '',
   });
 
   const [user, setUser] = useState<User | null>(null);
@@ -97,6 +99,7 @@ const ProfilePage: React.FC = () => {
             title: data.profile.title || '',
             function: data.profile.function || '',
             penName: data.profile.pen_name || '',
+            location: data.profile.location || 'USA',
           });
 
           if (data.profile.avatar_url) {
@@ -254,7 +257,7 @@ const ProfilePage: React.FC = () => {
               </div>
               <div>
                 <p className="font-bold">Default Location:</p>
-                <p>{dfCountryCode || 'USA'}</p>
+                <p>{formData.location}</p>
               </div>
               <div>
                 <p className="font-bold">Function:</p>
