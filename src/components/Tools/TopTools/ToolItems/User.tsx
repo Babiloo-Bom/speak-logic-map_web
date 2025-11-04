@@ -9,7 +9,6 @@ import ModalWrap from '@/components/Modals/ModalWrap';
 import DefaultLocationM from '@/components/Modals/ModalContents/DefaultLocationM';
 import { getLocation } from '@/utils/get_geolocation';
 import { useRouter } from "next/router";
-import { tree } from "next/dist/build/webpack/loaders/next-route-loader/templates/app-page";
 import SwitchComp from "@/components/Switch/SwitchComp";
 
 
@@ -18,15 +17,42 @@ const User: React.FC = (): JSX.Element => {
     const [toggleLocationModal, setToggleLocationModal] = useState<boolean>(false);
     const userStore = useUserStore();
     const router = useRouter();
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
     const getAuthToken = () => {
         return localStorage.getItem('accessToken');
     };
 
+    useEffect(() => {
+        const fetchAvatar = async () => {
+            try {
+                const token = getAuthToken();
+                if (!token) return;
+                
+                const response = await fetch('/api/user/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.profile?.avatar_url) {
+                        setAvatarUrl(data.profile.avatar_url);
+                    }
+                }
+            } catch (error) {
+                // Silently fail, use default avatar
+            }
+        };
+        
+        fetchAvatar();
+    }, []);
+
     const updateRole = (role: string) => {
-        let user = localStorage.getItem('user')
-        if (user && user.length) {
-            user = JSON.parse(user);
+        const userStr = localStorage.getItem('user')
+        if (userStr && userStr.length) {
+            const user = JSON.parse(userStr) as { [key: string]: any };
             const updatedUser = { ...user, role: role };
             localStorage.setItem('user', JSON.stringify(updatedUser));
             userStore.updateUserRole(role)
@@ -68,12 +94,24 @@ const User: React.FC = (): JSX.Element => {
                 </ModalWrap>
             )}
             <div className={`${styles['user']}`}>
-                <Image src={IMG_USER} alt='user' width={30} height={30} />
+                <Image 
+                    src={avatarUrl || IMG_USER} 
+                    alt='user' 
+                    width={30} 
+                    height={30}
+                    style={{ objectFit: 'cover', borderRadius: '50%' }}
+                />
                 <div className={`${styles['info']}`}>
                     <div className={`${styles['avatar']}`} onClick={() => {
                         router.push('/userprofile')
                     }}>
-                        <Image src={IMG_USER} alt='user' width={50} height={50} />
+                        <Image 
+                            src={avatarUrl || IMG_USER} 
+                            alt='user' 
+                            width={50} 
+                            height={50}
+                            style={{ objectFit: 'cover', borderRadius: '50%' }}
+                        />
                     </div>
                     <h3 className={`${styles['name']}`}>{userStore.getDisplayName()}</h3>
 

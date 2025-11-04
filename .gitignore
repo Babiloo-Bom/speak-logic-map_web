@@ -38,3 +38,6 @@ next-env.d.ts
 /.idea
 /.next
 package-lock.json
+
+.env
+.env.local

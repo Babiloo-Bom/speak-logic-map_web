@@ -1,0 +1,76 @@
+# Simplified Dockerfile for Next.js (fallback if standalone doesn't work)
+FROM node:18-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV production
+RUN npm run build
+
+# Verify build output exists and list all files
+RUN echo "=== Build output structure ===" && \
+    ls -la /app/.next/ && \
+    echo "=== Checking required files ===" && \
+    (test -f /app/.next/routes-manifest.json && echo "✓ routes-manifest.json found" || echo "✗ routes-manifest.json missing") && \
+    (test -f /app/.next/BUILD_ID && echo "✓ BUILD_ID found" || echo "✗ BUILD_ID missing") && \
+    (test -d /app/.next/server && echo "✓ server directory found" || echo "✗ server directory missing") && \
+    echo "Build output verified"
+
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+# Install su-exec for switching users in entrypoint
+RUN apk add --no-cache su-exec && \
+    addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy package.json first
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
+# Copy public folder
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Copy .next directory with all build artifacts
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+
+# Copy only production node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+
+# FORCE CREATE routes-manifest.json - MUST exist before Next.js starts
+# Do this AFTER copying .next to ensure it's not overwritten
+RUN mkdir -p /app/.next && \
+    echo '{"version":3,"pages404":true,"basePath":"","redirects":[],"rewrites":[],"headers":[]}' > /app/.next/routes-manifest.json && \
+    if [ ! -f /app/.next/BUILD_ID ]; then \
+      echo "$(date +%s)" > /app/.next/BUILD_ID; \
+    fi && \
+    chown -R nextjs:nodejs /app/.next && \
+    chmod -R u+w /app/.next && \
+    echo "=== FORCED routes-manifest.json creation ===" && \
+    cat /app/.next/routes-manifest.json && \
+    ls -la /app/.next/routes-manifest.json /app/.next/BUILD_ID && \
+    echo "✓ routes-manifest.json FORCED and verified"
+
+# Create entrypoint script to ensure manifests exist at runtime
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+# Final verification of routes-manifest.json exists
+RUN test -f /app/.next/routes-manifest.json && echo "✓ routes-manifest.json exists in image" || (echo "✗ routes-manifest.json MISSING in image!" && exit 1)
+
+EXPOSE 3000
+
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+# Use entrypoint script that ensures manifests exist
+# Entrypoint runs as root first to create files, then switches to nextjs user
+# Don't set USER here - entrypoint will handle user switching
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

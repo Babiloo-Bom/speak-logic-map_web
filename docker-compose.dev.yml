@@ -1,0 +1,75 @@
+# Docker Compose for Development
+# Usage: docker-compose -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: speak-logic-map-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: function_provider
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - speak-logic-map-network
+
+  # Next.js Application in Development Mode
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: speak-logic-map-app-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Database Configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: function_provider
+      DB_USER: postgres
+      DB_PASSWORD: password123
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-key-min-32-chars}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-jwt-refresh-secret-key-min-32-chars}
+      # Email Configuration (optional for dev)
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      FROM_EMAIL: ${FROM_EMAIL:-}
+      # Application Configuration
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev-nextauth-secret}
+      # Node Environment
+      NODE_ENV: development
+    volumes:
+      # Mount source code for hot reload
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - speak-logic-map-network
+
+volumes:
+  postgres_data_dev:
+    driver: local
+
+networks:
+  speak-logic-map-network:
+    driver: bridge
+

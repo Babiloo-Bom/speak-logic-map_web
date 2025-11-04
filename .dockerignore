@@ -1,0 +1,21 @@
+# Ignore these in build context, but they'll be created during build
+# Note: .next is created during build stage, so we can ignore it in context
+.git
+.env.local
+.env*.local
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+*.md
+!init-scripts/README.md
+!README_DOCKER.md
+docker-compose*.yml
+Dockerfile.simple
+.dockerignore
+
+# Don't ignore .next in COPY from builder stage (it's already built)
+# Don't ignore node_modules in COPY from builder stage (already installed)
+# Don't ignore docker-entrypoint.sh (needed for runtime)
+!docker-entrypoint.sh

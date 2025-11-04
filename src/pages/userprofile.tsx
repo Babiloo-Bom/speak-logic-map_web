@@ -6,6 +6,7 @@ import HeaderAuth from '@/components/Auth/Header';
 import FooterAuth from '@/components/Auth/Footer';
 import Image from "next/image";
 import IMG_MAPEXAMPLE from "@/assets/images/MapExample.png";
+import LocationMiniMap from '@/components/Profile/LocationMiniMap';
 import IMG_ICONUSEREXAMPLE from "@/assets/images/IconUserExample.jpg";
 
 interface User {
@@ -285,11 +286,11 @@ const ProfilePage: React.FC = () => {
                 )}
               </div>
               <div className="">
-                <Image
-                  src={IMG_MAPEXAMPLE}
-                  alt="World map"
-                  className="rounded-lg"
-                />
+                {formData.location ? (
+                  <LocationMiniMap locationName={formData.location} height={220} />
+                ) : (
+                  <Image src={IMG_MAPEXAMPLE} alt="World map" className="rounded-lg" />
+                )}
               </div>
             </div>
           </div>
