@@ -1,8 +1,0 @@
-{
-  "firstName": "Test",
-  "lastName": "User", 
-  "email": "testuser@example.com",
-  "password": "TestPassword123",
-  "confirmPassword": "TestPassword123"
-}
-
