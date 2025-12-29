@@ -34,9 +34,7 @@ const AddUserDetailForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [existingAvatarUrl, setExistingAvatarUrl] = useState<string | null>(
-    null
-  );
+  const [existingAvatarUrl, setExistingAvatarUrl] = useState<string | null>(null);
   const [existingAvatarId, setExistingAvatarId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -93,8 +91,7 @@ const AddUserDetailForm: React.FC = () => {
             }
           }
         }
-      } catch {
-      }
+      } catch {}
     };
 
     loadProfile();
@@ -164,10 +161,7 @@ const AddUserDetailForm: React.FC = () => {
       let avatar_id: number | null = null;
 
       if (file) {
-        const stampedName = `${Date.now()}-${file.name.replace(
-          /[^a-zA-Z0-9._-]/g,
-          "_"
-        )}`;
+        const stampedName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
         const publicUrl = `/uploads/${stampedName}`;
 
         const doUpload = async () => {
@@ -175,8 +169,7 @@ const AddUserDetailForm: React.FC = () => {
           const formDataToSend = new FormData();
           formDataToSend.append("file", file);
           formDataToSend.append("url", publicUrl);
-          if (existingAvatarId)
-            formDataToSend.append("id", String(existingAvatarId));
+          if (existingAvatarId) formDataToSend.append("id", String(existingAvatarId));
 
           const res = await fetch("/api/file/upload", {
             method: "POST",
@@ -222,11 +215,10 @@ const AddUserDetailForm: React.FC = () => {
         if (ok) profileRes = await doProfileUpdate(avatar_id);
       }
       const profileJson = await profileRes.json();
-      if (!profileRes.ok)
-        throw new Error(profileJson.error || "Profile update failed");
+      if (!profileRes.ok) throw new Error(profileJson.error || "Profile update failed");
 
       if (profileJson.profile) userStore.setProfile(profileJson.profile);
-      router.push("/userprofile");
+      router.push("/dashboard");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Network error";
       setErrors({ general: message });
@@ -239,16 +231,14 @@ const AddUserDetailForm: React.FC = () => {
     ? existingAvatarUrl.startsWith("http")
       ? existingAvatarUrl
       : typeof window !== "undefined"
-        ? `${window.location.origin}${existingAvatarUrl}`
-        : existingAvatarUrl
+      ? `${window.location.origin}${existingAvatarUrl}`
+      : existingAvatarUrl
     : null;
 
   return (
     <AuthLayout illustration="lock" title="User Profile Detail">
       <form className="w-full flex flex-col gap-6" onSubmit={handleSubmit}>
-        {errors.general && (
-          <div className={styles.errorBanner}>{errors.general}</div>
-        )}
+        {errors.general && <div className={styles.errorBanner}>{errors.general}</div>}
 
         <div className={styles.formGroup}>
           <label htmlFor="title" className={styles.label}>
@@ -264,9 +254,7 @@ const AddUserDetailForm: React.FC = () => {
             className={`${styles.input} ${errors.title ? styles.error : ""}`}
             disabled={isLoading}
           />
-          {errors.title && (
-            <span className={styles.errorMessage}>{errors.title}</span>
-          )}
+          {errors.title && <span className={styles.errorMessage}>{errors.title}</span>}
         </div>
 
         <div className={styles.formGroup}>
@@ -283,9 +271,7 @@ const AddUserDetailForm: React.FC = () => {
             className={`${styles.input} ${errors.function ? styles.error : ""}`}
             disabled={isLoading}
           />
-          {errors.function && (
-            <span className={styles.errorMessage}>{errors.function}</span>
-          )}
+          {errors.function && <span className={styles.errorMessage}>{errors.function}</span>}
         </div>
 
         <div className={styles.formGroup}>
@@ -302,9 +288,7 @@ const AddUserDetailForm: React.FC = () => {
             className={`${styles.input} ${errors.location ? styles.error : ""}`}
             disabled={isLoading}
           />
-          {errors.location && (
-            <span className={styles.errorMessage}>{errors.location}</span>
-          )}
+          {errors.location && <span className={styles.errorMessage}>{errors.location}</span>}
         </div>
 
         <div className={styles.formGroup}>
@@ -314,63 +298,23 @@ const AddUserDetailForm: React.FC = () => {
           <div className="flex items-center gap-3">
             {resolvedAvatarUrl && !file && (
               <div className="flex items-center gap-2">
-                <img
-                  src={resolvedAvatarUrl}
-                  alt="Current avatar"
-                  className="h-10 w-10 rounded object-cover"
-                />
+                <img src={resolvedAvatarUrl} alt="Current avatar" className="h-10 w-10 rounded object-cover" />
                 <span className="text-[#3B4EA6]">Current</span>
               </div>
             )}
             <label className="px-10 py-2 border-2 border-solid border-[#3B4EA6] rounded-md text-[#3B4EA6] font-semibold cursor-pointer hover:bg-blue-50">
               Upload Image
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileChange}
-              />
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
             </label>
             {file && (
               <div className="flex items-center gap-2">
                 <span className="text-[#3B4EA6]">{file.name}</span>
-                <button
-                  type="button"
-                  onClick={handleRemove}
-                  className="text-[#3B4EA6] hover:text-red-600"
-                  aria-label="Remove file"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M3 6h18"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M10 11v6M14 11v6"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
+                <button type="button" onClick={handleRemove} className="text-[#3B4EA6] hover:text-red-600" aria-label="Remove file">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" strokeWidth="2" />
+                    <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 </button>
               </div>
@@ -378,11 +322,7 @@ const AddUserDetailForm: React.FC = () => {
           </div>
         </div>
 
-        <button
-          type="submit"
-          className={`${styles.primaryButton} ${styles.small} mb-4`}
-          disabled={isLoading}
-        >
+        <button type="submit" className={`${styles.primaryButton} ${styles.small} mb-4`} disabled={isLoading}>
           Submit
         </button>
       </form>

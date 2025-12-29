@@ -72,4 +72,3 @@ volumes:
 networks:
   speak-logic-map-network:
     driver: bridge
-
