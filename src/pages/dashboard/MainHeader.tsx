@@ -1,9 +1,10 @@
+import { Image } from "antd";
+
 const MainHeader = () => (
   <header className="bg-white shadow">
     <div className="mx-12 px-4 py-4 flex items-center justify-between overflow-hidden">
       <div className="flex items-center gap-2">
-        <div className="w-10 h-10 bg-blue-700 text-white font-bold flex items-center justify-center rounded">FP</div>
-        <span className="font-semibold text-lg">Function Provider</span>
+        <Image preview={false} src="/img/Logo.png" alt="Logo" className="h-10 w-auto max-w-full" />
       </div>
 
       <nav className="hidden md:flex gap-6 text-sm font-medium">

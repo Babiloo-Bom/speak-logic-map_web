@@ -2,7 +2,7 @@ import { Button, Image, Input, Radio } from "antd";
 import FeatureItem from "./FeatureItem";
 import { SearchOutlined } from "@ant-design/icons";
 
-const MapIcon = () => <Image src="/icons/solar_map-outline.svg" alt="map" style={{ width: "1em", height: "1em" }} />;
+const MapIcon = () => <Image preview={false} src="/icons/solar_map-outline.svg" alt="map" style={{ width: "1em", height: "1em" }} />;
 
 const HeroSection = () => {
   return (
@@ -24,7 +24,7 @@ const HeroSection = () => {
         {/* Tabs */}
         <div className="flex justify-center gap-10 mb-6 bg-[#CCCCCC] rounded-2xl p-4 w-fit mx-auto">
           {["Providers", "Managers", "News"].map((tab) => (
-            <button key={tab} className="px-10 py-3 rounded-md border-[2px] border-solid border-[#324899]  text-white text-sm hover:bg-[#324899]">
+            <button key={tab} className="px-10 py-3 rounded-md border-[2px] border-solid border-[#324899]  text-sm hover:bg-[#324899] text-[#324899] font-semibold hover:text-white">
               {tab}
             </button>
           ))}
