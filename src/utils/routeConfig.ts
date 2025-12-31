@@ -7,20 +7,22 @@ export interface RouteConfig {
 
 // Define which routes are public (don't require authentication)
 export const PUBLIC_ROUTES: string[] = [
-  '/auth/sign-in',
-  '/auth/sign-up',
-  '/auth/forgot-password',
-  '/auth/reset-password',
-  '/auth/verify',
-  '/login', // Legacy route that redirects
-  '/unauthorized'
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/auth/verify",
+  "/login", // Legacy route that redirects
+  "/dashboard",
+  "/unauthorized",
+  "/manager-search",
 ];
 
 // Define routes that require authentication but allow unverified users
 export const UNVERIFIED_ALLOWED_ROUTES: string[] = [
-  '/auth/verify',
-  '/profile', // Allow users to access profile to resend verification
-  '/unauthorized'
+  "/auth/verify",
+  "/profile", // Allow users to access profile to resend verification
+  "/unauthorized",
 ];
 
 // Check if a route is public (doesn't require authentication)
@@ -29,17 +31,17 @@ export const isPublicRoute = (pathname: string): boolean => {
   if (PUBLIC_ROUTES.includes(pathname)) {
     return true;
   }
-  
+
   // Check if it's an auth route
-  if (pathname.startsWith('/auth/')) {
+  if (pathname.startsWith("/auth/")) {
     return true;
   }
-  
+
   // Check if it's an API route (handled separately)
-  if (pathname.startsWith('/api/')) {
+  if (pathname.startsWith("/api/")) {
     return true;
   }
-  
+
   return false;
 };
 
@@ -52,10 +54,10 @@ export const allowsUnverifiedUsers = (pathname: string): boolean => {
 export const getRequiredRoles = (pathname: string): string[] => {
   // Define role-based routes here
   const roleBasedRoutes: Record<string, string[]> = {
-    '/admin': ['admin'],
-    '/dashboard': ['admin', 'user'],
+    "/admin": ["admin"],
+    "/dashboard": ["admin", "user"],
     // Add more role-based routes as needed
   };
-  
+
   return roleBasedRoutes[pathname] || [];
 };

@@ -1,10 +1,12 @@
 import { Button, Image, Input, Radio } from "antd";
 import FeatureItem from "./FeatureItem";
 import { SearchOutlined } from "@ant-design/icons";
+import { useRouter } from "next/router";
 
 const MapIcon = () => <Image preview={false} src="/icons/solar_map-outline.svg" alt="map" style={{ width: "1em", height: "1em" }} />;
 
 const HeroSection = () => {
+  const router = useRouter();
   return (
     <section
       className="relative bg-cover bg-center mx-12 mt-6 rounded-lg overflow-hidden"
@@ -17,14 +19,17 @@ const HeroSection = () => {
       <div className="relative max-w-5xl mx-auto px-4 py-16 text-center text-white" style={{ fontFamily: "Urbanist, sans-serif" }}>
         <h1 className="text-4xl md:text-5xl font-medium mb-4 text-[#2D323B]">Home</h1>
 
-        <Button className="bg-white  rounded-lg shadow mb-6 border-[2px] border-[#324899] px-10 py-4" icon={<MapIcon />}>
+        <Button className="bg-white  rounded-lg shadow mb-6 border-[2px] border-[#324899] px-10 py-4" icon={<MapIcon />} onClick={() => router.push("/")}>
           <div className="font-semibold text-[#324899]">Show Map</div>
         </Button>
 
         {/* Tabs */}
         <div className="flex justify-center gap-10 mb-6 bg-[#CCCCCC] rounded-2xl p-4 w-fit mx-auto">
           {["Providers", "Managers", "News"].map((tab) => (
-            <button key={tab} className="px-10 py-3 rounded-md border-[2px] border-solid border-[#324899]  text-sm hover:bg-[#324899] text-[#324899] font-semibold hover:text-white">
+            <button
+              key={tab}
+              className="px-10 py-3 rounded-md border-[2px] border-solid border-[#324899]  text-sm hover:bg-[#324899] text-[#324899] font-semibold hover:text-white"
+            >
               {tab}
             </button>
           ))}

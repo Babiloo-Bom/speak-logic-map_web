@@ -1,8 +1,10 @@
 import Layout from "@/components/Layout/Layout";
+import MainLayout from "@/components/MainLayout/MainLayout";
 import { RootStoreProvider } from "@/providers/RootStoreProvider";
 import "@/styles/globals.scss";
 import type { AppProps } from "next/app";
 import RouteGuard from "@/components/Auth/RouteGuard";
+import { useRouter } from "next/router";
 
 declare global {
   interface Window {
@@ -81,13 +83,26 @@ declare global {
 }
 
 export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+
+  // Routes that use MainLayout (with TopBar, MainHeader, Footer)
+  const mainLayoutRoutes = ["/dashboard", "/"];
+  const useMainLayout = mainLayoutRoutes.includes(router.pathname);
+
   return (
     <RootStoreProvider>
       <RouteGuard>
-        <Layout>
+        {/* {useMainLayout ? ( */}
+        <MainLayout>
           <div id="app-modal" />
           <Component {...pageProps} />
-        </Layout>
+        </MainLayout>
+        {/* ) : (
+          <Layout>
+            <div id="app-modal" />
+            <Component {...pageProps} />
+          </Layout>
+        )} */}
       </RouteGuard>
     </RootStoreProvider>
   );
