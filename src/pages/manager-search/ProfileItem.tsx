@@ -1,4 +1,4 @@
-import { Skeleton } from "antd";
+import { Button, Skeleton } from "antd";
 import Image from "next/image";
 import { Profile } from "./types";
 
@@ -48,9 +48,9 @@ export default function ProfileItem({ data }: Props) {
 
       {/* Button */}
       <div className="mt-auto pt-4">
-        <Skeleton.Button active loading={!data} block size="large">
+        <Button loading={!data} block size="large" className="bg-primary text-white">
           More Details
-        </Skeleton.Button>
+        </Button>
       </div>
     </div>
   );

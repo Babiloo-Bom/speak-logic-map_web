@@ -16,6 +16,8 @@ export const PUBLIC_ROUTES: string[] = [
   "/dashboard",
   "/unauthorized",
   "/manager-search",
+  "/manager-rating",
+  "/manager-search/manager-rating",
 ];
 
 // Define routes that require authentication but allow unverified users

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import SearchBar from "./SearchBar";
 import ProfileList from "./ProfileList";
 import { Profile } from "./types";
+import HeaderSearch from "@/components/HeaderSearch/HeaderSearch";
 
 function ManagerSearch() {
   const [data, setData] = useState<Profile[]>();
@@ -24,7 +24,7 @@ function ManagerSearch() {
 
   return (
     <div className="mx-12 px-4 py-8">
-      <SearchBar imageUrl="/img/search-bar.png" />
+      <HeaderSearch imageUrl="/img/search-bar.png" />
       <div className="mt-8">
         <ProfileList data={data} />
       </div>

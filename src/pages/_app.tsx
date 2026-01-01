@@ -86,23 +86,23 @@ export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   // Routes that use MainLayout (with TopBar, MainHeader, Footer)
-  const mainLayoutRoutes = ["/dashboard", "/"];
-  const useMainLayout = mainLayoutRoutes.includes(router.pathname);
+  const layoutRoutes = ["/"];
+  const useLayoutDefault = layoutRoutes.includes(router.pathname);
 
   return (
     <RootStoreProvider>
       <RouteGuard>
-        {/* {useMainLayout ? ( */}
-        <MainLayout>
-          <div id="app-modal" />
-          <Component {...pageProps} />
-        </MainLayout>
-        {/* ) : (
+        {!useLayoutDefault ? (
+          <MainLayout>
+            <div id="app-modal" />
+            <Component {...pageProps} />
+          </MainLayout>
+        ) : (
           <Layout>
             <div id="app-modal" />
             <Component {...pageProps} />
           </Layout>
-        )} */}
+        )}
       </RouteGuard>
     </RootStoreProvider>
   );

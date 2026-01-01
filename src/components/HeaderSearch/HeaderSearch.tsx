@@ -1,13 +1,13 @@
 import { Input, Select, Button } from "antd";
-import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
+import { SearchOutlined, FilterOutlined, MenuOutlined } from "@ant-design/icons";
 import Image from "next/image";
 
-interface SearchHeroProps {
+interface HeaderSearchProps {
   title?: string;
   imageUrl: string;
 }
 
-export default function SearchBar({ title = "Manager Search", imageUrl }: SearchHeroProps) {
+export default function HeaderSearch({ title = "Manager Search", imageUrl }: HeaderSearchProps) {
   return (
     <div>
       <div className="relative w-full h-40 sm:h-48 md:h-64 rounded-xl overflow-hidden mb-10">
@@ -31,9 +31,8 @@ export default function SearchBar({ title = "Manager Search", imageUrl }: Search
           ]}
         />
 
-        <Button size="large" icon={<FilterOutlined />} className="border-blue-600 text-blue-600">
-          Filter
-        </Button>
+        <Button size="large" icon={<SearchOutlined />} className="border-primary text-white bg-primary"></Button>
+        <Button size="large" icon={<MenuOutlined />} className="border-primary text-primary hover:text-primary"></Button>
       </div>
     </div>
   );

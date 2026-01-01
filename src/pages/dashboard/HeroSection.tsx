@@ -2,11 +2,27 @@ import { Button, Image, Input, Radio } from "antd";
 import FeatureItem from "./FeatureItem";
 import { SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
+import { itemsTabs } from "./constants";
 
 const MapIcon = () => <Image preview={false} src="/icons/solar_map-outline.svg" alt="map" style={{ width: "1em", height: "1em" }} />;
 
 const HeroSection = () => {
   const router = useRouter();
+
+  const handleRedirectToMap = (type: string) => {
+    switch (type) {
+      case "provider":
+        router.push("/manager-search");
+        break;
+      case "manager":
+        router.push("/map/managers");
+        break;
+      case "new":
+        router.push("/map/news");
+        break;
+    }
+  };
+
   return (
     <section
       className="relative bg-cover bg-center mx-12 mt-6 rounded-lg overflow-hidden"
@@ -25,12 +41,13 @@ const HeroSection = () => {
 
         {/* Tabs */}
         <div className="flex justify-center gap-10 mb-6 bg-[#CCCCCC] rounded-2xl p-4 w-fit mx-auto">
-          {["Providers", "Managers", "News"].map((tab) => (
+          {itemsTabs.map((tab) => (
             <button
-              key={tab}
+              key={tab.field}
               className="px-10 py-3 rounded-md border-[2px] border-solid border-[#324899]  text-sm hover:bg-[#324899] text-[#324899] font-semibold hover:text-white"
+              onClick={() => handleRedirectToMap(tab.field)}
             >
-              {tab}
+              {tab.label}
             </button>
           ))}
         </div>
