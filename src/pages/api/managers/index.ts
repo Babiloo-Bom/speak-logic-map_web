@@ -11,10 +11,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const body = req.body as ManagerCreateInput;
 
+    // Validate required fields
     if (!body?.email || !body?.password) {
       return res
         .status(400)
         .json({ error: "email and password are required" });
+    }
+
+    if (!body?.name) {
+      return res
+        .status(400)
+        .json({ error: "name is required" });
     }
 
     const manager = await createManager(body);
@@ -31,5 +38,3 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 // Creating managers is an admin-only operation
 export default requireAuth(["admin"])(handler);
-
-

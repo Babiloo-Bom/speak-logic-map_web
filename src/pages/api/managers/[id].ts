@@ -20,7 +20,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       return res.status(200).json(manager);
     }
 
-    if (req.method === "PUT") {
+    if (req.method === "PUT" || req.method === "PATCH") {
       const updated = await updateManager(managerId, req.body);
       if (!updated) {
         return res.status(404).json({ error: "Manager not found" });
@@ -35,12 +35,10 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
 
     return res.status(405).json({ error: "Method not allowed" });
   } catch (error) {
-    console.error("Error fetching manager:", error);
+    console.error("Error handling manager request:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
 
 // All manager CRUD operations are admin-only
 export default requireAuth(["admin"])(handler);
-
-

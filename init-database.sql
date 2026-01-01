@@ -155,6 +155,57 @@ CREATE TABLE IF NOT EXISTS cities_metadata (
 );
 
 -- ============================================
+-- MANAGER SYSTEM TABLES
+-- ============================================
+
+-- Managers table (extends users with role='manager')
+-- Stores additional manager-specific data
+CREATE TABLE IF NOT EXISTS managers (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  expertise TEXT,  -- Manager's expertise/skills
+  geo_id BIGINT REFERENCES geopoints(id),
+  lat DECIMAL(10,7),
+  lng DECIMAL(10,7),
+  rating DECIMAL(3,2) DEFAULT 0.0 CHECK (rating >= 0.0 AND rating <= 5.0),
+  rating_count INTEGER DEFAULT 0,
+  status VARCHAR(20) DEFAULT 'active',
+  is_given_set BOOLEAN DEFAULT false,  -- "Manager using the Given Set"
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id)
+);
+
+-- Manager ratings table (per-user ratings)
+CREATE TABLE IF NOT EXISTS manager_ratings (
+  id BIGSERIAL PRIMARY KEY,
+  manager_id BIGINT NOT NULL REFERENCES managers(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (manager_id, user_id)
+);
+
+-- Manager-Function junction table (many-to-many)
+CREATE TABLE IF NOT EXISTS manager_functions (
+  manager_id BIGINT NOT NULL REFERENCES managers(id) ON DELETE CASCADE,
+  function_id BIGINT NOT NULL REFERENCES functions(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (manager_id, function_id)
+);
+
+-- Manager-Problem junction table (many-to-many)
+CREATE TABLE IF NOT EXISTS manager_problems (
+  manager_id BIGINT NOT NULL REFERENCES managers(id) ON DELETE CASCADE,
+  problem_id BIGINT NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (manager_id, problem_id)
+);
+
+-- ============================================
 -- PROVIDER SYSTEM TABLES
 -- ============================================
 
@@ -278,6 +329,38 @@ CREATE INDEX IF NOT EXISTS idx_provider_problems_problem_id ON provider_problems
 -- Provider ratings indexes
 CREATE INDEX IF NOT EXISTS idx_provider_ratings_provider_id ON provider_ratings(provider_id);
 CREATE INDEX IF NOT EXISTS idx_provider_ratings_user_id ON provider_ratings(user_id);
+
+-- ============================================
+-- MANAGER SYSTEM INDEXES
+-- ============================================
+
+-- Manager table indexes
+CREATE INDEX IF NOT EXISTS idx_managers_user_id ON managers(user_id);
+CREATE INDEX IF NOT EXISTS idx_managers_name ON managers(name);
+CREATE INDEX IF NOT EXISTS idx_managers_status ON managers(status);
+CREATE INDEX IF NOT EXISTS idx_managers_rating ON managers(rating);
+CREATE INDEX IF NOT EXISTS idx_managers_is_given_set ON managers(is_given_set);
+CREATE INDEX IF NOT EXISTS idx_managers_geo_id ON managers(geo_id);
+CREATE INDEX IF NOT EXISTS idx_managers_created_at ON managers(created_at);
+
+-- Full-text search indexes for managers
+CREATE INDEX IF NOT EXISTS idx_managers_name_fts ON managers USING gin(to_tsvector('english', COALESCE(name, '')));
+CREATE INDEX IF NOT EXISTS idx_managers_description_fts ON managers USING gin(to_tsvector('english', COALESCE(description, '')));
+CREATE INDEX IF NOT EXISTS idx_managers_expertise_fts ON managers USING gin(to_tsvector('english', COALESCE(expertise, '')));
+
+-- Alphabet filter index (for A-Z sidebar)
+CREATE INDEX IF NOT EXISTS idx_managers_name_first_letter ON managers(UPPER(LEFT(name, 1)));
+
+-- Manager junction tables indexes
+CREATE INDEX IF NOT EXISTS idx_manager_functions_manager_id ON manager_functions(manager_id);
+CREATE INDEX IF NOT EXISTS idx_manager_functions_function_id ON manager_functions(function_id);
+CREATE INDEX IF NOT EXISTS idx_manager_problems_manager_id ON manager_problems(manager_id);
+CREATE INDEX IF NOT EXISTS idx_manager_problems_problem_id ON manager_problems(problem_id);
+
+-- Manager ratings indexes
+CREATE INDEX IF NOT EXISTS idx_manager_ratings_manager_id ON manager_ratings(manager_id);
+CREATE INDEX IF NOT EXISTS idx_manager_ratings_user_id ON manager_ratings(user_id);
+CREATE INDEX IF NOT EXISTS idx_manager_ratings_rating ON manager_ratings(rating);
 
 -- ============================================
 -- GRANT PERMISSIONS (if needed)
@@ -626,6 +709,272 @@ WHERE p.name = 'E-commerce Solutions'
 ON CONFLICT DO NOTHING;
 
 -- ============================================
+-- INSERT SAMPLE MANAGERS
+-- ============================================
+
+-- Create manager users first
+INSERT INTO users (email, password_hash, role, status) VALUES
+  ('manager1@example.com', '$2a$12$1XQSRRgMWzsL88VKI3uSgeuh7/.Xer.PdxH/gaVSs7ncCW3rF4wJW', 'manager', 'active'),
+  ('manager2@example.com', '$2a$12$1XQSRRgMWzsL88VKI3uSgeuh7/.Xer.PdxH/gaVSs7ncCW3rF4wJW', 'manager', 'active'),
+  ('manager3@example.com', '$2a$12$1XQSRRgMWzsL88VKI3uSgeuh7/.Xer.PdxH/gaVSs7ncCW3rF4wJW', 'manager', 'active'),
+  ('manager4@example.com', '$2a$12$1XQSRRgMWzsL88VKI3uSgeuh7/.Xer.PdxH/gaVSs7ncCW3rF4wJW', 'manager', 'active'),
+  ('manager5@example.com', '$2a$12$1XQSRRgMWzsL88VKI3uSgeuh7/.Xer.PdxH/gaVSs7ncCW3rF4wJW', 'manager', 'active'),
+  ('manager6@example.com', '$2a$12$1XQSRRgMWzsL88VKI3uSgeuh7/.Xer.PdxH/gaVSs7ncCW3rF4wJW', 'manager', 'active')
+ON CONFLICT (email) DO NOTHING;
+
+-- Create profiles for managers
+INSERT INTO profiles (user_id, first_name, last_name, title, function)
+SELECT id, 'Alice', 'Johnson', 'Senior Project Manager', 'Project Management'
+FROM users WHERE email = 'manager1@example.com'
+ON CONFLICT (user_id) DO UPDATE SET
+  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
+  title = EXCLUDED.title, function = EXCLUDED.function;
+
+INSERT INTO profiles (user_id, first_name, last_name, title, function)
+SELECT id, 'Bob', 'Smith', 'Operations Manager', 'Operations'
+FROM users WHERE email = 'manager2@example.com'
+ON CONFLICT (user_id) DO UPDATE SET
+  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
+  title = EXCLUDED.title, function = EXCLUDED.function;
+
+INSERT INTO profiles (user_id, first_name, last_name, title, function)
+SELECT id, 'Charlie', 'Brown', 'Technical Manager', 'Technical Leadership'
+FROM users WHERE email = 'manager3@example.com'
+ON CONFLICT (user_id) DO UPDATE SET
+  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
+  title = EXCLUDED.title, function = EXCLUDED.function;
+
+INSERT INTO profiles (user_id, first_name, last_name, title, function)
+SELECT id, 'Diana', 'Wilson', 'Product Manager', 'Product Development'
+FROM users WHERE email = 'manager4@example.com'
+ON CONFLICT (user_id) DO UPDATE SET
+  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
+  title = EXCLUDED.title, function = EXCLUDED.function;
+
+INSERT INTO profiles (user_id, first_name, last_name, title, function)
+SELECT id, 'Edward', 'Davis', 'Regional Manager', 'Regional Operations'
+FROM users WHERE email = 'manager5@example.com'
+ON CONFLICT (user_id) DO UPDATE SET
+  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
+  title = EXCLUDED.title, function = EXCLUDED.function;
+
+INSERT INTO profiles (user_id, first_name, last_name, title, function)
+SELECT id, 'Nguyen', 'Van Minh', 'Area Manager', 'Area Operations'
+FROM users WHERE email = 'manager6@example.com'
+ON CONFLICT (user_id) DO UPDATE SET
+  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
+  title = EXCLUDED.title, function = EXCLUDED.function;
+
+-- Insert managers
+INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+SELECT 
+  id,
+  'Alice Johnson',
+  'Experienced project manager with 10+ years in software development. Specializes in Agile methodologies and team leadership.',
+  'Project Management, Agile, Scrum, Team Leadership, Risk Management',
+  21.0285, 105.8542, 4.8, 25, 'active', true
+FROM users WHERE email = 'manager1@example.com'
+ON CONFLICT (user_id) DO NOTHING;
+
+INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+SELECT 
+  id,
+  'Bob Smith',
+  'Operations manager focused on process optimization and efficiency. Expert in supply chain and logistics management.',
+  'Operations, Supply Chain, Logistics, Process Optimization, Quality Control',
+  10.7769, 106.7009, 4.5, 18, 'active', true
+FROM users WHERE email = 'manager2@example.com'
+ON CONFLICT (user_id) DO NOTHING;
+
+INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+SELECT 
+  id,
+  'Charlie Brown',
+  'Technical manager with deep expertise in cloud architecture and DevOps. Leads engineering teams to deliver scalable solutions.',
+  'Cloud Architecture, DevOps, AWS, Kubernetes, Microservices',
+  16.0544, 108.2022, 4.2, 12, 'active', false
+FROM users WHERE email = 'manager3@example.com'
+ON CONFLICT (user_id) DO NOTHING;
+
+INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+SELECT 
+  id,
+  'Diana Wilson',
+  'Product manager passionate about user experience and data-driven decision making. Successfully launched 20+ products.',
+  'Product Management, UX Design, Data Analytics, Market Research, A/B Testing',
+  21.0245, 105.8412, 4.9, 32, 'active', true
+FROM users WHERE email = 'manager4@example.com'
+ON CONFLICT (user_id) DO NOTHING;
+
+INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+SELECT 
+  id,
+  'Edward Davis',
+  'Regional manager overseeing operations across Southeast Asia. Expert in cross-cultural team management.',
+  'Regional Management, Cross-cultural Leadership, Business Development, Strategic Planning',
+  10.7769, 106.7009, 3.8, 8, 'active', false
+FROM users WHERE email = 'manager5@example.com'
+ON CONFLICT (user_id) DO NOTHING;
+
+INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+SELECT 
+  id,
+  'Nguyen Van Minh',
+  'Area manager with extensive experience in Vietnam market. Specializes in local business partnerships and expansion.',
+  'Local Market Expertise, Partnership Development, Business Expansion, Vietnamese Market',
+  21.0285, 105.8542, 4.6, 15, 'active', true
+FROM users WHERE email = 'manager6@example.com'
+ON CONFLICT (user_id) DO NOTHING;
+
+-- ============================================
+-- LINK MANAGERS TO FUNCTIONS
+-- ============================================
+
+-- Alice Johnson -> Software Development, IT Consulting
+INSERT INTO manager_functions (manager_id, function_id)
+SELECT m.id, f.id
+FROM managers m, functions f
+WHERE m.name = 'Alice Johnson'
+  AND f.name IN ('Software Development', 'IT Consulting')
+ON CONFLICT DO NOTHING;
+
+-- Bob Smith -> Cloud Services, E-commerce Solutions
+INSERT INTO manager_functions (manager_id, function_id)
+SELECT m.id, f.id
+FROM managers m, functions f
+WHERE m.name = 'Bob Smith'
+  AND f.name IN ('Cloud Services', 'E-commerce Solutions')
+ON CONFLICT DO NOTHING;
+
+-- Charlie Brown -> Cloud Services, Software Development, Cybersecurity
+INSERT INTO manager_functions (manager_id, function_id)
+SELECT m.id, f.id
+FROM managers m, functions f
+WHERE m.name = 'Charlie Brown'
+  AND f.name IN ('Cloud Services', 'Software Development', 'Cybersecurity')
+ON CONFLICT DO NOTHING;
+
+-- Diana Wilson -> Digital Marketing, Web Design, Data Analytics
+INSERT INTO manager_functions (manager_id, function_id)
+SELECT m.id, f.id
+FROM managers m, functions f
+WHERE m.name = 'Diana Wilson'
+  AND f.name IN ('Digital Marketing', 'Web Design', 'Data Analytics')
+ON CONFLICT DO NOTHING;
+
+-- Edward Davis -> IT Consulting, Sell Software
+INSERT INTO manager_functions (manager_id, function_id)
+SELECT m.id, f.id
+FROM managers m, functions f
+WHERE m.name = 'Edward Davis'
+  AND f.name IN ('IT Consulting', 'Sell Software')
+ON CONFLICT DO NOTHING;
+
+-- Nguyen Van Minh -> E-commerce Solutions, Digital Marketing
+INSERT INTO manager_functions (manager_id, function_id)
+SELECT m.id, f.id
+FROM managers m, functions f
+WHERE m.name = 'Nguyen Van Minh'
+  AND f.name IN ('E-commerce Solutions', 'Digital Marketing')
+ON CONFLICT DO NOTHING;
+
+-- ============================================
+-- LINK MANAGERS TO PROBLEMS
+-- ============================================
+
+-- Alice Johnson -> Remote Employee Management, Performance Optimization
+INSERT INTO manager_problems (manager_id, problem_id)
+SELECT m.id, pr.id
+FROM managers m, problems pr
+WHERE m.name = 'Alice Johnson'
+  AND pr.name IN ('Remote Employee Management', 'Performance Optimization')
+ON CONFLICT DO NOTHING;
+
+-- Bob Smith -> Cost Reduction, Inventory Management
+INSERT INTO manager_problems (manager_id, problem_id)
+SELECT m.id, pr.id
+FROM managers m, problems pr
+WHERE m.name = 'Bob Smith'
+  AND pr.name IN ('Cost Reduction', 'Inventory Management')
+ON CONFLICT DO NOTHING;
+
+-- Charlie Brown -> Scalability Issues, Data Security, System Integration
+INSERT INTO manager_problems (manager_id, problem_id)
+SELECT m.id, pr.id
+FROM managers m, problems pr
+WHERE m.name = 'Charlie Brown'
+  AND pr.name IN ('Scalability Issues', 'Data Security', 'System Integration')
+ON CONFLICT DO NOTHING;
+
+-- Diana Wilson -> Customer Support, Performance Optimization
+INSERT INTO manager_problems (manager_id, problem_id)
+SELECT m.id, pr.id
+FROM managers m, problems pr
+WHERE m.name = 'Diana Wilson'
+  AND pr.name IN ('Customer Support', 'Performance Optimization')
+ON CONFLICT DO NOTHING;
+
+-- Edward Davis -> Legacy System Migration, Cost Reduction
+INSERT INTO manager_problems (manager_id, problem_id)
+SELECT m.id, pr.id
+FROM managers m, problems pr
+WHERE m.name = 'Edward Davis'
+  AND pr.name IN ('Legacy System Migration', 'Cost Reduction')
+ON CONFLICT DO NOTHING;
+
+-- Nguyen Van Minh -> Payment Processing, Customer Support
+INSERT INTO manager_problems (manager_id, problem_id)
+SELECT m.id, pr.id
+FROM managers m, problems pr
+WHERE m.name = 'Nguyen Van Minh'
+  AND pr.name IN ('Payment Processing', 'Customer Support')
+ON CONFLICT DO NOTHING;
+
+-- ============================================
+-- INSERT SAMPLE MANAGER RATINGS
+-- ============================================
+
+-- Ratings for Alice Johnson (manager1)
+INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
+SELECT m.id, u.id, 5, 'Excellent project management skills!'
+FROM managers m, users u
+WHERE m.name = 'Alice Johnson' AND u.email = 'user@speaklogicmap.com'
+ON CONFLICT (manager_id, user_id) DO NOTHING;
+
+INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
+SELECT m.id, u.id, 5, 'Great leadership and communication.'
+FROM managers m, users u
+WHERE m.name = 'Alice Johnson' AND u.email = 'dev@speaklogicmap.com'
+ON CONFLICT (manager_id, user_id) DO NOTHING;
+
+-- Ratings for Bob Smith (manager2)
+INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
+SELECT m.id, u.id, 4, 'Very efficient operations management.'
+FROM managers m, users u
+WHERE m.name = 'Bob Smith' AND u.email = 'user@speaklogicmap.com'
+ON CONFLICT (manager_id, user_id) DO NOTHING;
+
+-- Ratings for Diana Wilson (manager4)
+INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
+SELECT m.id, u.id, 5, 'Best product manager I have worked with!'
+FROM managers m, users u
+WHERE m.name = 'Diana Wilson' AND u.email = 'user@speaklogicmap.com'
+ON CONFLICT (manager_id, user_id) DO NOTHING;
+
+INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
+SELECT m.id, u.id, 5, 'Amazing product vision and execution.'
+FROM managers m, users u
+WHERE m.name = 'Diana Wilson' AND u.email = 'dev@speaklogicmap.com'
+ON CONFLICT (manager_id, user_id) DO NOTHING;
+
+-- Ratings for Edward Davis (manager5)
+INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
+SELECT m.id, u.id, 3, 'Good regional knowledge but could improve communication.'
+FROM managers m, users u
+WHERE m.name = 'Edward Davis' AND u.email = 'user@speaklogicmap.com'
+ON CONFLICT (manager_id, user_id) DO NOTHING;
+
+-- ============================================
 -- VERIFICATION QUERIES
 -- ============================================
 
@@ -641,6 +990,10 @@ DECLARE
   provider_count INTEGER;
   provider_function_count INTEGER;
   provider_problem_count INTEGER;
+  manager_count INTEGER;
+  manager_function_count INTEGER;
+  manager_problem_count INTEGER;
+  manager_rating_count INTEGER;
 BEGIN
   SELECT COUNT(*) INTO user_count FROM users;
   SELECT COUNT(*) INTO profile_count FROM profiles;
@@ -651,15 +1004,27 @@ BEGIN
   SELECT COUNT(*) INTO provider_count FROM providers;
   SELECT COUNT(*) INTO provider_function_count FROM provider_functions;
   SELECT COUNT(*) INTO provider_problem_count FROM provider_problems;
+  SELECT COUNT(*) INTO manager_count FROM managers;
+  SELECT COUNT(*) INTO manager_function_count FROM manager_functions;
+  SELECT COUNT(*) INTO manager_problem_count FROM manager_problems;
+  SELECT COUNT(*) INTO manager_rating_count FROM manager_ratings;
   
   RAISE NOTICE 'Database initialized successfully!';
+  RAISE NOTICE '========== Users & Profiles ==========';
   RAISE NOTICE 'Users: %', user_count;
   RAISE NOTICE 'Profiles: %', profile_count;
   RAISE NOTICE 'Geopoints: %', geopoint_count;
   RAISE NOTICE 'Countries metadata: %', country_count;
+  RAISE NOTICE '========== Functions & Problems ==========';
   RAISE NOTICE 'Functions: %', function_count;
   RAISE NOTICE 'Problems: %', problem_count;
+  RAISE NOTICE '========== Providers ==========';
   RAISE NOTICE 'Providers: %', provider_count;
   RAISE NOTICE 'Provider-Function links: %', provider_function_count;
   RAISE NOTICE 'Provider-Problem links: %', provider_problem_count;
+  RAISE NOTICE '========== Managers ==========';
+  RAISE NOTICE 'Managers: %', manager_count;
+  RAISE NOTICE 'Manager-Function links: %', manager_function_count;
+  RAISE NOTICE 'Manager-Problem links: %', manager_problem_count;
+  RAISE NOTICE 'Manager ratings: %', manager_rating_count;
 END $$;
