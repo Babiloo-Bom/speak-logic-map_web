@@ -16,6 +16,10 @@ export interface Manager {
   rating_count: number;
   is_given_set: boolean;
 
+  // Manager Image
+  image_id?: number;
+  image_url?: string;
+
   // Location fields
   geo_id?: number;
   lat?: number;
@@ -169,6 +173,7 @@ export interface ManagerCreateInput {
   expertise?: string;
   status?: string;
   is_given_set?: boolean;
+  image_id?: number;        // Manager's profile image
   lat?: number;
   lng?: number;
   geo_id?: number;
@@ -184,6 +189,7 @@ export interface ManagerUpdateInput {
   status?: string;
   password?: string;
   is_given_set?: boolean;
+  image_id?: number;        // Manager's profile image
   lat?: number;
   lng?: number;
   geo_id?: number;

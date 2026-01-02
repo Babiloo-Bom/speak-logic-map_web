@@ -56,6 +56,7 @@ export async function getManagerById(id: number): Promise<Manager | null> {
           m.name,
           m.description,
           m.expertise,
+          m.image_id,
           m.lat,
           m.lng,
           m.rating,
@@ -75,12 +76,14 @@ export async function getManagerById(id: number): Promise<Manager | null> {
           p.pen_name,
           g.city,
           g.country,
-          fa.url as avatar_url
+          fa_avatar.url as avatar_url,
+          fa_image.url as image_url
         FROM managers m
         INNER JOIN users u ON u.id = m.user_id
         LEFT JOIN profiles p ON p.user_id = u.id
         LEFT JOIN geopoints g ON g.id = m.geo_id
-        LEFT JOIN file_assets fa ON fa.id = p.avatar_id
+        LEFT JOIN file_assets fa_avatar ON fa_avatar.id = p.avatar_id
+        LEFT JOIN file_assets fa_image ON fa_image.id = m.image_id
         WHERE m.id = $1
       `,
       [id]
@@ -127,6 +130,8 @@ export async function getManagerById(id: number): Promise<Manager | null> {
       rating: parseFloat(row.rating) || 0,
       rating_count: row.rating_count || 0,
       is_given_set: row.is_given_set || false,
+      image_id: row.image_id ?? undefined,
+      image_url: row.image_url ?? undefined,
       lat: row.lat ? parseFloat(row.lat) : undefined,
       lng: row.lng ? parseFloat(row.lng) : undefined,
       geo_id: row.geo_id ?? undefined,
@@ -473,6 +478,7 @@ export async function searchManagers(
           m.name,
           m.description,
           m.expertise,
+          m.image_id,
           m.lat,
           m.lng,
           m.rating,
@@ -492,13 +498,15 @@ export async function searchManagers(
           p.pen_name,
           g.city,
           g.country,
-          fa.url as avatar_url
+          fa_avatar.url as avatar_url,
+          fa_image.url as image_url
           ${distanceSelect}
         FROM managers m
         INNER JOIN users u ON u.id = m.user_id
         LEFT JOIN profiles p ON p.user_id = u.id
         LEFT JOIN geopoints g ON g.id = m.geo_id
-        LEFT JOIN file_assets fa ON fa.id = p.avatar_id
+        LEFT JOIN file_assets fa_avatar ON fa_avatar.id = p.avatar_id
+        LEFT JOIN file_assets fa_image ON fa_image.id = m.image_id
         ${joinsSql}
         ${finalWhereSql}
         ORDER BY ${finalOrderBy} ${sort_order.toUpperCase()}
@@ -523,6 +531,8 @@ export async function searchManagers(
           rating: parseFloat(row.rating) || 0,
           rating_count: row.rating_count || 0,
           is_given_set: row.is_given_set || false,
+          image_id: row.image_id ?? undefined,
+          image_url: row.image_url ?? undefined,
           lat: row.lat ? parseFloat(row.lat) : undefined,
           lng: row.lng ? parseFloat(row.lng) : undefined,
           geo_id: row.geo_id ?? undefined,
@@ -698,15 +708,16 @@ export async function createManager(
     // Create manager record
     const managerResult = await client.query(
       `
-        INSERT INTO managers (user_id, name, description, expertise, lat, lng, geo_id, status, is_given_set)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING id, user_id, name, description, expertise, lat, lng, geo_id, rating, rating_count, status, is_given_set, created_at
+        INSERT INTO managers (user_id, name, description, expertise, image_id, lat, lng, geo_id, status, is_given_set)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id, user_id, name, description, expertise, image_id, lat, lng, geo_id, rating, rating_count, status, is_given_set, created_at
       `,
       [
         userRow.id,
         input.name,
         input.description ?? null,
         input.expertise ?? null,
+        input.image_id ?? null,
         input.lat ?? null,
         input.lng ?? null,
         input.geo_id ?? null,
@@ -824,6 +835,10 @@ export async function updateManager(
     if (input.is_given_set !== undefined) {
       updates.push(`is_given_set = $${paramIndex++}`);
       updateValues.push(input.is_given_set);
+    }
+    if (input.image_id !== undefined) {
+      updates.push(`image_id = $${paramIndex++}`);
+      updateValues.push(input.image_id);
     }
     if (input.lat !== undefined) {
       updates.push(`lat = $${paramIndex++}`);

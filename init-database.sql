@@ -166,6 +166,7 @@ CREATE TABLE IF NOT EXISTS managers (
   name VARCHAR(255) NOT NULL,
   description TEXT,
   expertise TEXT,  -- Manager's expertise/skills
+  image_id BIGINT REFERENCES file_assets(id),  -- Manager's profile image
   geo_id BIGINT REFERENCES geopoints(id),
   lat DECIMAL(10,7),
   lng DECIMAL(10,7),
@@ -341,6 +342,7 @@ CREATE INDEX IF NOT EXISTS idx_managers_status ON managers(status);
 CREATE INDEX IF NOT EXISTS idx_managers_rating ON managers(rating);
 CREATE INDEX IF NOT EXISTS idx_managers_is_given_set ON managers(is_given_set);
 CREATE INDEX IF NOT EXISTS idx_managers_geo_id ON managers(geo_id);
+CREATE INDEX IF NOT EXISTS idx_managers_image_id ON managers(image_id);
 CREATE INDEX IF NOT EXISTS idx_managers_created_at ON managers(created_at);
 
 -- Full-text search indexes for managers
