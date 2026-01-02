@@ -15,9 +15,9 @@ export const PUBLIC_ROUTES: string[] = [
   "/login", // Legacy route that redirects
   "/dashboard",
   "/unauthorized",
-  "/manager-search",
-  "/manager-rating",
-  "/manager-search/manager-rating",
+  // "/manager-search",
+  // "/manager-rating",
+  // "/manager-search/manager-rating",
 ];
 
 // Define routes that require authentication but allow unverified users

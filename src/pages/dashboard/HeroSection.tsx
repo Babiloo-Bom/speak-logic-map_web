@@ -15,7 +15,7 @@ const HeroSection = () => {
         router.push("/manager-search");
         break;
       case "manager":
-        router.push("/map/managers");
+        router.push("/manager-search");
         break;
       case "new":
         router.push("/map/news");
