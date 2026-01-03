@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import ProfileList from "./ProfileList";
-import { Profile } from "./types";
+import { ManagerItem } from "./types";
 import HeaderSearch from "@/components/HeaderSearch/HeaderSearch";
-import { getAuthToken } from "@/utils/constants";
+import { buildQueryParams, getAuthToken } from "@/utils/constants";
+import { baseDataRequestGetList } from "./request";
 
 function ManagerSearch() {
-  const [data, setData] = useState<Profile[]>();
+  const [data, setData] = useState<ManagerItem[]>();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [dataRequest, setDataRequest] = useState(baseDataRequestGetList);
 
   const fetchProfile = async () => {
     try {
@@ -17,40 +19,28 @@ function ManagerSearch() {
         return;
       }
 
-      const response = await fetch("/api/managers/search", {
+      const queryString = buildQueryParams(dataRequest);
+      const url = `/api/managers/search${queryString ? `?${queryString}` : ""}`;
+
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("response: ", response);
+
+      if (response.ok) {
+        const result = await response.json();
+        setData(result.managers || []);
+        setSuccess("Managers loaded successfully");
+        setError("");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to fetch managers");
+      }
     } catch (error) {
       setError("Network error. Please try again.");
+      console.error("Fetch error:", error);
     }
-
-    //   if (response.ok) {
-    //     const data: ApiResponse = await response.json();
-    //     setUser(data.user);
-    //     setProfile(data.profile);
-
-    //     // Update form data
-    //     if (data.profile) {
-    //       setFormData({
-    //         firstName: data.profile.first_name || '',
-    //         lastName: data.profile.last_name || '',
-    //         title: data.profile.title || '',
-    //         function: data.profile.function || '',
-    //         penName: data.profile.pen_name || '',
-    //       });
-    //     }
-    //   } else {
-    //     const errorData = await response.json();
-    //     setError(errorData.error || 'Failed to fetch profile');
-    //   }
-    // } catch (error) {
-    //   setError('Network error. Please try again.');
-    // } finally {
-    //   setIsLoading(false);
-    // }
   };
 
   useEffect(() => {

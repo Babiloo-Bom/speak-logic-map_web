@@ -1,8 +1,8 @@
 import ProfileItem from "./ProfileItem";
-import { Profile } from "./types";
+import { ManagerItem } from "./types";
 
 interface Props {
-  data?: Profile[];
+  data?: ManagerItem[];
   placeholderCount?: number;
 }
 

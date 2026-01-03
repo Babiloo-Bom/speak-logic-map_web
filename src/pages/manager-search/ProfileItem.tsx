@@ -1,9 +1,9 @@
 import { Button, Skeleton } from "antd";
 import Image from "next/image";
-import { Profile } from "./types";
+import { ManagerItem } from "./types";
 
 interface Props {
-  data?: Profile;
+  data?: ManagerItem;
 }
 
 export default function ProfileItem({ data }: Props) {
@@ -28,7 +28,7 @@ export default function ProfileItem({ data }: Props) {
       <div className="mt-4 space-y-2 text-sm">
         <Skeleton active loading={!data} paragraph={{ rows: 1 }}>
           <p>
-            <span className="font-medium text-gray-700">Function Provided:</span> <span className="text-blue-600">{data?.functionProvided}</span>
+            <span className="font-medium text-gray-700">Function Provided:</span> <span className="text-blue-600">{data?.function}</span>
           </p>
         </Skeleton>
 
@@ -41,7 +41,7 @@ export default function ProfileItem({ data }: Props) {
         <Skeleton active loading={!data} paragraph={{ rows: 1 }}>
           <p>
             <span className="font-medium text-gray-700">The Given Set Applicable:</span>{" "}
-            <span className="text-blue-600">{data?.applicable ? "Yes" : "No"}</span>
+            <span className="text-blue-600">{data?.is_given_set ? "Yes" : "No"}</span>
           </p>
         </Skeleton>
       </div>
