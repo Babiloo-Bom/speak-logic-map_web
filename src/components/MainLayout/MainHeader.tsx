@@ -1,7 +1,7 @@
 import { Image } from "antd";
 
 const MainHeader = () => (
-  <header className="bg-white shadow">
+  <header className="bg-[#F2F2F2] shadow">
     <div className="mx-12 px-4 py-4 flex items-center justify-between overflow-hidden">
       <div className="flex items-center gap-2">
         <Image preview={false} src="/img/Logo.png" alt="Logo" className="h-10 w-auto max-w-full" />

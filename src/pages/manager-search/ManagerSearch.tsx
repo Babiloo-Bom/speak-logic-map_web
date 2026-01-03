@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import ProfileList from "./ProfileList";
-import { ManagerItem } from "./types";
+import { IDataRequestGetList, ManagerItem } from "./types";
 import HeaderSearch from "@/components/HeaderSearch/HeaderSearch";
 import { buildQueryParams, getAuthToken } from "@/utils/constants";
 import { baseDataRequestGetList } from "./request";
+import { Pagination, PaginationProps } from "antd";
 
 function ManagerSearch() {
   const [data, setData] = useState<ManagerItem[]>();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [dataRequest, setDataRequest] = useState(baseDataRequestGetList);
+  const [dataRequest, setDataRequest] = useState<IDataRequestGetList>(baseDataRequestGetList);
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (req: IDataRequestGetList) => {
     try {
       const token = getAuthToken();
       if (!token) {
@@ -19,7 +20,7 @@ function ManagerSearch() {
         return;
       }
 
-      const queryString = buildQueryParams(dataRequest);
+      const queryString = buildQueryParams(req);
       const url = `/api/managers/search${queryString ? `?${queryString}` : ""}`;
 
       const response = await fetch(url, {
@@ -44,7 +45,7 @@ function ManagerSearch() {
   };
 
   useEffect(() => {
-    fetchProfile();
+    fetchProfile(dataRequest);
     // setTimeout(() => {
     //   setData(
     //     Array.from({ length: 9 }).map((_, i) => ({
@@ -60,11 +61,25 @@ function ManagerSearch() {
     // }, 2000);
   }, []);
 
+  const onShowPageChange: PaginationProps["onChange"] = (page) => {
+    const newDataRequest = {
+      ...dataRequest,
+      page: page,
+    };
+    setDataRequest(newDataRequest);
+    fetchProfile(newDataRequest);
+  };
+
   return (
-    <div className="mx-12 px-4 py-8">
-      <HeaderSearch imageUrl="/img/search-bar.png" />
-      <div className="mt-8">
-        <ProfileList data={data} />
+    <div className=" bg-white">
+      <div className="mx-12 px-4 py-8">
+        <HeaderSearch imageUrl="/img/search-bar.png" />
+        <div className="mt-8">
+          <ProfileList data={data} />
+        </div>
+        <div className="mt-4">
+          <Pagination align="center" defaultCurrent={1} total={50} responsive onChange={onShowPageChange} />
+        </div>
       </div>
     </div>
   );

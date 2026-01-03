@@ -18,3 +18,27 @@ export interface ManagerItem {
   title: string;
   function: string;
 }
+
+export interface IDataRequestGetList {
+  q: string;
+  managers: string;
+  problems: string;
+  functions: string;
+  expertise: string;
+  descriptions: string;
+  operation: string;
+  rating: string;
+  rating_min: string;
+  rating_max: string;
+  given_set: string;
+  near_city: string;
+  city_id: string;
+  lat: string;
+  lng: string;
+  radius: string;
+  starts_with: string;
+  page: number;
+  limit: number;
+  sort_by: string;
+  sort_order: string;
+}

@@ -1,3 +1,4 @@
+import { Pagination } from "antd";
 import ProfileItem from "./ProfileItem";
 import { ManagerItem } from "./types";
 

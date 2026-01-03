@@ -1,4 +1,6 @@
-export const baseDataRequestGetList = {
+import { IDataRequestGetList } from "./types";
+
+export const baseDataRequestGetList: IDataRequestGetList = {
   q: "",
   managers: "",
   problems: "",
@@ -17,7 +19,7 @@ export const baseDataRequestGetList = {
   radius: "",
   starts_with: "",
   page: 1,
-  limit: 10,
+  limit: 6,
   sort_by: "relevance",
   sort_order: "desc",
 };

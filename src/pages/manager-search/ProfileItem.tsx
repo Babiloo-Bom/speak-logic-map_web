@@ -1,4 +1,4 @@
-import { Button, Skeleton } from "antd";
+import { Button, Rate, Skeleton } from "antd";
 import Image from "next/image";
 import { ManagerItem } from "./types";
 
@@ -19,7 +19,8 @@ export default function ProfileItem({ data }: Props) {
           </Skeleton>
 
           <Skeleton active loading={!data} title={{ width: "40%" }} paragraph={false}>
-            <div className="text-yellow-400 text-sm">{"★".repeat(data?.rating || 0)}</div>
+            <Rate disabled value={data?.rating || 0} allowHalf={true} />
+            {/* <div className="text-yellow-400 text-sm">{"★".repeat(data?.rating || 0)}</div> */}
           </Skeleton>
         </div>
       </div>
@@ -28,20 +29,20 @@ export default function ProfileItem({ data }: Props) {
       <div className="mt-4 space-y-2 text-sm">
         <Skeleton active loading={!data} paragraph={{ rows: 1 }}>
           <p>
-            <span className="font-medium text-gray-700">Function Provided:</span> <span className="text-blue-600">{data?.function}</span>
+            <span className="font-medium text-gray-700">Function Provided:</span> <span className="text-primary">{data?.function}</span>
           </p>
         </Skeleton>
 
         <Skeleton active loading={!data} paragraph={{ rows: 1 }}>
           <p>
-            <span className="font-medium text-gray-700">Expertise:</span> <span className="text-blue-600">{data?.expertise}</span>
+            <span className="font-medium text-gray-700">Expertise:</span> <span className="text-primary">{data?.expertise}</span>
           </p>
         </Skeleton>
 
         <Skeleton active loading={!data} paragraph={{ rows: 1 }}>
           <p>
             <span className="font-medium text-gray-700">The Given Set Applicable:</span>{" "}
-            <span className="text-blue-600">{data?.is_given_set ? "Yes" : "No"}</span>
+            <span className="text-primary">{data?.is_given_set ? "Yes" : "No"}</span>
           </p>
         </Skeleton>
       </div>
