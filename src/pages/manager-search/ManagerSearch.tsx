@@ -1,16 +1,19 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import ProfileList from "./ProfileList";
-import { IDataRequestGetList, ManagerItem } from "./types";
+import { IDataRequestGetList, ManagerItem, IDataResponseGetList } from "./types";
 import HeaderSearch from "@/components/HeaderSearch/HeaderSearch";
 import { buildQueryParams, getAuthToken } from "@/utils/constants";
 import { baseDataRequestGetList } from "./request";
 import { Pagination, PaginationProps } from "antd";
+import AdvanceSearch from "./AdvanceSearch";
 
 function ManagerSearch() {
-  const [data, setData] = useState<ManagerItem[]>();
+  const [data, setData] = useState<IDataResponseGetList>();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [dataRequest, setDataRequest] = useState<IDataRequestGetList>(baseDataRequestGetList);
+  const [openAdvanceSearch, setOpenAdvanceSearch] = useState(false);
 
   const fetchProfile = async (req: IDataRequestGetList) => {
     try {
@@ -30,8 +33,8 @@ function ManagerSearch() {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        setData(result.managers || []);
+        const result: IDataResponseGetList = await response.json();
+        setData(result);
         setSuccess("Managers loaded successfully");
         setError("");
       } else {
@@ -46,19 +49,6 @@ function ManagerSearch() {
 
   useEffect(() => {
     fetchProfile(dataRequest);
-    // setTimeout(() => {
-    //   setData(
-    //     Array.from({ length: 9 }).map((_, i) => ({
-    //       id: String(i),
-    //       name: "Patrick Thompson",
-    //       avatar: "/images/avatar.png",
-    //       rating: 5,
-    //       functionProvided: "Manage house Renovation",
-    //       expertise: "House renovation, Expertise 2",
-    //       applicable: true,
-    //     }))
-    //   );
-    // }, 2000);
   }, []);
 
   const onShowPageChange: PaginationProps["onChange"] = (page) => {
@@ -70,15 +60,17 @@ function ManagerSearch() {
     fetchProfile(newDataRequest);
   };
 
+  console.log("openAdvanceSearch: ", openAdvanceSearch);
   return (
-    <div className=" bg-white">
+    <div className="bg-white">
+      <AdvanceSearch open={openAdvanceSearch} onClose={() => setOpenAdvanceSearch(false)} />
       <div className="mx-12 px-4 py-8">
-        <HeaderSearch imageUrl="/img/search-bar.png" />
+        <HeaderSearch onOpenAdvanceSearch={() => setOpenAdvanceSearch(true)} imageUrl="/img/search-bar.png" />
         <div className="mt-8">
-          <ProfileList data={data} />
+          <ProfileList data={data?.managers} />
         </div>
         <div className="mt-4">
-          <Pagination align="center" defaultCurrent={1} total={50} responsive onChange={onShowPageChange} />
+          <Pagination align="center" defaultCurrent={1} total={data?.total || 0} responsive onChange={onShowPageChange} />
         </div>
       </div>
     </div>

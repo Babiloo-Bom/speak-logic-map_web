@@ -5,13 +5,14 @@ import Image from "next/image";
 interface HeaderSearchProps {
   title?: string;
   imageUrl: string;
+  onOpenAdvanceSearch?: () => void;
 }
 
-export default function HeaderSearch({ title = "Manager Search", imageUrl }: HeaderSearchProps) {
+export default function HeaderSearch({ title = "Manager Search", imageUrl, onOpenAdvanceSearch }: HeaderSearchProps) {
   return (
     <div>
       <div className="relative w-full h-40 sm:h-48 md:h-64 rounded-xl overflow-hidden mb-10">
-        <Image src={imageUrl} alt={title} fill priority className="object-cover" />
+        <Image src={imageUrl} alt={title} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
 
         {/* overlay */}
         {/* <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -32,7 +33,7 @@ export default function HeaderSearch({ title = "Manager Search", imageUrl }: Hea
         />
 
         <Button size="large" icon={<SearchOutlined />} className="border-primary text-white bg-primary"></Button>
-        <Button size="large" icon={<MenuOutlined />} className="border-primary text-primary hover:text-primary"></Button>
+        <Button size="large" icon={<MenuOutlined />} onClick={onOpenAdvanceSearch} className="border-primary text-primary hover:text-primary"></Button>
       </div>
     </div>
   );

@@ -49,7 +49,7 @@ export default function ProfileItem({ data }: Props) {
 
       {/* Button */}
       <div className="mt-auto pt-4">
-        <Button loading={!data} block size="large" className="bg-primary text-white">
+        <Button loading={!data} block size="large" className="bg-primary text-white hover:text-primary ">
           More Details
         </Button>
       </div>

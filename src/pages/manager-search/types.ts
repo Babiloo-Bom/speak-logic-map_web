@@ -42,3 +42,25 @@ export interface IDataRequestGetList {
   sort_by: string;
   sort_order: string;
 }
+
+export interface IDataResponseGetList {
+  total: number;
+  page: number;
+  limit: number;
+  managers: ManagerItem[];
+}
+
+export type FilterType = "checkbox" | "radio";
+
+export interface FilterOption {
+  label: string;
+  value: string | number;
+  count?: number;
+}
+
+export interface FilterSection {
+  key: string;
+  title: string;
+  type: FilterType;
+  options: FilterOption[];
+}
