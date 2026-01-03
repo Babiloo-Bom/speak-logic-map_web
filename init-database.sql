@@ -3,9 +3,44 @@
 -- This script creates all tables, indexes, and seed data
 -- Run this script to initialize the complete database
 -- ============================================
+-- Version: 2.0
+-- Last Updated: 2026-01-03
+-- ============================================
+
+-- ============================================
+-- DROP EXISTING TABLES (Optional - uncomment if needed)
+-- ============================================
+-- DROP TABLE IF EXISTS manager_ratings CASCADE;
+-- DROP TABLE IF EXISTS manager_problems CASCADE;
+-- DROP TABLE IF EXISTS manager_functions CASCADE;
+-- DROP TABLE IF EXISTS managers CASCADE;
+-- DROP TABLE IF EXISTS provider_ratings CASCADE;
+-- DROP TABLE IF EXISTS provider_problems CASCADE;
+-- DROP TABLE IF EXISTS provider_functions CASCADE;
+-- DROP TABLE IF EXISTS providers CASCADE;
+-- DROP TABLE IF EXISTS problems CASCADE;
+-- DROP TABLE IF EXISTS functions CASCADE;
+-- DROP TABLE IF EXISTS cities_metadata CASCADE;
+-- DROP TABLE IF EXISTS countries_metadata CASCADE;
+-- DROP TABLE IF EXISTS simulation_settings CASCADE;
+-- DROP TABLE IF EXISTS live_sessions CASCADE;
+-- DROP TABLE IF EXISTS user_locations CASCADE;
+-- DROP TABLE IF EXISTS file_assets CASCADE;
+-- DROP TABLE IF EXISTS geopoints CASCADE;
+-- DROP TABLE IF EXISTS refresh_tokens CASCADE;
+-- DROP TABLE IF EXISTS user_tokens CASCADE;
+-- DROP TABLE IF EXISTS profiles CASCADE;
+-- DROP TABLE IF EXISTS verification_tokens CASCADE;
+-- DROP TABLE IF EXISTS sessions CASCADE;
+-- DROP TABLE IF EXISTS accounts CASCADE;
+-- DROP TABLE IF EXISTS users CASCADE;
 
 -- ============================================
 -- CREATE TABLES
+-- ============================================
+
+-- ============================================
+-- 1. CORE USER TABLES
 -- ============================================
 
 -- Users table
@@ -14,8 +49,8 @@ CREATE TABLE IF NOT EXISTS users (
   id BIGSERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255),  -- NULL for OAuth users
-  role VARCHAR(20) DEFAULT 'user',
-  status VARCHAR(20) DEFAULT 'pending',
+  role VARCHAR(20) DEFAULT 'user',  -- user, admin, manager, provider
+  status VARCHAR(20) DEFAULT 'pending',  -- pending, active, suspended
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -62,6 +97,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   last_name VARCHAR(48),
   title VARCHAR(120),
   function VARCHAR(120),
+  location VARCHAR(255),  -- User's location text
   geo_id BIGINT,
   avatar_id BIGINT,
   pen_name VARCHAR(120),
@@ -70,9 +106,9 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 -- User tokens table (for email verification and password reset)
 CREATE TABLE IF NOT EXISTS user_tokens (
-  token VARCHAR(64) PRIMARY KEY,
+  token VARCHAR(512) PRIMARY KEY,
   user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
-  token_type VARCHAR(20),
+  token_type VARCHAR(20),  -- email_verify, password_reset, verify_password
   expires_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -81,10 +117,14 @@ CREATE TABLE IF NOT EXISTS user_tokens (
 CREATE TABLE IF NOT EXISTS refresh_tokens (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
-  token VARCHAR(128),
+  token VARCHAR(512),
   expires_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ============================================
+-- 2. GEOGRAPHIC & FILE TABLES
+-- ============================================
 
 -- Geopoints table
 CREATE TABLE IF NOT EXISTS geopoints (
@@ -96,10 +136,11 @@ CREATE TABLE IF NOT EXISTS geopoints (
 );
 
 -- File assets table
+-- Lưu thông tin file đã upload (images, documents, etc.)
 CREATE TABLE IF NOT EXISTS file_assets (
   id BIGSERIAL PRIMARY KEY,
-  url VARCHAR(500) NOT NULL,
-  mime_type VARCHAR(80),
+  url VARCHAR(500) NOT NULL,  -- URL đầy đủ của file (e.g., /uploads/image.jpg hoặc https://cdn.example.com/image.jpg)
+  mime_type VARCHAR(80),      -- image/jpeg, image/png, application/pdf, etc.
   size_bytes INTEGER,
   uploader_id BIGINT REFERENCES users(id),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -132,7 +173,11 @@ CREATE TABLE IF NOT EXISTS simulation_settings (
   value VARCHAR(200)
 );
 
--- Countries metadata table (optional - for caching country info)
+-- ============================================
+-- 3. METADATA TABLES
+-- ============================================
+
+-- Countries metadata table (for caching country info)
 CREATE TABLE IF NOT EXISTS countries_metadata (
   id BIGSERIAL PRIMARY KEY,
   code_name VARCHAR(10) UNIQUE NOT NULL,
@@ -142,7 +187,7 @@ CREATE TABLE IF NOT EXISTS countries_metadata (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Cities metadata table (optional - for caching city info)
+-- Cities metadata table (for caching city info)
 CREATE TABLE IF NOT EXISTS cities_metadata (
   id BIGSERIAL PRIMARY KEY,
   code VARCHAR(20),
@@ -155,25 +200,80 @@ CREATE TABLE IF NOT EXISTS cities_metadata (
 );
 
 -- ============================================
--- MANAGER SYSTEM TABLES
+-- 4. FUNCTIONS & PROBLEMS TABLES (Core entities)
+-- ============================================
+
+-- Functions table
+CREATE TABLE IF NOT EXISTS functions (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL UNIQUE,
+  description TEXT,
+  category VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Problems table
+CREATE TABLE IF NOT EXISTS problems (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL UNIQUE,
+  description TEXT,
+  category VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================
+-- 5. MANAGER SYSTEM TABLES
 -- ============================================
 
 -- Managers table (extends users with role='manager')
--- Stores additional manager-specific data
+-- ============================================
+-- IMPORTANT: image_url vs image_id
+-- ============================================
+-- Option 1: image_url (VARCHAR) - Lưu URL trực tiếp
+--   Pros: Đơn giản, không cần JOIN khi query
+--   Cons: Khó quản lý file (xóa, update)
+--   Usage: image_url = '/uploads/managers/alice.jpg' hoặc 'https://cdn.example.com/alice.jpg'
+--
+-- Option 2: image_id (BIGINT FK -> file_assets)
+--   Pros: Quản lý file tập trung, có metadata (size, mime_type)
+--   Cons: Cần JOIN khi query để lấy URL
+--   Usage: 
+--     INSERT INTO file_assets (url, mime_type, size_bytes) VALUES ('/uploads/alice.jpg', 'image/jpeg', 102400);
+--     UPDATE managers SET image_id = (SELECT id FROM file_assets WHERE url = '/uploads/alice.jpg') WHERE name = 'Alice';
+--     SELECT m.*, fa.url as image_url FROM managers m LEFT JOIN file_assets fa ON m.image_id = fa.id;
+--
+-- Current: Sử dụng image_url (VARCHAR) cho đơn giản
+-- ============================================
 CREATE TABLE IF NOT EXISTS managers (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
   description TEXT,
-  expertise TEXT,  -- Manager's expertise/skills
-  image_id BIGINT REFERENCES file_assets(id),  -- Manager's profile image
+  expertise TEXT,  -- Manager's expertise/skills (comma-separated)
+  
+  -- Image: Lưu URL trực tiếp thay vì ID
+  -- Ví dụ: '/uploads/managers/alice.jpg' hoặc 'https://cdn.example.com/alice.jpg'
+  image_url VARCHAR(500),
+  
+  -- Location
   geo_id BIGINT REFERENCES geopoints(id),
   lat DECIMAL(10,7),
   lng DECIMAL(10,7),
+  near_city VARCHAR(120),  -- Thành phố gần nhất (e.g., "Hà Nội", "Ho Chi Minh City")
+  
+  -- Rating
   rating DECIMAL(3,2) DEFAULT 0.0 CHECK (rating >= 0.0 AND rating <= 5.0),
   rating_count INTEGER DEFAULT 0,
-  status VARCHAR(20) DEFAULT 'active',
-  is_given_set BOOLEAN DEFAULT false,  -- "Manager using the Given Set"
+  
+  -- Status & Flags
+  status VARCHAR(20) DEFAULT 'active',  -- active, inactive, pending, suspended
+  
+  -- Boolean flags (TRUE/FALSE only)
+  is_given_set BOOLEAN DEFAULT false,  -- "Manager using the Given Set" (TRUE = Yes, FALSE = No)
+  location_by BOOLEAN DEFAULT false,   -- "Location by" flag (TRUE = enabled, FALSE = disabled)
+  
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(user_id)
@@ -207,48 +307,42 @@ CREATE TABLE IF NOT EXISTS manager_problems (
 );
 
 -- ============================================
--- PROVIDER SYSTEM TABLES
+-- 6. PROVIDER SYSTEM TABLES
 -- ============================================
-
--- Functions table
-CREATE TABLE IF NOT EXISTS functions (
-  id BIGSERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL UNIQUE,
-  description TEXT,
-  category VARCHAR(100),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Problems table
-CREATE TABLE IF NOT EXISTS problems (
-  id BIGSERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL UNIQUE,
-  description TEXT,
-  category VARCHAR(100),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
 -- Providers table
 CREATE TABLE IF NOT EXISTS providers (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
-  url VARCHAR(500),  -- Internal URL identifier (e.g., www.urlofprovider.com)
-  website_url VARCHAR(500),  -- External website URL
+  url VARCHAR(500),          -- Internal URL identifier (e.g., www.urlofprovider.com)
+  website_url VARCHAR(500),  -- External website URL (https://...)
   description TEXT,
+  
+  -- Image: Lưu URL trực tiếp
+  image_url VARCHAR(500),
+  
+  -- Location
   geo_id BIGINT REFERENCES geopoints(id),
   lat DECIMAL(10,7),
   lng DECIMAL(10,7),
-  rating DECIMAL(3,2) DEFAULT 0.0 CHECK (rating >= 0.0 AND rating <= 5.0),  -- 0.00 to 5.00
+  near_city VARCHAR(120),  -- Thành phố gần nhất
+  
+  -- Rating
+  rating DECIMAL(3,2) DEFAULT 0.0 CHECK (rating >= 0.0 AND rating <= 5.0),
+  
+  -- Status & Flags
   status VARCHAR(20) DEFAULT 'active',  -- active, inactive, pending, suspended
-  is_applicable BOOLEAN DEFAULT true,  -- "The Given Set Applicable"
+  
+  -- Boolean flags (TRUE/FALSE only)
+  is_applicable BOOLEAN DEFAULT true,  -- "The Given Set Applicable" (TRUE = Yes, FALSE = No)
+  location_by BOOLEAN DEFAULT false,   -- "Location by" flag (TRUE = enabled, FALSE = disabled)
+  
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Provider ratings table (per-user ratings, used to compute average rating)
+-- Provider ratings table (per-user ratings)
 CREATE TABLE IF NOT EXISTS provider_ratings (
   id BIGSERIAL PRIMARY KEY,
   provider_id BIGINT NOT NULL REFERENCES providers(id) ON DELETE CASCADE,
@@ -279,6 +373,9 @@ CREATE TABLE IF NOT EXISTS provider_problems (
 -- CREATE INDEXES
 -- ============================================
 
+-- ============================================
+-- 7.1 User & Auth Indexes
+-- ============================================
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
@@ -287,62 +384,48 @@ CREATE INDEX IF NOT EXISTS idx_user_tokens_user_id ON user_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token ON refresh_tokens(token);
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
+
+-- ============================================
+-- 7.2 OAuth/NextAuth Indexes
+-- ============================================
+CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_accounts_provider ON accounts(provider, provider_account_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_session_token ON sessions(session_token);
+
+-- ============================================
+-- 7.3 Geographic Indexes
+-- ============================================
 CREATE INDEX IF NOT EXISTS idx_geopoints_country ON geopoints(country);
 CREATE INDEX IF NOT EXISTS idx_geopoints_city ON geopoints(city);
 CREATE INDEX IF NOT EXISTS idx_user_locations_user_id ON user_locations(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_locations_is_live ON user_locations(is_live);
 CREATE INDEX IF NOT EXISTS idx_countries_metadata_code ON countries_metadata(code_name);
 CREATE INDEX IF NOT EXISTS idx_cities_metadata_country_code ON cities_metadata(country_code);
-CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts(user_id);
-CREATE INDEX IF NOT EXISTS idx_accounts_provider ON accounts(provider, provider_account_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_session_token ON sessions(session_token);
 
--- Provider system indexes
-CREATE INDEX IF NOT EXISTS idx_providers_user_id ON providers(user_id);
-CREATE INDEX IF NOT EXISTS idx_providers_name ON providers(name);
-CREATE INDEX IF NOT EXISTS idx_providers_status ON providers(status);
-CREATE INDEX IF NOT EXISTS idx_providers_rating ON providers(rating);
-CREATE INDEX IF NOT EXISTS idx_providers_is_applicable ON providers(is_applicable);
-CREATE INDEX IF NOT EXISTS idx_providers_geo_id ON providers(geo_id);
-CREATE INDEX IF NOT EXISTS idx_providers_created_at ON providers(created_at);
-
--- Full-text search indexes for providers (using GIN for better search performance)
-CREATE INDEX IF NOT EXISTS idx_providers_description_fts ON providers USING gin(to_tsvector('english', COALESCE(description, '')));
-CREATE INDEX IF NOT EXISTS idx_providers_name_fts ON providers USING gin(to_tsvector('english', COALESCE(name, '')));
-
--- Functions indexes
+-- ============================================
+-- 7.4 Functions & Problems Indexes
+-- ============================================
 CREATE INDEX IF NOT EXISTS idx_functions_name ON functions(name);
 CREATE INDEX IF NOT EXISTS idx_functions_category ON functions(category);
-CREATE INDEX IF NOT EXISTS idx_functions_name_fts ON functions USING gin(to_tsvector('english', COALESCE(name, '')));
-
--- Problems indexes
 CREATE INDEX IF NOT EXISTS idx_problems_name ON problems(name);
 CREATE INDEX IF NOT EXISTS idx_problems_category ON problems(category);
+
+-- Full-text search indexes
+CREATE INDEX IF NOT EXISTS idx_functions_name_fts ON functions USING gin(to_tsvector('english', COALESCE(name, '')));
 CREATE INDEX IF NOT EXISTS idx_problems_name_fts ON problems USING gin(to_tsvector('english', COALESCE(name, '')));
 
--- Junction tables indexes
-CREATE INDEX IF NOT EXISTS idx_provider_functions_provider_id ON provider_functions(provider_id);
-CREATE INDEX IF NOT EXISTS idx_provider_functions_function_id ON provider_functions(function_id);
-CREATE INDEX IF NOT EXISTS idx_provider_problems_provider_id ON provider_problems(provider_id);
-CREATE INDEX IF NOT EXISTS idx_provider_problems_problem_id ON provider_problems(problem_id);
-
--- Provider ratings indexes
-CREATE INDEX IF NOT EXISTS idx_provider_ratings_provider_id ON provider_ratings(provider_id);
-CREATE INDEX IF NOT EXISTS idx_provider_ratings_user_id ON provider_ratings(user_id);
-
 -- ============================================
--- MANAGER SYSTEM INDEXES
+-- 7.5 Manager Indexes
 -- ============================================
-
--- Manager table indexes
 CREATE INDEX IF NOT EXISTS idx_managers_user_id ON managers(user_id);
 CREATE INDEX IF NOT EXISTS idx_managers_name ON managers(name);
 CREATE INDEX IF NOT EXISTS idx_managers_status ON managers(status);
 CREATE INDEX IF NOT EXISTS idx_managers_rating ON managers(rating);
 CREATE INDEX IF NOT EXISTS idx_managers_is_given_set ON managers(is_given_set);
+CREATE INDEX IF NOT EXISTS idx_managers_location_by ON managers(location_by);
 CREATE INDEX IF NOT EXISTS idx_managers_geo_id ON managers(geo_id);
-CREATE INDEX IF NOT EXISTS idx_managers_image_id ON managers(image_id);
+CREATE INDEX IF NOT EXISTS idx_managers_near_city ON managers(near_city);
 CREATE INDEX IF NOT EXISTS idx_managers_created_at ON managers(created_at);
 
 -- Full-text search indexes for managers
@@ -365,10 +448,35 @@ CREATE INDEX IF NOT EXISTS idx_manager_ratings_user_id ON manager_ratings(user_i
 CREATE INDEX IF NOT EXISTS idx_manager_ratings_rating ON manager_ratings(rating);
 
 -- ============================================
--- GRANT PERMISSIONS (if needed)
+-- 7.6 Provider Indexes
 -- ============================================
+CREATE INDEX IF NOT EXISTS idx_providers_user_id ON providers(user_id);
+CREATE INDEX IF NOT EXISTS idx_providers_name ON providers(name);
+CREATE INDEX IF NOT EXISTS idx_providers_status ON providers(status);
+CREATE INDEX IF NOT EXISTS idx_providers_rating ON providers(rating);
+CREATE INDEX IF NOT EXISTS idx_providers_is_applicable ON providers(is_applicable);
+CREATE INDEX IF NOT EXISTS idx_providers_location_by ON providers(location_by);
+CREATE INDEX IF NOT EXISTS idx_providers_geo_id ON providers(geo_id);
+CREATE INDEX IF NOT EXISTS idx_providers_near_city ON providers(near_city);
+CREATE INDEX IF NOT EXISTS idx_providers_created_at ON providers(created_at);
 
--- PostgreSQL 15+ may need explicit grants
+-- Full-text search indexes for providers
+CREATE INDEX IF NOT EXISTS idx_providers_description_fts ON providers USING gin(to_tsvector('english', COALESCE(description, '')));
+CREATE INDEX IF NOT EXISTS idx_providers_name_fts ON providers USING gin(to_tsvector('english', COALESCE(name, '')));
+
+-- Provider junction tables indexes
+CREATE INDEX IF NOT EXISTS idx_provider_functions_provider_id ON provider_functions(provider_id);
+CREATE INDEX IF NOT EXISTS idx_provider_functions_function_id ON provider_functions(function_id);
+CREATE INDEX IF NOT EXISTS idx_provider_problems_provider_id ON provider_problems(provider_id);
+CREATE INDEX IF NOT EXISTS idx_provider_problems_problem_id ON provider_problems(problem_id);
+
+-- Provider ratings indexes
+CREATE INDEX IF NOT EXISTS idx_provider_ratings_provider_id ON provider_ratings(provider_id);
+CREATE INDEX IF NOT EXISTS idx_provider_ratings_user_id ON provider_ratings(user_id);
+
+-- ============================================
+-- GRANT PERMISSIONS
+-- ============================================
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres;
 
@@ -377,11 +485,10 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres;
 -- ============================================
 
 -- ============================================
--- INSERT TEST USERS
+-- 8.1 INSERT TEST USERS
 -- ============================================
 
 -- Test Admin User (password: admin123)
--- Password hash for "admin123" using bcrypt with 12 rounds
 INSERT INTO users (email, password_hash, role, status) 
 VALUES (
   'admin@speaklogicmap.com', 
@@ -392,7 +499,6 @@ VALUES (
 ON CONFLICT (email) DO NOTHING;
 
 -- Test Regular User (password: user123)
--- Password hash for "user123" using bcrypt with 12 rounds
 INSERT INTO users (email, password_hash, role, status) 
 VALUES (
   'user@speaklogicmap.com', 
@@ -403,7 +509,6 @@ VALUES (
 ON CONFLICT (email) DO NOTHING;
 
 -- Test Developer User (password: dev123)
--- Password hash for "dev123" using bcrypt with 12 rounds
 INSERT INTO users (email, password_hash, role, status) 
 VALUES (
   'dev@speaklogicmap.com', 
@@ -414,7 +519,7 @@ VALUES (
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================
--- INSERT TEST PROFILES
+-- 8.2 INSERT TEST PROFILES
 -- ============================================
 
 INSERT INTO profiles (user_id, first_name, last_name, title, function, pen_name) 
@@ -445,18 +550,23 @@ ON CONFLICT (user_id) DO UPDATE SET
   function = EXCLUDED.function;
 
 -- ============================================
--- INSERT SAMPLE GEOPOINTS (Hà Nội, Việt Nam)
+-- 8.3 INSERT SAMPLE GEOPOINTS
 -- ============================================
 
 INSERT INTO geopoints (lat, lng, city, country) VALUES
   (21.0285, 105.8542, 'Hà Nội', 'Vietnam'),
   (21.0245, 105.8412, 'Hà Nội', 'Vietnam'),
   (10.7769, 106.7009, 'Ho Chi Minh City', 'Vietnam'),
-  (16.0544, 108.2022, 'Da Nang', 'Vietnam')
+  (16.0544, 108.2022, 'Da Nang', 'Vietnam'),
+  (40.7128, -74.0060, 'New York', 'USA'),
+  (34.0522, -118.2437, 'Los Angeles', 'USA'),
+  (51.5074, -0.1278, 'London', 'UK'),
+  (35.6762, 139.6503, 'Tokyo', 'Japan'),
+  (1.3521, 103.8198, 'Singapore', 'Singapore')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
--- INSERT SOME COUNTRIES METADATA (Key countries)
+-- 8.4 INSERT COUNTRIES METADATA
 -- ============================================
 
 INSERT INTO countries_metadata (code_name, full_name, main_lat, main_lng) VALUES
@@ -478,7 +588,7 @@ INSERT INTO countries_metadata (code_name, full_name, main_lat, main_lng) VALUES
 ON CONFLICT (code_name) DO NOTHING;
 
 -- ============================================
--- INSERT SAMPLE CITIES METADATA (Vietnamese cities)
+-- 8.5 INSERT CITIES METADATA
 -- ============================================
 
 INSERT INTO cities_metadata (code, name, country_code, lat, lng, country_name) VALUES
@@ -489,11 +599,16 @@ INSERT INTO cities_metadata (code, name, country_code, lat, lng, country_name) V
   ('NHA', 'Nha Trang', 'VNM', 12.2388, 109.1967, 'Vietnam'),
   ('HPH', 'Haiphong', 'VNM', 20.8449, 106.6881, 'Vietnam'),
   ('VTE', 'Vung Tau', 'VNM', 10.3460, 107.0843, 'Vietnam'),
-  ('DAL', 'Da Lat', 'VNM', 11.9404, 108.4583, 'Vietnam')
+  ('DAL', 'Da Lat', 'VNM', 11.9404, 108.4583, 'Vietnam'),
+  ('NYC', 'New York', 'USA', 40.7128, -74.0060, 'USA'),
+  ('LAX', 'Los Angeles', 'USA', 34.0522, -118.2437, 'USA'),
+  ('LON', 'London', 'GBR', 51.5074, -0.1278, 'United Kingdom'),
+  ('TYO', 'Tokyo', 'JPN', 35.6762, 139.6503, 'Japan'),
+  ('SIN', 'Singapore', 'SGP', 1.3521, 103.8198, 'Singapore')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
--- INSERT SAMPLE SIMULATION SETTINGS
+-- 8.6 INSERT SAMPLE SIMULATION SETTINGS
 -- ============================================
 
 INSERT INTO simulation_settings (owner_id, key, value) VALUES
@@ -507,7 +622,7 @@ INSERT INTO simulation_settings (owner_id, key, value) VALUES
 ON CONFLICT DO NOTHING;
 
 -- ============================================
--- INSERT SAMPLE FUNCTIONS
+-- 8.7 INSERT SAMPLE FUNCTIONS
 -- ============================================
 
 INSERT INTO functions (name, description, category) VALUES
@@ -524,7 +639,7 @@ INSERT INTO functions (name, description, category) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- ============================================
--- INSERT SAMPLE PROBLEMS
+-- 8.8 INSERT SAMPLE PROBLEMS
 -- ============================================
 
 INSERT INTO problems (name, description, category) VALUES
@@ -541,7 +656,7 @@ INSERT INTO problems (name, description, category) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- ============================================
--- INSERT SAMPLE PROVIDERS
+-- 8.9 INSERT SAMPLE PROVIDERS
 -- ============================================
 
 -- Create provider users first
@@ -554,164 +669,140 @@ INSERT INTO users (email, password_hash, role, status) VALUES
   ('provider6@example.com', '$2a$12$1XQSRRgMWzsL88VKI3uSgeuh7/.Xer.PdxH/gaVSs7ncCW3rF4wJW', 'provider', 'active')
 ON CONFLICT (email) DO NOTHING;
 
--- Insert providers
-INSERT INTO providers (user_id, name, url, website_url, description, lat, lng, rating, status, is_applicable) VALUES
+-- Insert providers with near_city, is_applicable (boolean), location_by (boolean)
+INSERT INTO providers (user_id, name, url, website_url, description, image_url, lat, lng, near_city, rating, status, is_applicable, location_by) VALUES
   (
     (SELECT id FROM users WHERE email = 'provider1@example.com' LIMIT 1),
     'Tech Solutions Inc',
     'www.urlofprovider.com',
     'https://techsolutions.example.com',
-    'Trumps inspectors General has of to expressed dim views of oversight to congressional Trumps inspectors General. As we all know the aspects of providing comprehensive technology solutions for businesses of all sizes.',
-    21.0285, 105.8542, 4.5, 'active', true
+    'Comprehensive technology solutions for businesses of all sizes. We provide end-to-end IT services.',
+    '/uploads/providers/tech-solutions.jpg',
+    21.0285, 105.8542, 'Hà Nội',
+    4.5, 'active', true, true
   ),
   (
     (SELECT id FROM users WHERE email = 'provider2@example.com' LIMIT 1),
     'Cloud Services Pro',
     'wider.com',
     'https://cloudpro.example.com',
-    'Leading provider of cloud infrastructure and hosting services. We help businesses migrate to the cloud and optimize their IT infrastructure for better performance and cost efficiency.',
-    10.7769, 106.7009, 4.8, 'active', true
+    'Leading provider of cloud infrastructure and hosting services. We help businesses migrate to the cloud.',
+    '/uploads/providers/cloud-pro.jpg',
+    10.7769, 106.7009, 'Ho Chi Minh City',
+    4.8, 'active', true, false
   ),
   (
     (SELECT id FROM users WHERE email = 'provider3@example.com' LIMIT 1),
     'Digital Marketing Hub',
     'www.digitalmarketing.com',
     'https://digitalmarketing.example.com',
-    'Expert digital marketing services including SEO, social media marketing, content creation, and online advertising. We help businesses grow their online presence and reach their target audience.',
-    16.0544, 108.2022, 4.2, 'active', true
+    'Expert digital marketing services including SEO, social media marketing, and content creation.',
+    '/uploads/providers/digital-marketing.jpg',
+    16.0544, 108.2022, 'Da Nang',
+    4.2, 'active', false, true
   ),
   (
     (SELECT id FROM users WHERE email = 'provider4@example.com' LIMIT 1),
     'Software Development Co',
     'www.softdev.com',
     'https://softdev.example.com',
-    'Custom software development services specializing in web applications, mobile apps, and enterprise solutions. We deliver high-quality software tailored to your business needs.',
-    21.0245, 105.8412, 4.7, 'active', true
+    'Custom software development services specializing in web applications and mobile apps.',
+    '/uploads/providers/softdev.jpg',
+    21.0245, 105.8412, 'Hà Nội',
+    4.7, 'active', true, true
   ),
   (
     (SELECT id FROM users WHERE email = 'provider5@example.com' LIMIT 1),
     'Data Analytics Experts',
     'www.dataanalytics.com',
     'https://dataanalytics.example.com',
-    'Transform your data into actionable insights. We provide data analytics, business intelligence, and machine learning solutions to help you make informed decisions.',
-    10.7769, 106.7009, 4.6, 'active', true
+    'Transform your data into actionable insights with our analytics and BI solutions.',
+    '/uploads/providers/data-analytics.jpg',
+    10.7769, 106.7009, 'Ho Chi Minh City',
+    4.6, 'active', true, false
   ),
   (
     (SELECT id FROM users WHERE email = 'provider6@example.com' LIMIT 1),
     'E-commerce Solutions',
     'www.ecommercesolutions.com',
     'https://ecommerce.example.com',
-    'Complete e-commerce solutions including online store setup, payment integration, inventory management, and customer support. We help businesses sell online successfully.',
-    16.0544, 108.2022, 4.3, 'active', true
+    'Complete e-commerce solutions including online store setup and payment integration.',
+    '/uploads/providers/ecommerce.jpg',
+    16.0544, 108.2022, 'Da Nang',
+    4.3, 'active', false, false
   )
 ON CONFLICT DO NOTHING;
 
 -- ============================================
--- LINK PROVIDERS TO FUNCTIONS
+-- 8.10 LINK PROVIDERS TO FUNCTIONS
 -- ============================================
 
--- Tech Solutions Inc -> Sell Software, Software Development, IT Consulting
 INSERT INTO provider_functions (provider_id, function_id)
-SELECT p.id, f.id
-FROM providers p, functions f
-WHERE p.name = 'Tech Solutions Inc'
-  AND f.name IN ('Sell Software', 'Software Development', 'IT Consulting')
+SELECT p.id, f.id FROM providers p, functions f
+WHERE p.name = 'Tech Solutions Inc' AND f.name IN ('Sell Software', 'Software Development', 'IT Consulting')
 ON CONFLICT DO NOTHING;
 
--- Cloud Services Pro -> Cloud Services, IT Consulting
 INSERT INTO provider_functions (provider_id, function_id)
-SELECT p.id, f.id
-FROM providers p, functions f
-WHERE p.name = 'Cloud Services Pro'
-  AND f.name IN ('Cloud Services', 'IT Consulting')
+SELECT p.id, f.id FROM providers p, functions f
+WHERE p.name = 'Cloud Services Pro' AND f.name IN ('Cloud Services', 'IT Consulting')
 ON CONFLICT DO NOTHING;
 
--- Digital Marketing Hub -> Digital Marketing, Web Design
 INSERT INTO provider_functions (provider_id, function_id)
-SELECT p.id, f.id
-FROM providers p, functions f
-WHERE p.name = 'Digital Marketing Hub'
-  AND f.name IN ('Digital Marketing', 'Web Design')
+SELECT p.id, f.id FROM providers p, functions f
+WHERE p.name = 'Digital Marketing Hub' AND f.name IN ('Digital Marketing', 'Web Design')
 ON CONFLICT DO NOTHING;
 
--- Software Development Co -> Software Development, Mobile App Development
 INSERT INTO provider_functions (provider_id, function_id)
-SELECT p.id, f.id
-FROM providers p, functions f
-WHERE p.name = 'Software Development Co'
-  AND f.name IN ('Software Development', 'Mobile App Development')
+SELECT p.id, f.id FROM providers p, functions f
+WHERE p.name = 'Software Development Co' AND f.name IN ('Software Development', 'Mobile App Development')
 ON CONFLICT DO NOTHING;
 
--- Data Analytics Experts -> Data Analytics, IT Consulting
 INSERT INTO provider_functions (provider_id, function_id)
-SELECT p.id, f.id
-FROM providers p, functions f
-WHERE p.name = 'Data Analytics Experts'
-  AND f.name IN ('Data Analytics', 'IT Consulting')
+SELECT p.id, f.id FROM providers p, functions f
+WHERE p.name = 'Data Analytics Experts' AND f.name IN ('Data Analytics', 'IT Consulting')
 ON CONFLICT DO NOTHING;
 
--- E-commerce Solutions -> E-commerce Solutions, Web Design
 INSERT INTO provider_functions (provider_id, function_id)
-SELECT p.id, f.id
-FROM providers p, functions f
-WHERE p.name = 'E-commerce Solutions'
-  AND f.name IN ('E-commerce Solutions', 'Web Design')
+SELECT p.id, f.id FROM providers p, functions f
+WHERE p.name = 'E-commerce Solutions' AND f.name IN ('E-commerce Solutions', 'Web Design')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
--- LINK PROVIDERS TO PROBLEMS
+-- 8.11 LINK PROVIDERS TO PROBLEMS
 -- ============================================
 
--- Tech Solutions Inc -> Remote Employee Management, System Integration
 INSERT INTO provider_problems (provider_id, problem_id)
-SELECT p.id, pr.id
-FROM providers p, problems pr
-WHERE p.name = 'Tech Solutions Inc'
-  AND pr.name IN ('Remote Employee Management', 'System Integration')
+SELECT p.id, pr.id FROM providers p, problems pr
+WHERE p.name = 'Tech Solutions Inc' AND pr.name IN ('Remote Employee Management', 'System Integration')
 ON CONFLICT DO NOTHING;
 
--- Cloud Services Pro -> Scalability Issues, Cost Reduction
 INSERT INTO provider_problems (provider_id, problem_id)
-SELECT p.id, pr.id
-FROM providers p, problems pr
-WHERE p.name = 'Cloud Services Pro'
-  AND pr.name IN ('Scalability Issues', 'Cost Reduction')
+SELECT p.id, pr.id FROM providers p, problems pr
+WHERE p.name = 'Cloud Services Pro' AND pr.name IN ('Scalability Issues', 'Cost Reduction')
 ON CONFLICT DO NOTHING;
 
--- Digital Marketing Hub -> Customer Support, Performance Optimization
 INSERT INTO provider_problems (provider_id, problem_id)
-SELECT p.id, pr.id
-FROM providers p, problems pr
-WHERE p.name = 'Digital Marketing Hub'
-  AND pr.name IN ('Customer Support', 'Performance Optimization')
+SELECT p.id, pr.id FROM providers p, problems pr
+WHERE p.name = 'Digital Marketing Hub' AND pr.name IN ('Customer Support', 'Performance Optimization')
 ON CONFLICT DO NOTHING;
 
--- Software Development Co -> Legacy System Migration, Performance Optimization
 INSERT INTO provider_problems (provider_id, problem_id)
-SELECT p.id, pr.id
-FROM providers p, problems pr
-WHERE p.name = 'Software Development Co'
-  AND pr.name IN ('Legacy System Migration', 'Performance Optimization')
+SELECT p.id, pr.id FROM providers p, problems pr
+WHERE p.name = 'Software Development Co' AND pr.name IN ('Legacy System Migration', 'Performance Optimization')
 ON CONFLICT DO NOTHING;
 
--- Data Analytics Experts -> Data Security, Performance Optimization
 INSERT INTO provider_problems (provider_id, problem_id)
-SELECT p.id, pr.id
-FROM providers p, problems pr
-WHERE p.name = 'Data Analytics Experts'
-  AND pr.name IN ('Data Security', 'Performance Optimization')
+SELECT p.id, pr.id FROM providers p, problems pr
+WHERE p.name = 'Data Analytics Experts' AND pr.name IN ('Data Security', 'Performance Optimization')
 ON CONFLICT DO NOTHING;
 
--- E-commerce Solutions -> Payment Processing, Inventory Management
 INSERT INTO provider_problems (provider_id, problem_id)
-SELECT p.id, pr.id
-FROM providers p, problems pr
-WHERE p.name = 'E-commerce Solutions'
-  AND pr.name IN ('Payment Processing', 'Inventory Management')
+SELECT p.id, pr.id FROM providers p, problems pr
+WHERE p.name = 'E-commerce Solutions' AND pr.name IN ('Payment Processing', 'Inventory Management')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
--- INSERT SAMPLE MANAGERS
+-- 8.12 INSERT SAMPLE MANAGERS
 -- ============================================
 
 -- Create manager users first
@@ -728,305 +819,349 @@ ON CONFLICT (email) DO NOTHING;
 INSERT INTO profiles (user_id, first_name, last_name, title, function)
 SELECT id, 'Alice', 'Johnson', 'Senior Project Manager', 'Project Management'
 FROM users WHERE email = 'manager1@example.com'
-ON CONFLICT (user_id) DO UPDATE SET
-  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
-  title = EXCLUDED.title, function = EXCLUDED.function;
+ON CONFLICT (user_id) DO UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, title = EXCLUDED.title, function = EXCLUDED.function;
 
 INSERT INTO profiles (user_id, first_name, last_name, title, function)
 SELECT id, 'Bob', 'Smith', 'Operations Manager', 'Operations'
 FROM users WHERE email = 'manager2@example.com'
-ON CONFLICT (user_id) DO UPDATE SET
-  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
-  title = EXCLUDED.title, function = EXCLUDED.function;
+ON CONFLICT (user_id) DO UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, title = EXCLUDED.title, function = EXCLUDED.function;
 
 INSERT INTO profiles (user_id, first_name, last_name, title, function)
 SELECT id, 'Charlie', 'Brown', 'Technical Manager', 'Technical Leadership'
 FROM users WHERE email = 'manager3@example.com'
-ON CONFLICT (user_id) DO UPDATE SET
-  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
-  title = EXCLUDED.title, function = EXCLUDED.function;
+ON CONFLICT (user_id) DO UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, title = EXCLUDED.title, function = EXCLUDED.function;
 
 INSERT INTO profiles (user_id, first_name, last_name, title, function)
 SELECT id, 'Diana', 'Wilson', 'Product Manager', 'Product Development'
 FROM users WHERE email = 'manager4@example.com'
-ON CONFLICT (user_id) DO UPDATE SET
-  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
-  title = EXCLUDED.title, function = EXCLUDED.function;
+ON CONFLICT (user_id) DO UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, title = EXCLUDED.title, function = EXCLUDED.function;
 
 INSERT INTO profiles (user_id, first_name, last_name, title, function)
 SELECT id, 'Edward', 'Davis', 'Regional Manager', 'Regional Operations'
 FROM users WHERE email = 'manager5@example.com'
-ON CONFLICT (user_id) DO UPDATE SET
-  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
-  title = EXCLUDED.title, function = EXCLUDED.function;
+ON CONFLICT (user_id) DO UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, title = EXCLUDED.title, function = EXCLUDED.function;
 
 INSERT INTO profiles (user_id, first_name, last_name, title, function)
 SELECT id, 'Nguyen', 'Van Minh', 'Area Manager', 'Area Operations'
 FROM users WHERE email = 'manager6@example.com'
-ON CONFLICT (user_id) DO UPDATE SET
-  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
-  title = EXCLUDED.title, function = EXCLUDED.function;
+ON CONFLICT (user_id) DO UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, title = EXCLUDED.title, function = EXCLUDED.function;
 
--- Insert managers
-INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+-- Insert managers with image_url, near_city, is_given_set (boolean), location_by (boolean)
+INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
 SELECT 
   id,
   'Alice Johnson',
-  'Experienced project manager with 10+ years in software development. Specializes in Agile methodologies and team leadership.',
+  'Experienced project manager with 10+ years in software development. Specializes in Agile methodologies.',
   'Project Management, Agile, Scrum, Team Leadership, Risk Management',
-  21.0285, 105.8542, 4.8, 25, 'active', true
+  '/uploads/managers/alice-johnson.jpg',
+  21.0285, 105.8542, 'Hà Nội',
+  4.8, 25, 'active', true, true
 FROM users WHERE email = 'manager1@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
-INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
 SELECT 
   id,
   'Bob Smith',
-  'Operations manager focused on process optimization and efficiency. Expert in supply chain and logistics management.',
+  'Operations manager focused on process optimization and efficiency.',
   'Operations, Supply Chain, Logistics, Process Optimization, Quality Control',
-  10.7769, 106.7009, 4.5, 18, 'active', true
+  '/uploads/managers/bob-smith.jpg',
+  10.7769, 106.7009, 'Ho Chi Minh City',
+  4.5, 18, 'active', true, false
 FROM users WHERE email = 'manager2@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
-INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
 SELECT 
   id,
   'Charlie Brown',
-  'Technical manager with deep expertise in cloud architecture and DevOps. Leads engineering teams to deliver scalable solutions.',
+  'Technical manager with deep expertise in cloud architecture and DevOps.',
   'Cloud Architecture, DevOps, AWS, Kubernetes, Microservices',
-  16.0544, 108.2022, 4.2, 12, 'active', false
+  '/uploads/managers/charlie-brown.jpg',
+  16.0544, 108.2022, 'Da Nang',
+  4.2, 12, 'active', false, true
 FROM users WHERE email = 'manager3@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
-INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
 SELECT 
   id,
   'Diana Wilson',
-  'Product manager passionate about user experience and data-driven decision making. Successfully launched 20+ products.',
+  'Product manager passionate about user experience and data-driven decisions.',
   'Product Management, UX Design, Data Analytics, Market Research, A/B Testing',
-  21.0245, 105.8412, 4.9, 32, 'active', true
+  '/uploads/managers/diana-wilson.jpg',
+  21.0245, 105.8412, 'Hà Nội',
+  4.9, 32, 'active', true, true
 FROM users WHERE email = 'manager4@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
-INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
 SELECT 
   id,
   'Edward Davis',
-  'Regional manager overseeing operations across Southeast Asia. Expert in cross-cultural team management.',
-  'Regional Management, Cross-cultural Leadership, Business Development, Strategic Planning',
-  10.7769, 106.7009, 3.8, 8, 'active', false
+  'Regional manager overseeing operations across Southeast Asia.',
+  'Regional Management, Cross-cultural Leadership, Business Development',
+  '/uploads/managers/edward-davis.jpg',
+  10.7769, 106.7009, 'Ho Chi Minh City',
+  3.8, 8, 'active', false, false
 FROM users WHERE email = 'manager5@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
-INSERT INTO managers (user_id, name, description, expertise, lat, lng, rating, rating_count, status, is_given_set)
+INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
 SELECT 
   id,
   'Nguyen Van Minh',
-  'Area manager with extensive experience in Vietnam market. Specializes in local business partnerships and expansion.',
-  'Local Market Expertise, Partnership Development, Business Expansion, Vietnamese Market',
-  21.0285, 105.8542, 4.6, 15, 'active', true
+  'Area manager with extensive experience in Vietnam market.',
+  'Local Market Expertise, Partnership Development, Business Expansion',
+  '/uploads/managers/nguyen-van-minh.jpg',
+  21.0285, 105.8542, 'Hà Nội',
+  4.6, 15, 'active', true, false
 FROM users WHERE email = 'manager6@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
 -- ============================================
--- LINK MANAGERS TO FUNCTIONS
+-- 8.13 LINK MANAGERS TO FUNCTIONS
 -- ============================================
 
--- Alice Johnson -> Software Development, IT Consulting
 INSERT INTO manager_functions (manager_id, function_id)
-SELECT m.id, f.id
-FROM managers m, functions f
-WHERE m.name = 'Alice Johnson'
-  AND f.name IN ('Software Development', 'IT Consulting')
+SELECT m.id, f.id FROM managers m, functions f
+WHERE m.name = 'Alice Johnson' AND f.name IN ('Software Development', 'IT Consulting')
 ON CONFLICT DO NOTHING;
 
--- Bob Smith -> Cloud Services, E-commerce Solutions
 INSERT INTO manager_functions (manager_id, function_id)
-SELECT m.id, f.id
-FROM managers m, functions f
-WHERE m.name = 'Bob Smith'
-  AND f.name IN ('Cloud Services', 'E-commerce Solutions')
+SELECT m.id, f.id FROM managers m, functions f
+WHERE m.name = 'Bob Smith' AND f.name IN ('Cloud Services', 'E-commerce Solutions')
 ON CONFLICT DO NOTHING;
 
--- Charlie Brown -> Cloud Services, Software Development, Cybersecurity
 INSERT INTO manager_functions (manager_id, function_id)
-SELECT m.id, f.id
-FROM managers m, functions f
-WHERE m.name = 'Charlie Brown'
-  AND f.name IN ('Cloud Services', 'Software Development', 'Cybersecurity')
+SELECT m.id, f.id FROM managers m, functions f
+WHERE m.name = 'Charlie Brown' AND f.name IN ('Cloud Services', 'Software Development', 'Cybersecurity')
 ON CONFLICT DO NOTHING;
 
--- Diana Wilson -> Digital Marketing, Web Design, Data Analytics
 INSERT INTO manager_functions (manager_id, function_id)
-SELECT m.id, f.id
-FROM managers m, functions f
-WHERE m.name = 'Diana Wilson'
-  AND f.name IN ('Digital Marketing', 'Web Design', 'Data Analytics')
+SELECT m.id, f.id FROM managers m, functions f
+WHERE m.name = 'Diana Wilson' AND f.name IN ('Digital Marketing', 'Web Design', 'Data Analytics')
 ON CONFLICT DO NOTHING;
 
--- Edward Davis -> IT Consulting, Sell Software
 INSERT INTO manager_functions (manager_id, function_id)
-SELECT m.id, f.id
-FROM managers m, functions f
-WHERE m.name = 'Edward Davis'
-  AND f.name IN ('IT Consulting', 'Sell Software')
+SELECT m.id, f.id FROM managers m, functions f
+WHERE m.name = 'Edward Davis' AND f.name IN ('IT Consulting', 'Sell Software')
 ON CONFLICT DO NOTHING;
 
--- Nguyen Van Minh -> E-commerce Solutions, Digital Marketing
 INSERT INTO manager_functions (manager_id, function_id)
-SELECT m.id, f.id
-FROM managers m, functions f
-WHERE m.name = 'Nguyen Van Minh'
-  AND f.name IN ('E-commerce Solutions', 'Digital Marketing')
+SELECT m.id, f.id FROM managers m, functions f
+WHERE m.name = 'Nguyen Van Minh' AND f.name IN ('E-commerce Solutions', 'Digital Marketing')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
--- LINK MANAGERS TO PROBLEMS
+-- 8.14 LINK MANAGERS TO PROBLEMS
 -- ============================================
 
--- Alice Johnson -> Remote Employee Management, Performance Optimization
 INSERT INTO manager_problems (manager_id, problem_id)
-SELECT m.id, pr.id
-FROM managers m, problems pr
-WHERE m.name = 'Alice Johnson'
-  AND pr.name IN ('Remote Employee Management', 'Performance Optimization')
+SELECT m.id, pr.id FROM managers m, problems pr
+WHERE m.name = 'Alice Johnson' AND pr.name IN ('Remote Employee Management', 'Performance Optimization')
 ON CONFLICT DO NOTHING;
 
--- Bob Smith -> Cost Reduction, Inventory Management
 INSERT INTO manager_problems (manager_id, problem_id)
-SELECT m.id, pr.id
-FROM managers m, problems pr
-WHERE m.name = 'Bob Smith'
-  AND pr.name IN ('Cost Reduction', 'Inventory Management')
+SELECT m.id, pr.id FROM managers m, problems pr
+WHERE m.name = 'Bob Smith' AND pr.name IN ('Cost Reduction', 'Inventory Management')
 ON CONFLICT DO NOTHING;
 
--- Charlie Brown -> Scalability Issues, Data Security, System Integration
 INSERT INTO manager_problems (manager_id, problem_id)
-SELECT m.id, pr.id
-FROM managers m, problems pr
-WHERE m.name = 'Charlie Brown'
-  AND pr.name IN ('Scalability Issues', 'Data Security', 'System Integration')
+SELECT m.id, pr.id FROM managers m, problems pr
+WHERE m.name = 'Charlie Brown' AND pr.name IN ('Scalability Issues', 'Data Security', 'System Integration')
 ON CONFLICT DO NOTHING;
 
--- Diana Wilson -> Customer Support, Performance Optimization
 INSERT INTO manager_problems (manager_id, problem_id)
-SELECT m.id, pr.id
-FROM managers m, problems pr
-WHERE m.name = 'Diana Wilson'
-  AND pr.name IN ('Customer Support', 'Performance Optimization')
+SELECT m.id, pr.id FROM managers m, problems pr
+WHERE m.name = 'Diana Wilson' AND pr.name IN ('Customer Support', 'Performance Optimization')
 ON CONFLICT DO NOTHING;
 
--- Edward Davis -> Legacy System Migration, Cost Reduction
 INSERT INTO manager_problems (manager_id, problem_id)
-SELECT m.id, pr.id
-FROM managers m, problems pr
-WHERE m.name = 'Edward Davis'
-  AND pr.name IN ('Legacy System Migration', 'Cost Reduction')
+SELECT m.id, pr.id FROM managers m, problems pr
+WHERE m.name = 'Edward Davis' AND pr.name IN ('Legacy System Migration', 'Cost Reduction')
 ON CONFLICT DO NOTHING;
 
--- Nguyen Van Minh -> Payment Processing, Customer Support
 INSERT INTO manager_problems (manager_id, problem_id)
-SELECT m.id, pr.id
-FROM managers m, problems pr
-WHERE m.name = 'Nguyen Van Minh'
-  AND pr.name IN ('Payment Processing', 'Customer Support')
+SELECT m.id, pr.id FROM managers m, problems pr
+WHERE m.name = 'Nguyen Van Minh' AND pr.name IN ('Payment Processing', 'Customer Support')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
--- INSERT SAMPLE MANAGER RATINGS
+-- 8.15 INSERT SAMPLE RATINGS
 -- ============================================
 
--- Ratings for Alice Johnson (manager1)
+-- Manager ratings
 INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
 SELECT m.id, u.id, 5, 'Excellent project management skills!'
-FROM managers m, users u
-WHERE m.name = 'Alice Johnson' AND u.email = 'user@speaklogicmap.com'
+FROM managers m, users u WHERE m.name = 'Alice Johnson' AND u.email = 'user@speaklogicmap.com'
 ON CONFLICT (manager_id, user_id) DO NOTHING;
 
 INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
 SELECT m.id, u.id, 5, 'Great leadership and communication.'
-FROM managers m, users u
-WHERE m.name = 'Alice Johnson' AND u.email = 'dev@speaklogicmap.com'
+FROM managers m, users u WHERE m.name = 'Alice Johnson' AND u.email = 'dev@speaklogicmap.com'
 ON CONFLICT (manager_id, user_id) DO NOTHING;
 
--- Ratings for Bob Smith (manager2)
 INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
 SELECT m.id, u.id, 4, 'Very efficient operations management.'
-FROM managers m, users u
-WHERE m.name = 'Bob Smith' AND u.email = 'user@speaklogicmap.com'
+FROM managers m, users u WHERE m.name = 'Bob Smith' AND u.email = 'user@speaklogicmap.com'
 ON CONFLICT (manager_id, user_id) DO NOTHING;
 
--- Ratings for Diana Wilson (manager4)
 INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
 SELECT m.id, u.id, 5, 'Best product manager I have worked with!'
-FROM managers m, users u
-WHERE m.name = 'Diana Wilson' AND u.email = 'user@speaklogicmap.com'
+FROM managers m, users u WHERE m.name = 'Diana Wilson' AND u.email = 'user@speaklogicmap.com'
 ON CONFLICT (manager_id, user_id) DO NOTHING;
 
 INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
 SELECT m.id, u.id, 5, 'Amazing product vision and execution.'
-FROM managers m, users u
-WHERE m.name = 'Diana Wilson' AND u.email = 'dev@speaklogicmap.com'
+FROM managers m, users u WHERE m.name = 'Diana Wilson' AND u.email = 'dev@speaklogicmap.com'
 ON CONFLICT (manager_id, user_id) DO NOTHING;
 
--- Ratings for Edward Davis (manager5)
 INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
 SELECT m.id, u.id, 3, 'Good regional knowledge but could improve communication.'
-FROM managers m, users u
-WHERE m.name = 'Edward Davis' AND u.email = 'user@speaklogicmap.com'
+FROM managers m, users u WHERE m.name = 'Edward Davis' AND u.email = 'user@speaklogicmap.com'
 ON CONFLICT (manager_id, user_id) DO NOTHING;
+
+-- Provider ratings
+INSERT INTO provider_ratings (provider_id, user_id, rating, comment)
+SELECT p.id, u.id, 5, 'Excellent tech solutions!'
+FROM providers p, users u WHERE p.name = 'Tech Solutions Inc' AND u.email = 'user@speaklogicmap.com'
+ON CONFLICT (provider_id, user_id) DO NOTHING;
+
+INSERT INTO provider_ratings (provider_id, user_id, rating, comment)
+SELECT p.id, u.id, 5, 'Best cloud services in Vietnam.'
+FROM providers p, users u WHERE p.name = 'Cloud Services Pro' AND u.email = 'user@speaklogicmap.com'
+ON CONFLICT (provider_id, user_id) DO NOTHING;
+
+INSERT INTO provider_ratings (provider_id, user_id, rating, comment)
+SELECT p.id, u.id, 4, 'Great marketing results.'
+FROM providers p, users u WHERE p.name = 'Digital Marketing Hub' AND u.email = 'dev@speaklogicmap.com'
+ON CONFLICT (provider_id, user_id) DO NOTHING;
 
 -- ============================================
 -- VERIFICATION QUERIES
 -- ============================================
 
--- Display summary of inserted data
 DO $$
 DECLARE
   user_count INTEGER;
   profile_count INTEGER;
   geopoint_count INTEGER;
   country_count INTEGER;
+  city_count INTEGER;
   function_count INTEGER;
   problem_count INTEGER;
   provider_count INTEGER;
   provider_function_count INTEGER;
   provider_problem_count INTEGER;
+  provider_rating_count INTEGER;
   manager_count INTEGER;
   manager_function_count INTEGER;
   manager_problem_count INTEGER;
   manager_rating_count INTEGER;
+  table_count INTEGER;
+  index_count INTEGER;
 BEGIN
   SELECT COUNT(*) INTO user_count FROM users;
   SELECT COUNT(*) INTO profile_count FROM profiles;
   SELECT COUNT(*) INTO geopoint_count FROM geopoints;
   SELECT COUNT(*) INTO country_count FROM countries_metadata;
+  SELECT COUNT(*) INTO city_count FROM cities_metadata;
   SELECT COUNT(*) INTO function_count FROM functions;
   SELECT COUNT(*) INTO problem_count FROM problems;
   SELECT COUNT(*) INTO provider_count FROM providers;
   SELECT COUNT(*) INTO provider_function_count FROM provider_functions;
   SELECT COUNT(*) INTO provider_problem_count FROM provider_problems;
+  SELECT COUNT(*) INTO provider_rating_count FROM provider_ratings;
   SELECT COUNT(*) INTO manager_count FROM managers;
   SELECT COUNT(*) INTO manager_function_count FROM manager_functions;
   SELECT COUNT(*) INTO manager_problem_count FROM manager_problems;
   SELECT COUNT(*) INTO manager_rating_count FROM manager_ratings;
+  SELECT COUNT(*) INTO table_count FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
+  SELECT COUNT(*) INTO index_count FROM pg_indexes WHERE schemaname = 'public';
   
-  RAISE NOTICE 'Database initialized successfully!';
-  RAISE NOTICE '========== Users & Profiles ==========';
+  RAISE NOTICE '============================================';
+  RAISE NOTICE 'DATABASE INITIALIZED SUCCESSFULLY!';
+  RAISE NOTICE '============================================';
+  RAISE NOTICE 'Total Tables: %', table_count;
+  RAISE NOTICE 'Total Indexes: %', index_count;
+  RAISE NOTICE '============================================';
   RAISE NOTICE 'Users: %', user_count;
   RAISE NOTICE 'Profiles: %', profile_count;
   RAISE NOTICE 'Geopoints: %', geopoint_count;
-  RAISE NOTICE 'Countries metadata: %', country_count;
-  RAISE NOTICE '========== Functions & Problems ==========';
+  RAISE NOTICE 'Countries: %', country_count;
+  RAISE NOTICE 'Cities: %', city_count;
+  RAISE NOTICE '============================================';
   RAISE NOTICE 'Functions: %', function_count;
   RAISE NOTICE 'Problems: %', problem_count;
-  RAISE NOTICE '========== Providers ==========';
+  RAISE NOTICE '============================================';
   RAISE NOTICE 'Providers: %', provider_count;
   RAISE NOTICE 'Provider-Function links: %', provider_function_count;
   RAISE NOTICE 'Provider-Problem links: %', provider_problem_count;
-  RAISE NOTICE '========== Managers ==========';
+  RAISE NOTICE 'Provider ratings: %', provider_rating_count;
+  RAISE NOTICE '============================================';
   RAISE NOTICE 'Managers: %', manager_count;
   RAISE NOTICE 'Manager-Function links: %', manager_function_count;
   RAISE NOTICE 'Manager-Problem links: %', manager_problem_count;
   RAISE NOTICE 'Manager ratings: %', manager_rating_count;
+  RAISE NOTICE '============================================';
 END $$;
+
+-- ============================================
+-- USAGE EXAMPLES (Comment block)
+-- ============================================
+
+/*
+============================================
+USAGE EXAMPLES
+============================================
+
+-- 1. Query managers with image_url (direct URL)
+SELECT 
+  m.id,
+  m.name,
+  m.image_url,  -- Direct URL: '/uploads/managers/alice.jpg'
+  m.near_city,
+  m.is_given_set,
+  m.location_by
+FROM managers m
+WHERE m.status = 'active';
+
+-- 2. Query providers with filters
+SELECT 
+  p.id,
+  p.name,
+  p.image_url,
+  p.near_city,
+  p.is_applicable,  -- Boolean: TRUE/FALSE
+  p.location_by     -- Boolean: TRUE/FALSE
+FROM providers p
+WHERE p.is_applicable = true
+  AND p.near_city = 'Hà Nội';
+
+-- 3. Update manager image (direct URL)
+UPDATE managers 
+SET image_url = '/uploads/managers/new-image.jpg'
+WHERE name = 'Alice Johnson';
+
+-- 4. Filter by boolean flags
+-- Managers using The Given Set
+SELECT * FROM managers WHERE is_given_set = true;
+
+-- Providers with Location By enabled
+SELECT * FROM providers WHERE location_by = true;
+
+-- Providers that are applicable to The Given Set
+SELECT * FROM providers WHERE is_applicable = true;
+
+-- 5. Search by near_city
+SELECT * FROM managers WHERE near_city ILIKE '%Ho Chi Minh%';
+SELECT * FROM providers WHERE near_city = 'Da Nang';
+
+-- 6. Full-text search
+SELECT * FROM managers 
+WHERE to_tsvector('english', name || ' ' || COALESCE(description, '')) 
+      @@ plainto_tsquery('english', 'project management');
+
+============================================
+*/
