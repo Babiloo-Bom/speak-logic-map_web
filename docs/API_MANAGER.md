@@ -94,6 +94,19 @@ Authorization: Bearer <access_token>
 
 ## 🔗 Endpoints
 
+| # | Method | Endpoint | Mô tả |
+|---|--------|----------|-------|
+| 1 | POST | `/api/managers` | Tạo manager mới |
+| 2 | GET | `/api/managers/search` | Tìm kiếm managers |
+| 3 | GET | `/api/managers/{id}` | Lấy thông tin manager |
+| 4 | PUT/PATCH | `/api/managers/{id}` | Cập nhật manager |
+| 5 | DELETE | `/api/managers/{id}` | Xóa manager |
+| 6 | GET | `/api/managers/{id}/rating` | Lấy đánh giá manager |
+| 7 | POST | `/api/managers/{id}/rating` | Thêm/cập nhật đánh giá |
+| 8 | DELETE | `/api/managers/{id}/rating` | Xóa đánh giá |
+
+---
+
 ### 1. Tạo Manager Mới
 
 **POST** `/api/managers`
@@ -568,6 +581,173 @@ Xóa một manager khỏi hệ thống (bao gồm user account và tất cả d�
 
 ---
 
+### 6. Lấy Đánh Giá Manager
+
+**GET** `/api/managers/{id}/rating`
+
+Lấy thông tin tổng hợp đánh giá của một manager.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `id` | number | ✅ **Yes** | Manager ID |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "averageRating": 4.5,
+  "ratingCount": 25,
+  "ratings": [
+    {
+      "id": 1,
+      "manager_id": 42,
+      "user_id": 100,
+      "rating": 5,
+      "comment": "Excellent manager, very helpful!",
+      "created_at": "2026-01-01T10:30:00.000Z",
+      "user_email": "user@example.com",
+      "user_name": "Nguyen Van A"
+    },
+    {
+      "id": 2,
+      "manager_id": 42,
+      "user_id": 101,
+      "rating": 4,
+      "comment": "Good communication skills",
+      "created_at": "2026-01-02T14:20:00.000Z",
+      "user_email": "user2@example.com",
+      "user_name": "Tran Van B"
+    }
+  ]
+}
+```
+
+#### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `averageRating` | number | Rating trung bình (0-5) |
+| `ratingCount` | number | Tổng số đánh giá |
+| `ratings` | array | Danh sách chi tiết các đánh giá |
+| `ratings[].id` | number | ID của đánh giá |
+| `ratings[].manager_id` | number | ID của manager |
+| `ratings[].user_id` | number | ID của user đánh giá |
+| `ratings[].rating` | number | Điểm đánh giá (1-5) |
+| `ratings[].comment` | string | Bình luận (optional) |
+| `ratings[].created_at` | string | Thời gian đánh giá (ISO 8601) |
+| `ratings[].user_email` | string | Email của user đánh giá |
+| `ratings[].user_name` | string | Tên của user đánh giá (optional) |
+
+#### Error Responses
+
+| Status | Message | Mô tả |
+|--------|---------|-------|
+| 400 | `Invalid manager id` | ID không hợp lệ |
+| 404 | `Manager not found` | Không tìm thấy manager |
+
+---
+
+### 7. Thêm/Cập Nhật Đánh Giá Manager
+
+**POST** `/api/managers/{id}/rating`
+
+Thêm hoặc cập nhật đánh giá của user hiện tại cho manager. Mỗi user chỉ có thể đánh giá một manager một lần, nếu đánh giá lại sẽ cập nhật đánh giá cũ.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `id` | number | ✅ **Yes** | Manager ID |
+
+#### Request Body
+
+```json
+{
+  "rating": 5,
+  "comment": "Excellent manager, very professional!"
+}
+```
+
+#### Request Body Fields
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `rating` | number | ✅ **Yes** | Điểm đánh giá (1-5) |
+| `comment` | string | No | Bình luận (optional) |
+
+#### Response
+
+**200 OK** - Trả về rating summary sau khi cập nhật
+
+```json
+{
+  "averageRating": 4.6,
+  "ratingCount": 26,
+  "ratings": [
+    {
+      "id": 50,
+      "manager_id": 42,
+      "user_id": 102,
+      "rating": 5,
+      "comment": "Excellent manager, very professional!",
+      "created_at": "2026-01-03T09:15:00.000Z",
+      "user_email": "current.user@example.com",
+      "user_name": "Current User"
+    }
+    // ... other ratings
+  ]
+}
+```
+
+#### Error Responses
+
+| Status | Message | Mô tả |
+|--------|---------|-------|
+| 400 | `Invalid manager id` | ID không hợp lệ |
+| 400 | `Rating must be between 1 and 5` | Rating không hợp lệ |
+| 401 | `Unauthorized` | Chưa đăng nhập |
+| 404 | `Manager not found` | Không tìm thấy manager |
+
+---
+
+### 8. Xóa Đánh Giá Manager
+
+**DELETE** `/api/managers/{id}/rating`
+
+Xóa đánh giá của user hiện tại cho manager.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `id` | number | ✅ **Yes** | Manager ID |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "message": "Rating deleted successfully",
+  "averageRating": 4.4,
+  "ratingCount": 24
+}
+```
+
+#### Error Responses
+
+| Status | Message | Mô tả |
+|--------|---------|-------|
+| 400 | `Invalid manager id` | ID không hợp lệ |
+| 401 | `Unauthorized` | Chưa đăng nhập |
+| 404 | `Manager not found` | Không tìm thấy manager |
+
+---
+
 ## 🔐 Authentication & Authorization
 
 ### Headers Required
@@ -679,6 +859,36 @@ const deleteManager = async (token, id) => {
   return response.status === 204;
 };
 
+// Lấy đánh giá manager
+const getManagerRatings = async (token, id) => {
+  const response = await fetch(`${API_BASE}/${id}/rating`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// Thêm/cập nhật đánh giá manager
+const rateManager = async (token, id, rating, comment) => {
+  const response = await fetch(`${API_BASE}/${id}/rating`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ rating, comment })
+  });
+  return response.json();
+};
+
+// Xóa đánh giá manager
+const deleteManagerRating = async (token, id) => {
+  const response = await fetch(`${API_BASE}/${id}/rating`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
 // ============================================
 // USAGE EXAMPLES
 // ============================================
@@ -710,6 +920,18 @@ const specificManagers = await searchManagers(token, {
 const managersStartWithN = await searchManagers(token, {
   starts_with: 'N'
 });
+
+// Lấy đánh giá của manager
+const ratings = await getManagerRatings(token, 42);
+console.log(`Average: ${ratings.averageRating}, Total: ${ratings.ratingCount}`);
+
+// Đánh giá manager
+const newRating = await rateManager(token, 42, 5, 'Excellent manager!');
+console.log('New average:', newRating.averageRating);
+
+// Xóa đánh giá của mình
+const result = await deleteManagerRating(token, 42);
+console.log('Rating deleted, new average:', result.averageRating);
 ```
 
 ### cURL
@@ -757,6 +979,23 @@ curl -X PUT http://localhost:3000/api/managers/42 \
 
 # Xóa
 curl -X DELETE http://localhost:3000/api/managers/42 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Lấy đánh giá manager
+curl http://localhost:3000/api/managers/42/rating \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Thêm/cập nhật đánh giá
+curl -X POST http://localhost:3000/api/managers/42/rating \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rating": 5,
+    "comment": "Excellent manager, very professional!"
+  }'
+
+# Xóa đánh giá của mình
+curl -X DELETE http://localhost:3000/api/managers/42/rating \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -922,6 +1161,26 @@ Response từ search API bao gồm `aggregations` để hiển thị counts trê
 | Parameter | Required |
 |-----------|:--------:|
 | All query params | ❌ |
+
+### GET `/api/managers/{id}/rating` (Get Ratings)
+
+| Parameter | Required |
+|-----------|:--------:|
+| `id` (path) | ✅ |
+
+### POST `/api/managers/{id}/rating` (Add/Update Rating)
+
+| Parameter | Required |
+|-----------|:--------:|
+| `id` (path) | ✅ |
+| `rating` (body) | ✅ |
+| `comment` (body) | ❌ |
+
+### DELETE `/api/managers/{id}/rating` (Delete Rating)
+
+| Parameter | Required |
+|-----------|:--------:|
+| `id` (path) | ✅ |
 
 ### All Endpoints
 
