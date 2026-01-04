@@ -1,4 +1,4 @@
-import { FilterSection } from "./types";
+import { FilterSection } from "@/utils/constants";
 
 export const ADVANCE_SEARCH_FILTERS: FilterSection[] = [
   {

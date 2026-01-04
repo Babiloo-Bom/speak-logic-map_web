@@ -22,4 +22,5 @@ export const baseDataRequestGetList: IDataRequestGetList = {
   limit: 9,
   sort_by: "relevance",
   sort_order: "desc",
+  browse: [],
 };

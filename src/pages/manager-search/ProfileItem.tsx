@@ -1,12 +1,14 @@
 import { Button, Rate, Skeleton } from "antd";
 import Image from "next/image";
 import { ManagerItem } from "./types";
+import { useRouter } from "next/router";
 
 interface Props {
   data?: ManagerItem;
 }
 
 export default function ProfileItem({ data }: Props) {
+  const router = useRouter();
   return (
     <div className="bg-white rounded-xl border border-[#CCCCCC] border-solid shadow-sm p-5 flex flex-col">
       {/* Header */}
@@ -52,9 +54,18 @@ export default function ProfileItem({ data }: Props) {
       </div>
 
       {/* Button */}
-      <div className="mt-auto pt-4">
+      <div className="mt-auto pt-4 flex items-center gap-4">
         <Button loading={!data} block size="large" className="bg-primary text-white hover:text-primary ">
           More Details
+        </Button>
+        <Button
+          onClick={() => router.push(`/manager-search/manager-rating?managerId=${data?.id}`)}
+          loading={!data}
+          block
+          size="large"
+          className="bg-white text-primary border border-primary hover:bg-primary hover:text-white"
+        >
+          Rating
         </Button>
       </div>
     </div>

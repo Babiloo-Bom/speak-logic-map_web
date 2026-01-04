@@ -50,18 +50,3 @@ export interface IDataResponseGetList {
   limit: number;
   providers: ProviderItem[];
 }
-
-export type FilterType = "checkbox" | "radio";
-
-export interface FilterOption {
-  label: string;
-  value: string | number;
-  count?: number;
-}
-
-export interface FilterSection {
-  key: string;
-  title: string;
-  type: FilterType;
-  options: FilterOption[];
-}

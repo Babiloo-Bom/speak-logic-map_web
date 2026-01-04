@@ -55,7 +55,7 @@ const ManagerRating = () => {
       <Steps current={currentStep} labelPlacement="vertical" items={items} className="manager-steps" />
 
       <div style={contentStyle}>{steps[currentStep].content}</div>
-      <div style={{ marginTop: 24 }}>
+      {/* <div style={{ marginTop: 24 }}>
         {currentStep < steps.length - 1 && (
           <Button type="primary" onClick={() => next()}>
             Next
@@ -71,7 +71,7 @@ const ManagerRating = () => {
             Previous
           </Button>
         )}
-      </div>
+      </div> */}
     </div>
   );
 };

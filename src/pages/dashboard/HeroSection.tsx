@@ -1,24 +1,41 @@
 import { Button, Image, Input, Radio } from "antd";
 import FeatureItem from "./FeatureItem";
-import { SearchOutlined } from "@ant-design/icons";
+import { MenuOutlined, SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import { DASHBOARD_HEADER_TABS, itemsTabs } from "./constants";
+import { useState } from "react";
+import AdvanceSearch from "./AdvanceSearch";
+import { baseDataRequest } from "./request";
 
 const MapIcon = () => <Image preview={false} src="/icons/solar_map-outline.svg" alt="map" style={{ width: "1em", height: "1em" }} />;
 
 const HeroSection = () => {
   const router = useRouter();
+  const [openAdvanceSearch, setOpenAdvanceSearch] = useState(false);
+  const [dataRequest, setDataRequest] = useState(baseDataRequest);
 
   const handleRedirectToMap = (type: string) => {
+    const queryParams = new URLSearchParams();
+
+    // Thêm dataRequest vào query params
+    Object.entries(dataRequest).forEach(([key, value]) => {
+      if (value) {
+        queryParams.append(key, String(value));
+      }
+    });
+
+    const queryString = queryParams.toString();
+    const query = queryString ? `?${queryString}` : "";
+
     switch (type) {
       case "provider":
-        router.push("/provider-search");
+        router.push(`/provider-search${query}`);
         break;
       case "manager":
-        router.push("/manager-search");
+        router.push(`/manager-search${query}`);
         break;
       case "new":
-        router.push("/map/news");
+        router.push(`/map/news${query}`);
         break;
     }
   };
@@ -30,6 +47,15 @@ const HeroSection = () => {
         backgroundImage: "url('/img/bg-dashboard.png')",
       }}
     >
+      {openAdvanceSearch && (
+        <AdvanceSearch
+          open={openAdvanceSearch}
+          onClose={() => setOpenAdvanceSearch(false)}
+          dataRequest={dataRequest}
+          setDataRequest={setDataRequest}
+          handleClearAllFormSearch={() => setDataRequest(baseDataRequest)}
+        />
+      )}
       <div className="absolute inset-0 bg-black/30" />
 
       <div className="relative max-w-5xl mx-auto px-4 py-16 text-center text-white" style={{ fontFamily: "Urbanist, sans-serif" }}>
@@ -54,11 +80,16 @@ const HeroSection = () => {
 
         {/* Search */}
         <div className="flex flex-col md:flex-row gap-3 mx-auto">
-          <Input placeholder="Search all location" className="flex-1 px-4 py-3 rounded-md  !h-12" />
-          <button className="px-4 py-3 rounded-lg !h-12 !w-12 bg-[#324899] ">
-            <SearchOutlined className="text-white hover-text-[#324899]" />
+          <Input
+            value={dataRequest.q}
+            onChange={(e) => setDataRequest((prev) => ({ ...prev, q: e.target.value }))}
+            placeholder="Search all location"
+            className="flex-1 px-4 py-3 rounded-md  !h-12"
+          />
+          <button className="px-4 py-3 rounded-lg !h-12 !w-12 bg-primary">
+            <SearchOutlined className="text-white" onClick={() => handleRedirectToMap("manager")} />
           </button>
-          <button className="px-4 py-3 bg-[#324899] rounded-md !h-12">☰</button>
+          <Button icon={<MenuOutlined />} onClick={() => setOpenAdvanceSearch(true)} className="border-primary text-primary hover:text-primary !h-12 !w-12" />
         </div>
 
         {/* Feature cards */}

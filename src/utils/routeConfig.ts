@@ -13,11 +13,7 @@ export const PUBLIC_ROUTES: string[] = [
   "/auth/reset-password",
   "/auth/verify",
   "/login", // Legacy route that redirects
-  "/dashboard",
   "/unauthorized",
-  // "/manager-search",
-  // "/manager-rating",
-  // "/manager-search/manager-rating",
 ];
 
 // Define routes that require authentication but allow unverified users
@@ -25,6 +21,10 @@ export const UNVERIFIED_ALLOWED_ROUTES: string[] = [
   "/auth/verify",
   "/profile", // Allow users to access profile to resend verification
   "/unauthorized",
+  "/dashboard",
+  "/manager-search",
+  "/manager-rating",
+  "/manager-search/manager-rating",
 ];
 
 // Check if a route is public (doesn't require authentication)
@@ -57,7 +57,7 @@ export const getRequiredRoles = (pathname: string): string[] => {
   // Define role-based routes here
   const roleBasedRoutes: Record<string, string[]> = {
     "/admin": ["admin"],
-    "/dashboard": ["admin", "user"],
+    "/dashboard": ["admin", "user", "manager"],
     // Add more role-based routes as needed
   };
 

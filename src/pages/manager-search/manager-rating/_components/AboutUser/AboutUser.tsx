@@ -1,57 +1,40 @@
-import { Form, Input } from "antd";
+import { Form, Input, Button } from "antd";
 import React from "react";
-import { USER_FORM_FIELDS } from "./constants";
-import { Controller, useForm } from "react-hook-form";
+import { FormField, USER_FORM_FIELDS } from "./constants";
 
 type Props = {};
 
 const AboutUser = (props: Props) => {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const [form] = Form.useForm();
 
   const onSubmit = (data: any) => {
     console.log("Form Data:", data);
   };
 
-  const renderInput = (field: any) => {
-    switch (field.type) {
+  const renderInput = (config: FormField) => {
+    switch (config.type) {
       case "textarea":
-        return <Input.TextArea rows={4} />;
+        return <Input.TextArea rows={4} className="bg-[#F5F6FA]" placeholder={config.placeholder} />;
       default:
-        return <Input />;
+        return <Input size="large" className="bg-[#F5F6FA]" placeholder={config.placeholder} />;
     }
   };
-  return (
-    <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {USER_FORM_FIELDS.map((field) => (
-          <div key={field.name} className={field.colSpan === 2 ? "md:col-span-2" : ""}>
-            <Form.Item label={field.label} validateStatus={errors[field.name] ? "error" : ""} help={errors[field.name]?.message as string}>
-              <Controller
-                name={field.name}
-                control={control}
-                // rules={field.rules}
-                render={({ field: controllerField }) => (
-                  <div className="border border-dashed border-blue-400 rounded-lg p-1">
-                    {renderInput({
-                      ...field,
-                      ...controllerField,
-                    })}
-                  </div>
-                )}
-              />
-            </Form.Item>
-          </div>
-        ))}
-      </div>
 
-      <div className="flex justify-end mt-6">
-        <button type="submit" className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
-          Submit
-        </button>
+  return (
+    <Form form={form} layout="vertical" onFinish={onSubmit}>
+      <div className="bg-white border border-solid border-gray-300 rounded-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {USER_FORM_FIELDS.map((field) => (
+            <Form.Item key={field.name} name={field.name} label={field.label} rules={field.rules} className={field.colSpan === 2 ? "md:col-span-2" : ""}>
+              {renderInput(field)}
+            </Form.Item>
+          ))}
+        </div>
+        <div className="flex justify-end mt-6 w-full">
+          <Button type="primary" htmlType="submit" size="large" className="bg-primary hover:bg-primary px-6 py-2">
+            Next
+          </Button>
+        </div>
       </div>
     </Form>
   );

@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import ProfileList from "./ProfileList";
 import { IDataRequestGetList, IDataResponseGetList } from "./types";
 import HeaderSearch from "./HeaderSearch";
@@ -9,6 +10,7 @@ import { Pagination, PaginationProps } from "antd";
 import AdvanceSearch from "./AdvanceSearch";
 
 function ManagerSearch() {
+  const router = useRouter();
   const [data, setData] = useState<IDataResponseGetList>();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -22,10 +24,14 @@ function ManagerSearch() {
         setError("No authentication token found");
         return;
       }
+      const newRequest = {
+        ...req,
+        given_set: req.given_set ? true : false,
+        near_city: req.near_city ? true : false,
+      };
 
-      const queryString = buildQueryParams(req);
+      const queryString = buildQueryParams(newRequest);
       const url = `/api/managers/search${queryString ? `?${queryString}` : ""}`;
-      console.log("queryString; ", queryString);
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -48,8 +54,29 @@ function ManagerSearch() {
   };
 
   useEffect(() => {
-    fetchProfile(dataRequest);
-  }, []);
+    if (router.isReady) {
+      const queryParams = router.query;
+
+      const browsArray = queryParams.browse
+        ? typeof queryParams.browse === "string"
+          ? queryParams.browse.split(",").map((item) => item.trim())
+          : queryParams.browse
+        : [];
+
+      const mergedDataRequest: IDataRequestGetList = {
+        ...baseDataRequestGetList,
+        q: (queryParams.q as string) || "",
+        browse: browsArray,
+        operation: (queryParams.operation as string) || "and",
+        rating: (queryParams.rating as string) || "",
+        given_set: (queryParams.given_set as string) || "",
+        near_city: (queryParams.near_city as string) || "",
+      };
+
+      setDataRequest(mergedDataRequest);
+      fetchProfile(mergedDataRequest);
+    }
+  }, [router.isReady]);
 
   const onShowPageChange: PaginationProps["onChange"] = (page) => {
     const newDataRequest = {
@@ -67,6 +94,7 @@ function ManagerSearch() {
     };
     setDataRequest(newDataRequest);
     fetchProfile(newDataRequest);
+    setOpenAdvanceSearch(false);
   };
 
   const handleClearAllFormSearch = () => {
