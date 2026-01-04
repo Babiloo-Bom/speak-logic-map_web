@@ -7,7 +7,7 @@ const MainHeader = () => (
       </div>
 
       <nav className="hidden md:flex gap-6 text-sm font-medium">
-        <a href="#">Provider</a>
+        <a href="/provider-search">Provider</a>
         <a href="#">Problem</a>
         <a href="#">Function</a>
         <a href="#">News</a>

@@ -2,7 +2,7 @@ import { Button, Image, Input, Radio } from "antd";
 import FeatureItem from "./FeatureItem";
 import { SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
-import { itemsTabs } from "./constants";
+import { DASHBOARD_HEADER_TABS, itemsTabs } from "./constants";
 
 const MapIcon = () => <Image preview={false} src="/icons/solar_map-outline.svg" alt="map" style={{ width: "1em", height: "1em" }} />;
 
@@ -12,7 +12,7 @@ const HeroSection = () => {
   const handleRedirectToMap = (type: string) => {
     switch (type) {
       case "provider":
-        router.push("/manager-search");
+        router.push("/provider-search");
         break;
       case "manager":
         router.push("/manager-search");
@@ -73,9 +73,9 @@ const HeroSection = () => {
         {/* Filter */}
         <div className="mt-6 bg-white/30 border border-white border-solid backdrop-blur rounded-xl p-4">
           <div className="flex flex-wrap justify-center gap-2 mb-4">
-            {["Providers", "Functions", "Descriptions", "Problems", "All"].map((item) => (
-              <button key={item} className="px-4 py-2 bg-[#324899] text-white rounded-md text-sm">
-                {item}
+            {DASHBOARD_HEADER_TABS.map((item) => (
+              <button key={item.field} className="px-4 py-2 bg-[#324899] text-white rounded-md text-sm">
+                {item.label}
               </button>
             ))}
           </div>

@@ -1,14 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import ProfileList from "./ProfileList";
-import { IDataRequestGetList, IDataResponseGetList } from "./types";
+import { IDataRequestGetList, ProviderItem, IDataResponseGetList } from "./types";
 import HeaderSearch from "./HeaderSearch";
 import { buildQueryParams, getAuthToken } from "@/utils/constants";
 import { baseDataRequestGetList } from "./request";
 import { Pagination, PaginationProps } from "antd";
 import AdvanceSearch from "./AdvanceSearch";
 
-function ManagerSearch() {
+function ProviderSearch() {
   const [data, setData] = useState<IDataResponseGetList>();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -24,7 +24,7 @@ function ManagerSearch() {
       }
 
       const queryString = buildQueryParams(req);
-      const url = `/api/managers/search${queryString ? `?${queryString}` : ""}`;
+      const url = `/api/providers/search${queryString ? `?${queryString}` : ""}`;
       console.log("queryString; ", queryString);
       const response = await fetch(url, {
         headers: {
@@ -35,11 +35,11 @@ function ManagerSearch() {
       if (response.ok) {
         const result: IDataResponseGetList = await response.json();
         setData(result);
-        setSuccess("Managers loaded successfully");
+        setSuccess("Providers loaded successfully");
         setError("");
       } else {
         const errorData = await response.json();
-        setError(errorData.error || "Failed to fetch managers");
+        setError(errorData.error || "Failed to fetch providers");
       }
     } catch (error) {
       setError("Network error. Please try again.");
@@ -94,7 +94,7 @@ function ManagerSearch() {
         />
         <div className="mx-8">
           <div className="mt-8">
-            <ProfileList data={data?.managers} />
+            <ProfileList data={data?.providers} />
           </div>
           <div className="mt-4">
             <Pagination align="center" defaultCurrent={1} total={data?.total || 0} responsive onChange={onShowPageChange} />
@@ -105,4 +105,4 @@ function ManagerSearch() {
   );
 }
 
-export default ManagerSearch;
+export default ProviderSearch;
