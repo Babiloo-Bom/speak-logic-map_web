@@ -17,6 +17,7 @@ export interface ManagerItem {
   last_name: string;
   title: string;
   function: string;
+  image_url: string;
 }
 
 export interface IDataRequestGetList {

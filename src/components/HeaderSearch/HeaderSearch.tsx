@@ -1,14 +1,25 @@
 import { Input, Select, Button } from "antd";
 import { SearchOutlined, FilterOutlined, MenuOutlined } from "@ant-design/icons";
 import Image from "next/image";
+import { IDataRequestGetList } from "@/pages/manager-search/types";
 
 interface HeaderSearchProps {
   title?: string;
   imageUrl: string;
   onOpenAdvanceSearch?: () => void;
+  dataRequest: IDataRequestGetList;
+  setDataRequest: React.Dispatch<React.SetStateAction<IDataRequestGetList>>;
+  handleSearch: () => void;
 }
 
-export default function HeaderSearch({ title = "Manager Search", imageUrl, onOpenAdvanceSearch }: HeaderSearchProps) {
+export default function HeaderSearch({
+  title = "Manager Search",
+  imageUrl,
+  onOpenAdvanceSearch,
+  dataRequest,
+  setDataRequest,
+  handleSearch,
+}: HeaderSearchProps) {
   return (
     <div>
       <div className="relative w-full h-40 sm:h-48 md:h-64 rounded-xl overflow-hidden mb-10">
@@ -20,7 +31,15 @@ export default function HeaderSearch({ title = "Manager Search", imageUrl, onOpe
         </div> */}
       </div>
       <div className="flex flex-col md:flex-row gap-3">
-        <Input size="large" placeholder="Search for anything..." prefix={<SearchOutlined />} className="md:flex-1" />
+        <Input
+          size="large"
+          placeholder="Search for anything..."
+          value={dataRequest.q}
+          onChange={(e) => setDataRequest({ ...dataRequest, q: e.target.value })}
+          prefix={<SearchOutlined />}
+          className="md:flex-1"
+          onPressEnter={() => handleSearch()}
+        />
 
         <Select
           size="large"

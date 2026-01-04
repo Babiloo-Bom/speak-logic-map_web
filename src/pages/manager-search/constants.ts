@@ -37,13 +37,13 @@ export const ADVANCE_SEARCH_FILTERS: FilterSection[] = [
   {
     key: "given_set",
     title: "The Given Set",
-    type: "checkbox",
+    type: "radio",
     options: [{ label: "Manager using the Given Set", value: "using_given_set" }],
   },
   {
     key: "location",
     title: "Location By",
-    type: "checkbox",
+    type: "radio",
     options: [{ label: "Near by City", value: "near_city" }],
   },
 ];

@@ -8,10 +8,14 @@ interface Props {
 
 export default function ProfileItem({ data }: Props) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex flex-col">
+    <div className="bg-white rounded-xl border border-[#CCCCCC] border-solid shadow-sm p-5 flex flex-col">
       {/* Header */}
       <div className="flex gap-4">
-        <Skeleton.Avatar active size={56} shape="circle" />
+        {data?.image_url ? (
+          <Image src={data?.image_url} alt={data.name} width={65} height={65} className="rounded-full object-cover !w-[65px] !h-[65px]" />
+        ) : (
+          <Skeleton.Avatar active size={56} shape="circle" />
+        )}
 
         <div className="flex-1">
           <Skeleton active loading={!data} title={{ width: "60%" }} paragraph={false}>

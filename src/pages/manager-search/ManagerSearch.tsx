@@ -25,7 +25,7 @@ function ManagerSearch() {
 
       const queryString = buildQueryParams(req);
       const url = `/api/managers/search${queryString ? `?${queryString}` : ""}`;
-
+      console.log("queryString; ", queryString);
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -60,17 +60,45 @@ function ManagerSearch() {
     fetchProfile(newDataRequest);
   };
 
-  console.log("openAdvanceSearch: ", openAdvanceSearch);
+  const handleSearch = () => {
+    const newDataRequest = {
+      ...dataRequest,
+      page: 1,
+    };
+    setDataRequest(newDataRequest);
+    fetchProfile(newDataRequest);
+  };
+
+  const handleClearAllFormSearch = () => {
+    setDataRequest(baseDataRequestGetList);
+    fetchProfile(baseDataRequestGetList);
+  };
+
   return (
     <div className="bg-white">
-      <AdvanceSearch open={openAdvanceSearch} onClose={() => setOpenAdvanceSearch(false)} />
+      <AdvanceSearch
+        open={openAdvanceSearch}
+        onClose={() => setOpenAdvanceSearch(false)}
+        dataRequest={dataRequest}
+        setDataRequest={setDataRequest}
+        handleSearch={handleSearch}
+        handleClearAllFormSearch={handleClearAllFormSearch}
+      />
       <div className="mx-12 px-4 py-8">
-        <HeaderSearch onOpenAdvanceSearch={() => setOpenAdvanceSearch(true)} imageUrl="/img/search-bar.png" />
-        <div className="mt-8">
-          <ProfileList data={data?.managers} />
-        </div>
-        <div className="mt-4">
-          <Pagination align="center" defaultCurrent={1} total={data?.total || 0} responsive onChange={onShowPageChange} />
+        <HeaderSearch
+          dataRequest={dataRequest}
+          setDataRequest={setDataRequest}
+          onOpenAdvanceSearch={() => setOpenAdvanceSearch(true)}
+          imageUrl="/img/search-bar.png"
+          handleSearch={handleSearch}
+        />
+        <div className="mx-8">
+          <div className="mt-8">
+            <ProfileList data={data?.managers} />
+          </div>
+          <div className="mt-4">
+            <Pagination align="center" defaultCurrent={1} total={data?.total || 0} responsive onChange={onShowPageChange} />
+          </div>
         </div>
       </div>
     </div>

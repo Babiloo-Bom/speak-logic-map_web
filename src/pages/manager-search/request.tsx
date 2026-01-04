@@ -19,7 +19,7 @@ export const baseDataRequestGetList: IDataRequestGetList = {
   radius: "",
   starts_with: "",
   page: 1,
-  limit: 6,
+  limit: 9,
   sort_by: "relevance",
   sort_order: "desc",
 };

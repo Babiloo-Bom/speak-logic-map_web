@@ -3,15 +3,18 @@ export const getAuthToken = () => {
 };
 
 // Convert dataRequest object to query string params
-export const buildQueryParams = (params: any): string => {
-  const queryParams = new URLSearchParams();
+export const buildQueryParams = (filters: Record<string, any>) => {
+  const params = new URLSearchParams();
 
-  Object.entries(params).forEach(([key, value]) => {
-    // Only add non-empty values to query string
-    if (value !== "" && value !== null && value !== undefined) {
-      queryParams.append(key, String(value));
+  Object.entries(filters).forEach(([key, value]) => {
+    if (!value) return;
+
+    if (Array.isArray(value)) {
+      value.forEach((v) => params.append(key, v));
+    } else if (value !== undefined && value !== null) {
+      params.set(key, String(value));
     }
   });
 
-  return queryParams.toString();
+  return params.toString();
 };

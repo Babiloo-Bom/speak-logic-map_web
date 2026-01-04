@@ -1,48 +1,27 @@
 import { Button, Checkbox, Drawer, Radio } from "antd";
 import React from "react";
 import { ADVANCE_SEARCH_FILTERS } from "./constants";
+import { IDataRequestGetList } from "./types";
 
 type Props = {
   open: boolean;
   onClose: () => void;
+  dataRequest: IDataRequestGetList;
+  setDataRequest: React.Dispatch<React.SetStateAction<IDataRequestGetList>>;
+  handleSearch: () => void;
+  handleClearAllFormSearch: () => void;
 };
 
 function AdvanceSearch(props: Props) {
-  const { open, onClose } = props;
+  const { open, onClose, dataRequest, setDataRequest, handleSearch, handleClearAllFormSearch } = props;
 
-  const renderInput = (config) => {
-    switch (config.type) {
-      case "checkbox":
-        return (
-          <Checkbox.Group>
-            {config.options.map((option) => (
-              <Checkbox key={option.value} value={option.value}>
-                {option.label}
-              </Checkbox>
-            ))}
-          </Checkbox.Group>
-        );
-      case "radio":
-        return (
-          <Radio.Group>
-            {config.options.map((option) => (
-              <Radio key={option.value} value={option.value}>
-                {option.label}
-              </Radio>
-            ))}
-          </Radio.Group>
-        );
-      default:
-        return null;
-    }
-  };
   return (
     <div className="bg-white">
       <Drawer
         title={
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold">ADVANCE SEARCH</h2>
-            <Button type="text" className="text-primary text-sm">
+            <Button type="text" className="text-primary text-sm" onClick={() => handleClearAllFormSearch()}>
               CLEAR ALL
             </Button>
           </div>
@@ -52,9 +31,18 @@ function AdvanceSearch(props: Props) {
         onClose={onClose}
         open={open}
         footer={
-          <div className="flex justify-between">
-            <Button onClick={onClose}>Close</Button>
-            <Button type="primary">Apply</Button>
+          <div className="flex items-center justify-between border-t border-blue-500/40">
+            {/* CLOSE */}
+            <Button type="text" onClick={onClose} className="w-1/2 h-12 text-gray-700 font-medium rounded-none hover:bg-transparent">
+              CLOSE
+            </Button>
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-blue-500/40" />
+
+            <Button type="text" onClick={handleSearch} className="w-1/2 h-12 text-primary font-semibold rounded-none hover:bg-transparent">
+              APPLY
+            </Button>
           </div>
         }
       >
@@ -64,7 +52,11 @@ function AdvanceSearch(props: Props) {
               <h4 className="font-semibold text-primary mb-2">{section.title}</h4>
 
               {section.type === "checkbox" ? (
-                <Checkbox.Group className="flex flex-col gap-3">
+                <Checkbox.Group
+                  className="flex flex-col gap-3"
+                  value={(dataRequest[section.key as keyof IDataRequestGetList] as unknown as any[]) || []}
+                  onChange={(values) => setDataRequest({ ...dataRequest, [section.key]: values })}
+                >
                   {section.options.map((option) => (
                     <div key={option.value} className="flex justify-between items-center">
                       <Checkbox value={option.value}>{option.label}</Checkbox>
@@ -73,7 +65,11 @@ function AdvanceSearch(props: Props) {
                   ))}
                 </Checkbox.Group>
               ) : (
-                <Radio.Group className="flex flex-col gap-3">
+                <Radio.Group
+                  className="flex flex-col gap-3"
+                  value={dataRequest[section.key as keyof IDataRequestGetList] as unknown}
+                  onChange={(e) => setDataRequest({ ...dataRequest, [section.key]: e.target.value })}
+                >
                   {section.options.map((option) => (
                     <Radio key={option.value} value={option.value}>
                       {option.label}
