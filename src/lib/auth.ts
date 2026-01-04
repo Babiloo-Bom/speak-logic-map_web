@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import { NextApiRequest, NextApiResponse } from 'next';
-import pool from './database';
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { NextApiRequest, NextApiResponse } from "next";
+import pool from "./database";
 
 export interface User {
   id: number;
@@ -42,8 +42,8 @@ interface UploadFile {
   uploader_id?: number;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key";
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "fallback-refresh-secret-key";
 
 // Password hashing utilities
 export const hashPassword = async (password: string): Promise<string> => {
@@ -63,8 +63,8 @@ export const generateTokens = (user: User) => {
     role: user.role,
   };
 
-  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' });
-  const refreshToken = jwt.sign({ userId: user.id }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
+  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: "15d" });
+  const refreshToken = jwt.sign({ userId: user.id }, JWT_REFRESH_SECRET, { expiresIn: "30d" });
 
   return { accessToken, refreshToken };
 };
@@ -92,10 +92,10 @@ export const createUser = async (email: string, password: string): Promise<User>
   try {
     const hashedPassword = await hashPassword(password);
 
-    const result = await client.query(
-      'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, role, status, created_at',
-      [email, hashedPassword]
-    );
+    const result = await client.query("INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, role, status, created_at", [
+      email,
+      hashedPassword,
+    ]);
 
     return result.rows[0];
   } finally {
@@ -107,10 +107,7 @@ export const findUserByEmail = async (email: string): Promise<UserWithPassword |
   const client = await pool.connect();
 
   try {
-    const result = await client.query(
-      'SELECT id, email, password_hash, role, status, created_at FROM users WHERE email = $1',
-      [email]
-    );
+    const result = await client.query("SELECT id, email, password_hash, role, status, created_at FROM users WHERE email = $1", [email]);
 
     return result.rows[0] || null;
   } finally {
@@ -122,10 +119,7 @@ export const findUserById = async (id: number): Promise<User | null> => {
   const client = await pool.connect();
 
   try {
-    const result = await client.query(
-      'SELECT id, email, role, status, created_at FROM users WHERE id = $1',
-      [id]
-    );
+    const result = await client.query("SELECT id, email, role, status, created_at FROM users WHERE id = $1", [id]);
 
     return result.rows[0] || null;
   } finally {
@@ -137,10 +131,7 @@ export const updateUserStatus = async (id: number, status: string): Promise<void
   const client = await pool.connect();
 
   try {
-    await client.query(
-      'UPDATE users SET status = $1 WHERE id = $2',
-      [status, id]
-    );
+    await client.query("UPDATE users SET status = $1 WHERE id = $2", [status, id]);
   } finally {
     client.release();
   }
@@ -150,10 +141,7 @@ export const updateUserRole = async (id: number, role: string): Promise<void> =>
   const client = await pool.connect();
 
   try {
-    await client.query(
-      'UPDATE users SET role = $1 WHERE id = $2',
-      [role, id]
-    );
+    await client.query("UPDATE users SET role = $1 WHERE id = $2", [role, id]);
   } finally {
     client.release();
   }
@@ -164,10 +152,7 @@ export const updateUserPassword = async (id: number, newPassword: string): Promi
 
   try {
     const hashedPassword = await hashPassword(newPassword);
-    await client.query(
-      'UPDATE users SET password_hash = $1 WHERE id = $2',
-      [hashedPassword, id]
-    );
+    await client.query("UPDATE users SET password_hash = $1 WHERE id = $2", [hashedPassword, id]);
   } finally {
     client.release();
   }
@@ -178,10 +163,7 @@ export const getUserProfile = async (userId: number): Promise<UserProfile | null
   const client = await pool.connect();
 
   try {
-    const result = await client.query(
-      'SELECT * FROM profiles WHERE user_id = $1',
-      [userId]
-    );
+    const result = await client.query("SELECT * FROM profiles WHERE user_id = $1", [userId]);
 
     return result.rows[0] || null;
   } finally {
@@ -193,11 +175,12 @@ export const createOrUpdateProfile = async (profile: UserProfile): Promise<UserP
   const client = await pool.connect();
 
   try {
-    const result = await client.query(`
+    const result = await client.query(
+      `
       INSERT INTO profiles (user_id, first_name, last_name, title, function, location, geo_id, avatar_id, pen_name)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      ON CONFLICT (user_id) 
-      DO UPDATE SET 
+      ON CONFLICT (user_id)
+      DO UPDATE SET
         first_name = $2,
         last_name = $3,
         title = $4,
@@ -207,17 +190,19 @@ export const createOrUpdateProfile = async (profile: UserProfile): Promise<UserP
         avatar_id = $8,
         pen_name = $9
       RETURNING *
-    `, [
-      profile.user_id,
-      profile.first_name,
-      profile.last_name,
-      profile.title,
-      profile.function,
-      profile.location,
-      profile.geo_id,
-      profile.avatar_id,
-      profile.pen_name
-    ]);
+    `,
+      [
+        profile.user_id,
+        profile.first_name,
+        profile.last_name,
+        profile.title,
+        profile.function,
+        profile.location,
+        profile.geo_id,
+        profile.avatar_id,
+        profile.pen_name,
+      ]
+    );
 
     return result.rows[0];
   } finally {
@@ -261,7 +246,7 @@ export const findOrCreateUserFromSocialLogin = async (
       created_at: existingUser.created_at,
     };
 
-    if (user.status !== 'active') {
+    if (user.status !== "active") {
       const client = await pool.connect();
 
       try {
@@ -307,10 +292,7 @@ export const storeRefreshToken = async (userId: number, refreshToken: string): P
   try {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-    await client.query(
-      'INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES ($1, $2, $3)',
-      [userId, refreshToken, expiresAt]
-    );
+    await client.query("INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES ($1, $2, $3)", [userId, refreshToken, expiresAt]);
   } finally {
     client.release();
   }
@@ -320,10 +302,7 @@ export const validateRefreshToken = async (refreshToken: string): Promise<number
   const client = await pool.connect();
 
   try {
-    const result = await client.query(
-      'SELECT user_id FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()',
-      [refreshToken]
-    );
+    const result = await client.query("SELECT user_id FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()", [refreshToken]);
 
     return result.rows[0]?.user_id || null;
   } finally {
@@ -335,10 +314,7 @@ export const invalidateRefreshToken = async (refreshToken: string): Promise<void
   const client = await pool.connect();
 
   try {
-    await client.query(
-      'DELETE FROM refresh_tokens WHERE token = $1',
-      [refreshToken]
-    );
+    await client.query("DELETE FROM refresh_tokens WHERE token = $1", [refreshToken]);
   } finally {
     client.release();
   }
@@ -351,10 +327,7 @@ export const createVerificationToken = async (userId: number, token: string, typ
   try {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    await client.query(
-      'INSERT INTO user_tokens (token, user_id, token_type, expires_at) VALUES ($1, $2, $3, $4)',
-      [token, userId, type, expiresAt]
-    );
+    await client.query("INSERT INTO user_tokens (token, user_id, token_type, expires_at) VALUES ($1, $2, $3, $4)", [token, userId, type, expiresAt]);
   } finally {
     client.release();
   }
@@ -364,17 +337,11 @@ export const validateVerificationToken = async (token: string, type: string): Pr
   const client = await pool.connect();
 
   try {
-    const result = await client.query(
-      'SELECT user_id FROM user_tokens WHERE token = $1 AND token_type = $2 AND expires_at > NOW()',
-      [token, type]
-    );
+    const result = await client.query("SELECT user_id FROM user_tokens WHERE token = $1 AND token_type = $2 AND expires_at > NOW()", [token, type]);
 
     if (result.rows[0]) {
       // Delete the token after successful validation
-      await client.query(
-        'DELETE FROM user_tokens WHERE token = $1',
-        [token]
-      );
+      await client.query("DELETE FROM user_tokens WHERE token = $1", [token]);
 
       return result.rows[0].user_id;
     }
@@ -389,17 +356,11 @@ export const removeCodeUserToken = async (user_id: number): Promise<number | nul
   const client = await pool.connect();
 
   try {
-    const result = await client.query(
-      'SELECT user_id FROM user_tokens WHERE user_id = $1 AND token_type = $2',
-      [user_id, 'verify_password']
-    );
+    const result = await client.query("SELECT user_id FROM user_tokens WHERE user_id = $1 AND token_type = $2", [user_id, "verify_password"]);
 
     if (result.rows[0]) {
       // Delete the token after successful validation
-      await client.query(
-        'DELETE FROM user_tokens WHERE user_id = $1',
-        [user_id]
-      );
+      await client.query("DELETE FROM user_tokens WHERE user_id = $1", [user_id]);
 
       return result.rows[0].user_id;
     }
@@ -419,37 +380,37 @@ export const requireAuth = (roles: string[] = []) => {
   return (handler: (req: AuthenticatedRequest, res: NextApiResponse) => Promise<void> | void) => {
     return async (req: AuthenticatedRequest, res: NextApiResponse) => {
       try {
-        const token = req.headers.authorization?.replace('Bearer ', '');
+        const token = req.headers.authorization?.replace("Bearer ", "");
 
         if (!token) {
-          return res.status(401).json({ error: 'No token provided' });
+          return res.status(401).json({ error: "No token provided" });
         }
 
         const payload = verifyToken(token);
 
         if (!payload) {
-          return res.status(401).json({ error: 'Invalid token' });
+          return res.status(401).json({ error: "Invalid token" });
         }
 
         const user = await findUserById(payload.userId);
 
         if (!user) {
-          return res.status(401).json({ error: 'User not found' });
+          return res.status(401).json({ error: "User not found" });
         }
 
-        if (user.status !== 'active') {
-          return res.status(401).json({ error: 'Account not activated' });
+        if (user.status !== "active") {
+          return res.status(401).json({ error: "Account not activated" });
         }
 
         if (roles.length > 0 && !roles.includes(user.role)) {
-          return res.status(403).json({ error: 'Insufficient permissions' });
+          return res.status(403).json({ error: "Insufficient permissions" });
         }
 
         req.user = user;
         return handler(req, res);
       } catch (error) {
-        console.error('Auth middleware error:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        console.error("Auth middleware error:", error);
+        return res.status(500).json({ error: "Internal server error" });
       }
     };
   };
@@ -472,11 +433,14 @@ export const uploadFile = async (updateFile: UploadFile): Promise<FileAsset> => 
   const client = await pool.connect();
 
   try {
-    const result = await client.query(`
+    const result = await client.query(
+      `
       INSERT INTO file_assets (url, mime_type, size_bytes, uploader_id)
       VALUES ($1, $2, $3, $4)
       RETURNING id, url, mime_type, size_bytes, uploader_id, created_at;
-    `, [updateFile.url, updateFile.mime_type, updateFile.size_bytes, updateFile.uploader_id]);
+    `,
+      [updateFile.url, updateFile.mime_type, updateFile.size_bytes, updateFile.uploader_id]
+    );
 
     return result.rows[0] as FileAsset;
   } finally {
@@ -496,34 +460,23 @@ export interface FileAsset {
 export const getFileAssetById = async (id: number): Promise<FileAsset | null> => {
   const client = await pool.connect();
   try {
-    const result = await client.query(
-      'SELECT id, url, mime_type, size_bytes, uploader_id, created_at FROM file_assets WHERE id = $1',
-      [id]
-    );
+    const result = await client.query("SELECT id, url, mime_type, size_bytes, uploader_id, created_at FROM file_assets WHERE id = $1", [id]);
     return result.rows[0] || null;
   } finally {
     client.release();
   }
 };
 
-export const updateFileAsset = async (
-  id: number,
-  updateFile: UploadFile & { uploader_id?: number | bigint }
-): Promise<FileAsset | null> => {
+export const updateFileAsset = async (id: number, updateFile: UploadFile & { uploader_id?: number | bigint }): Promise<FileAsset | null> => {
   const client = await pool.connect();
-  console.log('Updating file asset:', updateFile);
+  console.log("Updating file asset:", updateFile);
 
   try {
     // Convert number or bigint to string if it exists
     const uploaderIdValue: number | bigint | undefined = updateFile.uploader_id;
-    const uploaderId: string | null = uploaderIdValue != null 
-      ? String(uploaderIdValue) 
-      : null;
-    
-    const checkFile = await client.query(
-      `SELECT id FROM file_assets WHERE id = $1 AND ($2::bigint IS NULL OR uploader_id = $2::bigint)`,
-      [id, uploaderId]
-    );
+    const uploaderId: string | null = uploaderIdValue != null ? String(uploaderIdValue) : null;
+
+    const checkFile = await client.query(`SELECT id FROM file_assets WHERE id = $1 AND ($2::bigint IS NULL OR uploader_id = $2::bigint)`, [id, uploaderId]);
 
     if (!checkFile.rows[0]) {
       // File doesn't exist, create new one
@@ -531,14 +484,17 @@ export const updateFileAsset = async (
         url: updateFile.url,
         mime_type: updateFile.mime_type,
         size_bytes: updateFile.size_bytes,
-        uploader_id: uploaderIdValue ? Number(uploaderIdValue) : undefined
+        uploader_id: uploaderIdValue ? Number(uploaderIdValue) : undefined,
       };
-      const newFileResult = await client.query(`
+      const newFileResult = await client.query(
+        `
         INSERT INTO file_assets (url, mime_type, size_bytes, uploader_id)
         VALUES ($1, $2, $3, $4)
         RETURNING id, url, mime_type, size_bytes, uploader_id, created_at;
-      `, [uploadData.url, uploadData.mime_type, uploadData.size_bytes, uploadData.uploader_id]);
-      
+      `,
+        [uploadData.url, uploadData.mime_type, uploadData.size_bytes, uploadData.uploader_id]
+      );
+
       return newFileResult.rows[0] || null;
     }
 
