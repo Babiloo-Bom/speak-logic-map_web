@@ -39,8 +39,7 @@ Authorization: Bearer <access_token>
   role: "manager";               // Role cố định
 
   // ========== Manager Image ==========
-  image_id?: number;             // ID ảnh đại diện manager
-  image_url?: string;            // URL ảnh đại diện manager
+  image_url?: string;            // URL ảnh đại diện manager (e.g., '/uploads/managers/alice.jpg')
 
   // ========== Location Info ==========
   lat?: number;                  // Latitude
@@ -124,7 +123,7 @@ Tạo một tài khoản manager mới.
   "expertise": "Project Management, Agile, Scrum",
   "status": "active",
   "is_given_set": true,
-  "image_id": 15,
+  "image_url": "/uploads/managers/nguyen-van-a.jpg",
   "lat": 21.0285,
   "lng": 105.8542,
   "geo_id": 1,
@@ -153,7 +152,7 @@ Tạo một tài khoản manager mới.
 | `expertise` | string | No | `null` | Chuyên môn/kỹ năng |
 | `status` | string | No | `"active"` | Trạng thái: `"active"`, `"pending"`, `"suspended"` |
 | `is_given_set` | boolean | No | `false` | Thuộc "The Given Set" |
-| `image_id` | number | No | `null` | ID ảnh đại diện (từ file_assets) |
+| `image_url` | string | No | `null` | URL ảnh đại diện (e.g., '/uploads/managers/photo.jpg') |
 | `lat` | number | No | `null` | Latitude |
 | `lng` | number | No | `null` | Longitude |
 | `geo_id` | number | No | `null` | ID vị trí địa lý (từ geopoints) |
@@ -191,8 +190,7 @@ Tạo một tài khoản manager mới.
   "is_given_set": true,
   "status": "active",
   "created_at": "2026-01-01T10:30:00.000Z",
-  "image_id": 15,
-  "image_url": "/uploads/manager_image.jpg",
+  "image_url": "/uploads/managers/nguyen-van-a.jpg",
   "lat": 21.0285,
   "lng": 105.8542,
   "city": "Hà Nội",
@@ -359,8 +357,7 @@ GET /api/managers/search?managers=nguyen&functions=development&operation=and&rat
       "is_given_set": true,
       "status": "active",
       "created_at": "2026-01-01T10:30:00.000Z",
-      "image_id": 15,
-      "image_url": "/uploads/manager_image.jpg",
+      "image_url": "/uploads/managers/nguyen-van-a.jpg",
       "lat": 21.0285,
       "lng": 105.8542,
       "city": "Hà Nội",
@@ -448,8 +445,7 @@ Lấy thông tin chi tiết của một manager theo ID.
   "is_given_set": true,
   "status": "active",
   "created_at": "2026-01-01T10:30:00.000Z",
-  "image_id": 15,
-  "image_url": "/uploads/manager_image.jpg",
+  "image_url": "/uploads/managers/nguyen-van-a.jpg",
   "lat": 21.0285,
   "lng": 105.8542,
   "city": "Hà Nội",
@@ -504,7 +500,7 @@ Cập nhật thông tin manager.
   "status": "suspended",
   "password": "newSecurePassword",
   "is_given_set": false,
-  "image_id": 20,
+  "image_url": "/uploads/managers/updated-photo.jpg",
   "lat": 10.7769,
   "lng": 106.7009,
   "geo_id": 2,
@@ -532,7 +528,7 @@ Cập nhật thông tin manager.
 | `status` | string | No | Trạng thái |
 | `password` | string | No | Mật khẩu mới |
 | `is_given_set` | boolean | No | Thuộc Given Set |
-| `image_id` | number | No | ID ảnh đại diện mới |
+| `image_url` | string | No | URL ảnh đại diện mới |
 | `lat` | number | No | Latitude |
 | `lng` | number | No | Longitude |
 | `geo_id` | number | No | ID vị trí địa lý |
@@ -585,13 +581,19 @@ Xóa một manager khỏi hệ thống (bao gồm user account và tất cả d�
 
 **GET** `/api/managers/{id}/rating`
 
-Lấy thông tin tổng hợp đánh giá của một manager.
+Lấy thông tin tổng hợp đánh giá của một manager. Form rating gồm 4 bước: About User, About Manager, About Function And Problem, About Feedback.
 
 #### Path Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|:--------:|-------------|
 | `id` | number | ✅ **Yes** | Manager ID |
+
+#### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `my_rating` | boolean | No | Nếu `true`, chỉ trả về rating của user hiện tại |
 
 #### Response
 
@@ -606,41 +608,100 @@ Lấy thông tin tổng hợp đánh giá của một manager.
       "id": 1,
       "manager_id": 42,
       "user_id": 100,
+      
+      "reviewer_name": "Nguyen Van A",
+      "reviewer_full_name": "Nguyen Van A",
+      "reviewer_email": "user@example.com",
+      "reviewer_phone": "+84123456789",
+      "reviewer_address": "123 Street, District 1, HCMC",
+      
+      "manager_name": "Tran Van B",
+      "manager_user_name": "tranvanb",
+      "manager_location": "Ha Noi",
+      "job_location": "Ho Chi Minh City",
+      "manager_url": "https://example.com/manager/42",
+      
+      "function_name": "Software Development",
+      "function_manager": "Tran Van B",
+      "used_function_from_manager": true,
+      "function_execution_date": "2026-01-01",
+      "problem_solver_manager_name": "Tran Van B",
+      "problem_to_be_solved": "Build a web application",
+      "manager_helped_identify_problem": true,
+      "function_solved_problem": true,
+      "problem_existed_before_function": true,
+      "problem_existed_after_function": false,
+      "function_provided_solved_problem": true,
+      
+      "provided_feedback_after_function": true,
+      "manager_applied_feedback": true,
+      
       "rating": 5,
       "comment": "Excellent manager, very helpful!",
       "created_at": "2026-01-01T10:30:00.000Z",
+      "updated_at": "2026-01-01T10:30:00.000Z",
       "user_email": "user@example.com",
       "user_name": "Nguyen Van A"
-    },
-    {
-      "id": 2,
-      "manager_id": 42,
-      "user_id": 101,
-      "rating": 4,
-      "comment": "Good communication skills",
-      "created_at": "2026-01-02T14:20:00.000Z",
-      "user_email": "user2@example.com",
-      "user_name": "Tran Van B"
     }
   ]
 }
 ```
 
-#### Response Fields
+#### Rating Object Fields
+
+##### Step 1: About User (Reviewer Info)
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `averageRating` | number | Rating trung bình (0-5) |
-| `ratingCount` | number | Tổng số đánh giá |
-| `ratings` | array | Danh sách chi tiết các đánh giá |
-| `ratings[].id` | number | ID của đánh giá |
-| `ratings[].manager_id` | number | ID của manager |
-| `ratings[].user_id` | number | ID của user đánh giá |
-| `ratings[].rating` | number | Điểm đánh giá (1-5) |
-| `ratings[].comment` | string | Bình luận (optional) |
-| `ratings[].created_at` | string | Thời gian đánh giá (ISO 8601) |
-| `ratings[].user_email` | string | Email của user đánh giá |
-| `ratings[].user_name` | string | Tên của user đánh giá (optional) |
+| `reviewer_name` | string | User Name - Tên người đánh giá |
+| `reviewer_full_name` | string | Full Name - Họ tên đầy đủ |
+| `reviewer_email` | string | Email Address - Địa chỉ email |
+| `reviewer_phone` | string | Phone Number - Số điện thoại |
+| `reviewer_address` | string | Address (Optional) - Địa chỉ |
+
+##### Step 2: About Manager
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `manager_name` | string | Manager name - Tên manager |
+| `manager_user_name` | string | User Name - Username của manager |
+| `manager_location` | string | Manager Location - Vị trí manager |
+| `job_location` | string | Job Location - Vị trí công việc |
+| `manager_url` | string | Manager URL - URL profile manager |
+
+##### Step 3: About Function And Problem
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `function_name` | string | Function Name - Tên function |
+| `function_manager` | string | Function Manager - Manager của function |
+| `used_function_from_manager` | boolean | Did you use the function from the Manager? |
+| `function_execution_date` | string | Function Execution Date (ISO date) |
+| `problem_solver_manager_name` | string | Manager name who helped you solve the problem? |
+| `problem_to_be_solved` | string | Problem to be solved by the function executed by the Manager |
+| `manager_helped_identify_problem` | boolean | Did the manager help you identify the problem properly? |
+| `function_solved_problem` | boolean | Did the function solve the problem? |
+| `problem_existed_before_function` | boolean | Did the problem exist before the function executed by the Manager? |
+| `problem_existed_after_function` | boolean | Did the problem exist after the function executed by the Manager? |
+| `function_provided_solved_problem` | boolean | Is the function provided by the Manager solved the problem? |
+
+##### Step 4: About Feedback
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `provided_feedback_after_function` | boolean | Did you provide feedback to the Manager after function executed to help the function executed properly to solve the problem? |
+| `manager_applied_feedback` | boolean | Did the Manager apply the feedback to help solve the problem? |
+
+##### Legacy/Computed Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `rating` | number | Overall rating (1-5, optional) |
+| `comment` | string | Additional comments |
+| `created_at` | string | Thời gian tạo (ISO 8601) |
+| `updated_at` | string | Thời gian cập nhật (ISO 8601) |
+| `user_email` | string | Email của user đánh giá |
+| `user_name` | string | Tên của user đánh giá |
 
 #### Error Responses
 
@@ -655,7 +716,7 @@ Lấy thông tin tổng hợp đánh giá của một manager.
 
 **POST** `/api/managers/{id}/rating`
 
-Thêm hoặc cập nhật đánh giá của user hiện tại cho manager. Mỗi user chỉ có thể đánh giá một manager một lần, nếu đánh giá lại sẽ cập nhật đánh giá cũ.
+Thêm hoặc cập nhật đánh giá của user hiện tại cho manager. Form rating gồm 4 bước với nhiều trường thông tin chi tiết. Mỗi user chỉ có thể đánh giá một manager một lần, nếu đánh giá lại sẽ cập nhật đánh giá cũ.
 
 #### Path Parameters
 
@@ -667,6 +728,33 @@ Thêm hoặc cập nhật đánh giá của user hiện tại cho manager. Mỗi
 
 ```json
 {
+  "reviewer_name": "Nguyen Van A",
+  "reviewer_full_name": "Nguyen Van A",
+  "reviewer_email": "user@example.com",
+  "reviewer_phone": "+84123456789",
+  "reviewer_address": "123 Street, District 1, HCMC",
+  
+  "manager_name": "Tran Van B",
+  "manager_user_name": "tranvanb",
+  "manager_location": "Ha Noi",
+  "job_location": "Ho Chi Minh City",
+  "manager_url": "https://example.com/manager/42",
+  
+  "function_name": "Software Development",
+  "function_manager": "Tran Van B",
+  "used_function_from_manager": true,
+  "function_execution_date": "2026-01-01",
+  "problem_solver_manager_name": "Tran Van B",
+  "problem_to_be_solved": "Build a web application",
+  "manager_helped_identify_problem": true,
+  "function_solved_problem": true,
+  "problem_existed_before_function": true,
+  "problem_existed_after_function": false,
+  "function_provided_solved_problem": true,
+  
+  "provided_feedback_after_function": true,
+  "manager_applied_feedback": true,
+  
   "rating": 5,
   "comment": "Excellent manager, very professional!"
 }
@@ -674,10 +762,55 @@ Thêm hoặc cập nhật đánh giá của user hiện tại cho manager. Mỗi
 
 #### Request Body Fields
 
+##### Step 1: About User (Reviewer Info)
+
 | Field | Type | Required | Description |
 |-------|------|:--------:|-------------|
-| `rating` | number | ✅ **Yes** | Điểm đánh giá (1-5) |
-| `comment` | string | No | Bình luận (optional) |
+| `reviewer_name` | string | No | User Name - Tên người đánh giá |
+| `reviewer_full_name` | string | No | Full Name - Họ tên đầy đủ |
+| `reviewer_email` | string | No | Email Address - Địa chỉ email |
+| `reviewer_phone` | string | No | Phone Number - Số điện thoại |
+| `reviewer_address` | string | No | Address (Optional) - Địa chỉ |
+
+##### Step 2: About Manager
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `manager_name` | string | No | Manager name - Tên manager |
+| `manager_user_name` | string | No | User Name - Username của manager |
+| `manager_location` | string | No | Manager Location - Vị trí manager |
+| `job_location` | string | No | Job Location - Vị trí công việc |
+| `manager_url` | string | No | Manager URL - URL profile manager |
+
+##### Step 3: About Function And Problem
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `function_name` | string | No | Function Name - Tên function |
+| `function_manager` | string | No | Function Manager - Manager của function |
+| `used_function_from_manager` | boolean | No | Did you use the function from the Manager? |
+| `function_execution_date` | string | No | Function Execution Date (ISO date: YYYY-MM-DD) |
+| `problem_solver_manager_name` | string | No | Manager name who helped you solve the problem? |
+| `problem_to_be_solved` | string | No | Problem to be solved by the function executed by the Manager |
+| `manager_helped_identify_problem` | boolean | No | Did the manager help you identify the problem properly? |
+| `function_solved_problem` | boolean | No | Did the function solve the problem? |
+| `problem_existed_before_function` | boolean | No | Did the problem exist before the function executed by the Manager? |
+| `problem_existed_after_function` | boolean | No | Did the problem exist after the function executed by the Manager? |
+| `function_provided_solved_problem` | boolean | No | Is the function provided by the Manager solved the problem? |
+
+##### Step 4: About Feedback
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `provided_feedback_after_function` | boolean | No | Did you provide feedback to the Manager after function executed? |
+| `manager_applied_feedback` | boolean | No | Did the Manager apply the feedback to help solve the problem? |
+
+##### Legacy/Optional Fields
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `rating` | number | No | Overall rating (1-5) |
+| `comment` | string | No | Additional comments |
 
 #### Response
 
@@ -692,13 +825,16 @@ Thêm hoặc cập nhật đánh giá của user hiện tại cho manager. Mỗi
       "id": 50,
       "manager_id": 42,
       "user_id": 102,
+      "reviewer_name": "Current User",
+      "reviewer_full_name": "Current User Full Name",
+      "reviewer_email": "current.user@example.com",
+      "function_name": "Software Development",
+      "function_solved_problem": true,
       "rating": 5,
       "comment": "Excellent manager, very professional!",
       "created_at": "2026-01-03T09:15:00.000Z",
-      "user_email": "current.user@example.com",
-      "user_name": "Current User"
+      "updated_at": "2026-01-03T09:15:00.000Z"
     }
-    // ... other ratings
   ]
 }
 ```
@@ -799,7 +935,7 @@ const createManager = async (token, data) => {
       description: 'Experienced manager...',
       expertise: 'Project Management, Agile',
       is_given_set: true,
-      image_id: 15,
+      image_url: '/uploads/managers/john-doe.jpg',
       profile: {
         first_name: 'John',
         last_name: 'Doe',
@@ -867,15 +1003,23 @@ const getManagerRatings = async (token, id) => {
   return response.json();
 };
 
-// Thêm/cập nhật đánh giá manager
-const rateManager = async (token, id, rating, comment) => {
+// Thêm/cập nhật đánh giá manager (4-step form)
+const rateManager = async (token, id, ratingData) => {
   const response = await fetch(`${API_BASE}/${id}/rating`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ rating, comment })
+    body: JSON.stringify(ratingData)
+  });
+  return response.json();
+};
+
+// Lấy rating của user hiện tại
+const getMyRating = async (token, id) => {
+  const response = await fetch(`${API_BASE}/${id}/rating?my_rating=true`, {
+    headers: { 'Authorization': `Bearer ${token}` }
   });
   return response.json();
 };
@@ -925,9 +1069,39 @@ const managersStartWithN = await searchManagers(token, {
 const ratings = await getManagerRatings(token, 42);
 console.log(`Average: ${ratings.averageRating}, Total: ${ratings.ratingCount}`);
 
-// Đánh giá manager
-const newRating = await rateManager(token, 42, 5, 'Excellent manager!');
+// Đánh giá manager với 4-step form
+const newRating = await rateManager(token, 42, {
+  // Step 1: About User
+  reviewer_name: 'Nguyen Van A',
+  reviewer_full_name: 'Nguyen Van A',
+  reviewer_email: 'user@example.com',
+  reviewer_phone: '+84123456789',
+  
+  // Step 2: About Manager
+  manager_name: 'Tran Van B',
+  manager_location: 'Ha Noi',
+  job_location: 'Ho Chi Minh City',
+  
+  // Step 3: About Function And Problem
+  function_name: 'Software Development',
+  used_function_from_manager: true,
+  function_execution_date: '2026-01-01',
+  problem_to_be_solved: 'Build web app',
+  function_solved_problem: true,
+  
+  // Step 4: About Feedback
+  provided_feedback_after_function: true,
+  manager_applied_feedback: true,
+  
+  // Optional
+  rating: 5,
+  comment: 'Excellent manager!'
+});
 console.log('New average:', newRating.averageRating);
+
+// Lấy rating của mình cho manager
+const myRating = await getMyRating(token, 42);
+console.log('My rating:', myRating);
 
 // Xóa đánh giá của mình
 const result = await deleteManagerRating(token, 42);
@@ -948,7 +1122,7 @@ curl -X POST http://localhost:3000/api/managers \
     "description": "Test description",
     "expertise": "Testing, QA",
     "is_given_set": true,
-    "image_id": 15,
+    "image_url": "/uploads/managers/test-manager.jpg",
     "function_ids": [1, 2],
     "problem_ids": [1]
   }'
@@ -973,7 +1147,7 @@ curl -X PUT http://localhost:3000/api/managers/42 \
     "name": "Updated Name",
     "status": "suspended",
     "is_given_set": false,
-    "image_id": 20,
+    "image_url": "/uploads/managers/updated-photo.jpg",
     "function_ids": [1, 3, 5]
   }'
 
@@ -985,14 +1159,32 @@ curl -X DELETE http://localhost:3000/api/managers/42 \
 curl http://localhost:3000/api/managers/42/rating \
   -H "Authorization: Bearer YOUR_TOKEN"
 
-# Thêm/cập nhật đánh giá
+# Thêm/cập nhật đánh giá (4-step form)
 curl -X POST http://localhost:3000/api/managers/42/rating \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
+    "reviewer_name": "Nguyen Van A",
+    "reviewer_full_name": "Nguyen Van A",
+    "reviewer_email": "user@example.com",
+    "reviewer_phone": "+84123456789",
+    "manager_name": "Tran Van B",
+    "manager_location": "Ha Noi",
+    "job_location": "Ho Chi Minh City",
+    "function_name": "Software Development",
+    "used_function_from_manager": true,
+    "function_execution_date": "2026-01-01",
+    "problem_to_be_solved": "Build web app",
+    "function_solved_problem": true,
+    "provided_feedback_after_function": true,
+    "manager_applied_feedback": true,
     "rating": 5,
     "comment": "Excellent manager, very professional!"
   }'
+
+# Lấy rating của user hiện tại
+curl "http://localhost:3000/api/managers/42/rating?my_rating=true" \
+  -H "Authorization: Bearer YOUR_TOKEN"
 
 # Xóa đánh giá của mình
 curl -X DELETE http://localhost:3000/api/managers/42/rating \
@@ -1042,7 +1234,9 @@ CREATE TABLE managers (
   name VARCHAR(255) NOT NULL,                                       -- Required
   description TEXT,
   expertise TEXT,
-  image_id BIGINT REFERENCES file_assets(id),
+  -- Image: Lưu URL trực tiếp thay vì ID
+  -- Ví dụ: '/uploads/managers/alice.jpg' hoặc 'https://cdn.example.com/alice.jpg'
+  image_url VARCHAR(500),
   geo_id BIGINT REFERENCES geopoints(id),
   lat DECIMAL(10,7),
   lng DECIMAL(10,7),
@@ -1061,11 +1255,46 @@ CREATE TABLE managers (
 ```sql
 CREATE TABLE manager_ratings (
   id BIGSERIAL PRIMARY KEY,
-  manager_id BIGINT NOT NULL REFERENCES managers(id) ON DELETE CASCADE,  -- Required
-  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,        -- Required
-  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),           -- Required
-  comment TEXT,
+  manager_id BIGINT NOT NULL REFERENCES managers(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  
+  -- Step 1: About User (Reviewer Info)
+  reviewer_name VARCHAR(255),                    -- User Name
+  reviewer_full_name VARCHAR(255),               -- Full Name
+  reviewer_email VARCHAR(255),                   -- Email Address
+  reviewer_phone VARCHAR(50),                    -- Phone Number
+  reviewer_address TEXT,                         -- Address (Optional)
+  
+  -- Step 2: About Manager
+  manager_name VARCHAR(255),                     -- Manager name
+  manager_user_name VARCHAR(255),                -- User Name (of manager)
+  manager_location VARCHAR(255),                 -- Manager Location
+  job_location VARCHAR(255),                     -- Job Location
+  manager_url VARCHAR(500),                      -- Manager URL
+  
+  -- Step 3: About Function And Problem
+  function_name VARCHAR(255),                    -- Function Name
+  function_manager VARCHAR(255),                 -- Function Manager
+  used_function_from_manager BOOLEAN,            -- Did you use the function from the Manager?
+  function_execution_date DATE,                  -- Function Execution Date
+  problem_solver_manager_name VARCHAR(255),      -- Manager name who helped you solve the problem?
+  problem_to_be_solved TEXT,                     -- Problem to be solved
+  manager_helped_identify_problem BOOLEAN,       -- Did the manager help you identify the problem properly?
+  function_solved_problem BOOLEAN,               -- Did the function solve the problem?
+  problem_existed_before_function BOOLEAN,       -- Did the problem exist before the function executed?
+  problem_existed_after_function BOOLEAN,        -- Did the problem exist after the function executed?
+  function_provided_solved_problem BOOLEAN,      -- Is the function provided by the Manager solved the problem?
+  
+  -- Step 4: About Feedback
+  provided_feedback_after_function BOOLEAN,      -- Did you provide feedback after function executed?
+  manager_applied_feedback BOOLEAN,              -- Did the Manager apply the feedback?
+  
+  -- Legacy/Computed Fields
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),  -- Overall computed rating (optional)
+  comment TEXT,                                  -- Additional comments
+  
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (manager_id, user_id)
 );
 ```
