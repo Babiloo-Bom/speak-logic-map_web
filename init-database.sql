@@ -284,9 +284,54 @@ CREATE TABLE IF NOT EXISTS manager_ratings (
   id BIGSERIAL PRIMARY KEY,
   manager_id BIGINT NOT NULL REFERENCES managers(id) ON DELETE CASCADE,
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-  comment TEXT,
+  
+  -- ============================================
+  -- Step 1: About User (Reviewer Info)
+  -- ============================================
+  reviewer_name VARCHAR(255),                    -- User Name
+  reviewer_full_name VARCHAR(255),               -- Full Name
+  reviewer_email VARCHAR(255),                   -- Email Address
+  reviewer_phone VARCHAR(50),                    -- Phone Number
+  reviewer_address TEXT,                         -- Address (Optional)
+  
+  -- ============================================
+  -- Step 2: About Manager
+  -- ============================================
+  manager_name VARCHAR(255),                     -- Manager name
+  manager_user_name VARCHAR(255),                -- User Name (of manager)
+  manager_location VARCHAR(255),                 -- Manager Location
+  job_location VARCHAR(255),                     -- Job Location
+  manager_url VARCHAR(500),                      -- Manager URL
+  
+  -- ============================================
+  -- Step 3: About Function And Problem
+  -- ============================================
+  function_name VARCHAR(255),                    -- Function Name
+  function_manager VARCHAR(255),                 -- Function Manager
+  used_function_from_manager BOOLEAN,            -- Did you use the function from the Manager?
+  function_execution_date DATE,                  -- Function Execution Date
+  problem_solver_manager_name VARCHAR(255),      -- Manager name who helped you solve the problem?
+  problem_to_be_solved TEXT,                     -- Problem to be solved by the function executed by the Manager
+  manager_helped_identify_problem BOOLEAN,       -- Did the manager help you identify the problem properly?
+  function_solved_problem BOOLEAN,               -- Did the function solve the problem?
+  problem_existed_before_function BOOLEAN,       -- Did the problem exist before the function executed by the Manager?
+  problem_existed_after_function BOOLEAN,        -- Did the problem exist after the function executed by the Manager?
+  function_provided_solved_problem BOOLEAN,      -- Is the function provided by the Manager solved the problem?
+  
+  -- ============================================
+  -- Step 4: About Feedback
+  -- ============================================
+  provided_feedback_after_function BOOLEAN,      -- Did you provide feedback to the Manager after function executed?
+  manager_applied_feedback BOOLEAN,              -- Did the Manager apply the feedback to help solve the problem?
+  
+  -- ============================================
+  -- Legacy/Computed Fields
+  -- ============================================
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),  -- Overall computed rating (optional)
+  comment TEXT,                                  -- Additional comments
+  
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (manager_id, user_id)
 );
 
