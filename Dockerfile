@@ -54,6 +54,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Standalone only includes production dependencies
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Copy only essential public files (uploads should be mounted as volume)
 # Exclude uploads directory to reduce image size
