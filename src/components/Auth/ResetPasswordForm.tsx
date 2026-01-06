@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import * as crypto from 'crypto';
 import ForgotPasswordLayout from './ForgotPasswordLayout';
 import styles from './_Auth.module.scss';
 
@@ -27,7 +28,8 @@ const ResetPasswordForm: React.FC = () => {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    if (!token && router.isReady) {
+    const tokenValue = Array.isArray(token) ? token[0] : token;
+    if (!tokenValue && router.isReady) {
       router.push('/auth/forgot-password');
     }
   }, [token, router]);
@@ -73,13 +75,20 @@ const ResetPasswordForm: React.FC = () => {
     setSuccess('');
 
     try {
+      const tokenValue = Array.isArray(token) ? token[0] : token;
+      if (!tokenValue) {
+        setErrors({ general: 'Token is required' });
+        setIsLoading(false);
+        return;
+      }
+      
       const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          token,
+          token: tokenValue,
           password: formData.password,
         }),
       });

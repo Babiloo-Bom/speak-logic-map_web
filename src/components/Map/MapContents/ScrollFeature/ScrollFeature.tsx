@@ -148,7 +148,7 @@ const ScrollFeature = () => {
                         gutter={{xs: 8, sm: 16, md: 24, lg: 32}}>
                         <Col span={1} style={{display: "flex", paddingLeft: 10}}>
                             <Button onClick={handlePrevious} type="text" disabled={date < data.endDate || iPercent != data.endPerformance}
-                                    icon={<LeftCircleOutlined rev={undefined}/>}>
+                                    icon={<LeftCircleOutlined />}>
                             </Button>
                         </Col>
                         {
@@ -160,7 +160,7 @@ const ScrollFeature = () => {
                         }
                         <Col span={1} style={{display: "flex", justifyContent: "end"}}>
                             <Button onClick={handlePrior} type="text" disabled={date > data.startDate || iPercent != data.startPerformance}
-                                    icon={<RightCircleOutlined rev={undefined}/>}>
+                                    icon={<RightCircleOutlined />}>
                             </Button>
                         </Col>
                     </Row>

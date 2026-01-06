@@ -64,7 +64,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.simple
+      dockerfile: Dockerfile
     container_name: speak-logic-map-app
     restart: unless-stopped
     ports:

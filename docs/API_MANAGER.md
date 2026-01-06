@@ -104,6 +104,15 @@ Authorization: Bearer <access_token>
 | 7 | POST | `/api/managers/{id}/rating` | Thêm/cập nhật đánh giá |
 | 8 | DELETE | `/api/managers/{id}/rating` | Xóa đánh giá |
 
+### Project Identification Endpoints
+
+| # | Method | Endpoint | Mô tả |
+|---|--------|----------|-------|
+| 9 | GET | `/api/ratings/project-identification` | Lấy danh sách Project ID |
+| 10 | POST | `/api/ratings/project-identification` | Tạo Project ID mới |
+| 11 | GET | `/api/ratings/project-identification/{projectId}` | Lấy chi tiết Project ID |
+| 12 | DELETE | `/api/ratings/project-identification/{projectId}` | Xóa Project ID |
+
 ---
 
 ### 1. Tạo Manager Mới
@@ -884,6 +893,165 @@ Xóa đánh giá của user hiện tại cho manager.
 
 ---
 
+## 🆔 Project Identification API
+
+Project Identification là mã UUID duy nhất dùng để theo dõi và quản lý các đánh giá (ratings). Mỗi user có thể tạo nhiều Project ID để sử dụng khi đánh giá managers/providers.
+
+### 9. Lấy Danh Sách Project Identification
+
+**GET** `/api/ratings/project-identification`
+
+Lấy danh sách tất cả Project ID của user hiện tại.
+
+#### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|:--------:|---------|-------------|
+| `page` | number | No | `1` | Số trang |
+| `limit` | number | No | `20` | Số kết quả/trang (max: 100) |
+| `used` | boolean | No | - | Filter: `true` = đã sử dụng, `false` = chưa sử dụng |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "user_id": 100,
+      "project_id": "277CA003-06I0-478F-9385-4D2732771EBE",
+      "used": true,
+      "manager_id": 42,
+      "created_at": "2026-01-01T10:30:00.000Z",
+      "used_at": "2026-01-02T14:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "user_id": 100,
+      "project_id": "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+      "used": false,
+      "created_at": "2026-01-03T09:00:00.000Z"
+    }
+  ],
+  "total": 5,
+  "page": 1,
+  "limit": 20,
+  "totalPages": 1
+}
+```
+
+#### Project Identification Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | number | ID trong database |
+| `user_id` | number | ID của user sở hữu |
+| `project_id` | string | UUID duy nhất (e.g., "277CA003-06I0-478F-9385-4D2732771EBE") |
+| `used` | boolean | Đã sử dụng để rating chưa |
+| `manager_id` | number | ID manager được rating (nếu đã dùng) |
+| `provider_id` | number | ID provider được rating (nếu đã dùng) |
+| `created_at` | string | Thời gian tạo (ISO 8601) |
+| `used_at` | string | Thời gian sử dụng (ISO 8601) |
+
+---
+
+### 10. Tạo Project Identification Mới
+
+**POST** `/api/ratings/project-identification`
+
+Tạo một Project ID mới (Generate Project Identification).
+
+#### Request Body
+
+Không cần body - API tự động generate UUID.
+
+#### Response
+
+**201 Created**
+
+```json
+{
+  "id": 3,
+  "user_id": 100,
+  "project_id": "F9E8D7C6-B5A4-3210-9876-543210FEDCBA",
+  "used": false,
+  "created_at": "2026-01-04T08:00:00.000Z"
+}
+```
+
+---
+
+### 11. Lấy Chi Tiết Project Identification
+
+**GET** `/api/ratings/project-identification/{projectId}`
+
+Lấy thông tin chi tiết của một Project ID theo UUID.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `projectId` | string | ✅ **Yes** | UUID của Project ID |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "id": 1,
+  "user_id": 100,
+  "project_id": "277CA003-06I0-478F-9385-4D2732771EBE",
+  "used": true,
+  "manager_id": 42,
+  "created_at": "2026-01-01T10:30:00.000Z",
+  "used_at": "2026-01-02T14:00:00.000Z"
+}
+```
+
+#### Error Responses
+
+| Status | Message | Mô tả |
+|--------|---------|-------|
+| 400 | `Invalid project ID` | Project ID không hợp lệ |
+| 404 | `Project identification not found` | Không tìm thấy hoặc không thuộc user |
+
+---
+
+### 12. Xóa Project Identification
+
+**DELETE** `/api/ratings/project-identification/{projectId}`
+
+Xóa một Project ID. **Chỉ có thể xóa Project ID chưa được sử dụng**.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `projectId` | string | ✅ **Yes** | UUID của Project ID |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "message": "Project identification deleted successfully"
+}
+```
+
+#### Error Responses
+
+| Status | Message | Mô tả |
+|--------|---------|-------|
+| 400 | `Invalid project ID` | Project ID không hợp lệ |
+| 400 | `Cannot delete a used project identification` | Không thể xóa Project ID đã sử dụng |
+| 404 | `Project identification not found` | Không tìm thấy hoặc không thuộc user |
+
+---
+
 ## 🔐 Authentication & Authorization
 
 ### Headers Required
@@ -1106,6 +1274,61 @@ console.log('My rating:', myRating);
 // Xóa đánh giá của mình
 const result = await deleteManagerRating(token, 42);
 console.log('Rating deleted, new average:', result.averageRating);
+
+// ============================================
+// PROJECT IDENTIFICATION API
+// ============================================
+
+// Lấy danh sách Project IDs
+const getProjectIdentifications = async (token, filters = {}) => {
+  const params = new URLSearchParams(filters);
+  const response = await fetch(`/api/ratings/project-identification?${params}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// Generate Project Identification mới
+const generateProjectId = async (token) => {
+  const response = await fetch('/api/ratings/project-identification', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// Lấy chi tiết Project ID
+const getProjectIdDetail = async (token, projectId) => {
+  const response = await fetch(`/api/ratings/project-identification/${projectId}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// Xóa Project ID (chỉ khi chưa used)
+const deleteProjectId = async (token, projectId) => {
+  const response = await fetch(`/api/ratings/project-identification/${projectId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// USAGE: Generate và view Project IDs
+const newProjectId = await generateProjectId(token);
+console.log('New Project ID:', newProjectId.project_id);
+// Output: "277CA003-06I0-478F-9385-4D2732771EBE"
+
+// Lấy tất cả Project IDs
+const allProjectIds = await getProjectIdentifications(token);
+console.log('Total:', allProjectIds.total);
+
+// Lấy chỉ những Project ID chưa dùng
+const unusedProjectIds = await getProjectIdentifications(token, { used: 'false' });
+console.log('Unused:', unusedProjectIds.items);
+
+// Copy to clipboard (browser)
+navigator.clipboard.writeText(newProjectId.project_id);
 ```
 
 ### cURL
@@ -1188,6 +1411,30 @@ curl "http://localhost:3000/api/managers/42/rating?my_rating=true" \
 
 # Xóa đánh giá của mình
 curl -X DELETE http://localhost:3000/api/managers/42/rating \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# ============================================
+# PROJECT IDENTIFICATION API
+# ============================================
+
+# Generate Project Identification mới
+curl -X POST http://localhost:3000/api/ratings/project-identification \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Lấy danh sách tất cả Project IDs
+curl "http://localhost:3000/api/ratings/project-identification" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Lấy danh sách Project IDs chưa sử dụng
+curl "http://localhost:3000/api/ratings/project-identification?used=false" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Lấy chi tiết một Project ID
+curl "http://localhost:3000/api/ratings/project-identification/277CA003-06I0-478F-9385-4D2732771EBE" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Xóa Project ID (chỉ khi chưa used)
+curl -X DELETE "http://localhost:3000/api/ratings/project-identification/277CA003-06I0-478F-9385-4D2732771EBE" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -1321,6 +1568,26 @@ CREATE TABLE manager_problems (
 );
 ```
 
+### Table: `project_identifications`
+
+```sql
+CREATE TABLE project_identifications (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  project_id VARCHAR(36) UNIQUE NOT NULL,  -- UUID format: "277CA003-06I0-478F-9385-4D2732771EBE"
+  used BOOLEAN DEFAULT false,              -- Has this ID been used for a rating?
+  manager_id BIGINT REFERENCES managers(id) ON DELETE SET NULL,   -- If used for manager rating
+  provider_id BIGINT REFERENCES providers(id) ON DELETE SET NULL, -- If used for provider rating
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  used_at TIMESTAMP  -- When the ID was used
+);
+
+-- Indexes
+CREATE INDEX idx_project_identifications_user_id ON project_identifications(user_id);
+CREATE INDEX idx_project_identifications_project_id ON project_identifications(project_id);
+CREATE INDEX idx_project_identifications_used ON project_identifications(used);
+```
+
 ---
 
 ## 📈 Aggregations Response
@@ -1410,6 +1677,30 @@ Response từ search API bao gồm `aggregations` để hiển thị counts trê
 | Parameter | Required |
 |-----------|:--------:|
 | `id` (path) | ✅ |
+
+### GET `/api/ratings/project-identification` (List Project IDs)
+
+| Parameter | Required |
+|-----------|:--------:|
+| All query params | ❌ |
+
+### POST `/api/ratings/project-identification` (Generate Project ID)
+
+| Parameter | Required |
+|-----------|:--------:|
+| No body required | - |
+
+### GET `/api/ratings/project-identification/{projectId}` (Get Project ID)
+
+| Parameter | Required |
+|-----------|:--------:|
+| `projectId` (path) | ✅ |
+
+### DELETE `/api/ratings/project-identification/{projectId}` (Delete Project ID)
+
+| Parameter | Required |
+|-----------|:--------:|
+| `projectId` (path) | ✅ |
 
 ### All Endpoints
 

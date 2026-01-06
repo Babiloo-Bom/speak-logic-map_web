@@ -80,7 +80,7 @@ const Pallet: React.FC = (): JSX.Element => {
                 </div>
                 <div id="image-event"
                      className={`${styles['pallet-item']} ${globalStore.palletOption === 'image' ? styles['active'] : null}`}>
-                    <FileImageOutlined rev={undefined}/>
+                    <FileImageOutlined />
                     <span>Image</span>
                 </div>
             </div>
