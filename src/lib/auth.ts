@@ -468,17 +468,17 @@ export const generateRandomCode = (): string => {
   return code.toString().padStart(6, "0");
 };
 
-export const uploadFile = async (updateFile: UploadFile): Promise<UploadFile> => {
+export const uploadFile = async (updateFile: UploadFile): Promise<FileAsset> => {
   const client = await pool.connect();
 
   try {
     const result = await client.query(`
       INSERT INTO file_assets (url, mime_type, size_bytes, uploader_id)
       VALUES ($1, $2, $3, $4)
-      RETURNING id;
+      RETURNING id, url, mime_type, size_bytes, uploader_id, created_at;
     `, [updateFile.url, updateFile.mime_type, updateFile.size_bytes, updateFile.uploader_id]);
 
-    return result.rows[0];
+    return result.rows[0] as FileAsset;
   } finally {
     client.release();
   }
@@ -508,25 +508,39 @@ export const getFileAssetById = async (id: number): Promise<FileAsset | null> =>
 
 export const updateFileAsset = async (
   id: number,
-  updateFile: UploadFile & { uploader_id?: bigint }
+  updateFile: UploadFile & { uploader_id?: number | bigint }
 ): Promise<FileAsset | null> => {
   const client = await pool.connect();
   console.log('Updating file asset:', updateFile);
 
   try {
+    // Convert number or bigint to string if it exists
+    const uploaderIdValue: number | bigint | undefined = updateFile.uploader_id;
+    const uploaderId: string | null = uploaderIdValue != null 
+      ? String(uploaderIdValue) 
+      : null;
+    
     const checkFile = await client.query(
       `SELECT id FROM file_assets WHERE id = $1 AND ($2::bigint IS NULL OR uploader_id = $2::bigint)`,
-      [id, updateFile.uploader_id ? updateFile.uploader_id.toString() : null]
+      [id, uploaderId]
     );
 
     if (!checkFile.rows[0]) {
-      const result = uploadFile(updateFile);
-      return result;
+      // File doesn't exist, create new one
+      const uploadData: UploadFile = {
+        url: updateFile.url,
+        mime_type: updateFile.mime_type,
+        size_bytes: updateFile.size_bytes,
+        uploader_id: uploaderIdValue ? Number(uploaderIdValue) : undefined
+      };
+      const newFileResult = await client.query(`
+        INSERT INTO file_assets (url, mime_type, size_bytes, uploader_id)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, url, mime_type, size_bytes, uploader_id, created_at;
+      `, [uploadData.url, uploadData.mime_type, uploadData.size_bytes, uploadData.uploader_id]);
+      
+      return newFileResult.rows[0] || null;
     }
-
-    const uploaderId = updateFile.uploader_id
-      ? updateFile.uploader_id.toString()
-      : null;
 
     const result = await client.query(
       `UPDATE file_assets

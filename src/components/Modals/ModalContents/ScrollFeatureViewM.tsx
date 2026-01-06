@@ -47,7 +47,7 @@ const ScrollFeatureViewM = () => {
             key: 'x',
             render: (text, row) => (
                 <Button onClick={() => handleDelete(row)}
-                        icon={<DeleteOutlined rev={undefined}/>}>
+                        icon={<DeleteOutlined />}>
                 </Button>
             ),
         },

@@ -44,8 +44,9 @@ const SignUpForm: React.FC = () => {
 
   useEffect(() => {
     if (router.query.email) {
-      setEmail(decodeURIComponent(router.query.email));
-      formData.email = router.query.email
+      const emailValue = Array.isArray(router.query.email) ? router.query.email[0] : router.query.email;
+      setEmail(decodeURIComponent(emailValue));
+      formData.email = emailValue;
 
       if (router.query.sc) {
         setIsSocial(true)

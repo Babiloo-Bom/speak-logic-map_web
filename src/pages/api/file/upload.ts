@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { IncomingForm, File as FormidableFile } from "formidable";
 import fs from "fs";
 import path from "path";
-import { requireAuth, type AuthenticatedRequest, uploadFile, updateFileAsset } from "@/lib/auth";
+import { requireAuth, type AuthenticatedRequest, uploadFile, updateFileAsset, type FileAsset } from "@/lib/auth";
 
 export const config = {
   api: {

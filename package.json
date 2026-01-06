@@ -36,13 +36,15 @@
     "mobx": "^6.6.2",
     "mobx-react": "^7.5.3",
     "next": "^13.4.13",
-    "nodemailer": "^6.9.7",
+    "next-auth": "^4.24.5",
+    "nodemailer": "^7.0.7",
     "pg": "^8.11.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.1.0",
     "react-modal": "^3.16.1",
-    "react-switch": "^7.0.0"
+    "react-switch": "^7.0.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -56,6 +58,7 @@
     "@types/pg": "^8.10.9",
     "@types/react": "18.0.24",
     "@types/react-dom": "18.0.8",
+    "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^8.27.0",
     "eslint-config-next": "13.0.1",

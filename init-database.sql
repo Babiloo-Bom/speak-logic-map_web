@@ -279,6 +279,90 @@ CREATE TABLE IF NOT EXISTS managers (
   UNIQUE(user_id)
 );
 
+-- Ensure all columns exist (for existing tables)
+DO $$ 
+BEGIN
+  -- Add image_url if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'managers' AND column_name = 'image_url'
+  ) THEN
+    ALTER TABLE managers ADD COLUMN image_url VARCHAR(500);
+  END IF;
+  
+  -- Add near_city if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'managers' AND column_name = 'near_city'
+  ) THEN
+    ALTER TABLE managers ADD COLUMN near_city VARCHAR(120);
+  END IF;
+  
+  -- Add location_by if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'managers' AND column_name = 'location_by'
+  ) THEN
+    ALTER TABLE managers ADD COLUMN location_by BOOLEAN DEFAULT false;
+  END IF;
+  
+  -- Add is_given_set if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'managers' AND column_name = 'is_given_set'
+  ) THEN
+    ALTER TABLE managers ADD COLUMN is_given_set BOOLEAN DEFAULT false;
+  END IF;
+  
+  -- Add rating if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'managers' AND column_name = 'rating'
+  ) THEN
+    ALTER TABLE managers ADD COLUMN rating DECIMAL(3,2) DEFAULT 0.0;
+  END IF;
+  
+  -- Add rating_count if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'managers' AND column_name = 'rating_count'
+  ) THEN
+    ALTER TABLE managers ADD COLUMN rating_count INTEGER DEFAULT 0;
+  END IF;
+  
+  -- Add expertise if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'managers' AND column_name = 'expertise'
+  ) THEN
+    ALTER TABLE managers ADD COLUMN expertise TEXT;
+  END IF;
+  
+  -- Add geo_id if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'managers' AND column_name = 'geo_id'
+  ) THEN
+    ALTER TABLE managers ADD COLUMN geo_id BIGINT REFERENCES geopoints(id);
+  END IF;
+  
+  -- Add lat if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'managers' AND column_name = 'lat'
+  ) THEN
+    ALTER TABLE managers ADD COLUMN lat DECIMAL(10,7);
+  END IF;
+  
+  -- Add lng if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'managers' AND column_name = 'lng'
+  ) THEN
+    ALTER TABLE managers ADD COLUMN lng DECIMAL(10,7);
+  END IF;
+END $$;
+
 -- Manager ratings table (per-user ratings)
 CREATE TABLE IF NOT EXISTS manager_ratings (
   id BIGSERIAL PRIMARY KEY,
@@ -387,6 +471,82 @@ CREATE TABLE IF NOT EXISTS providers (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Ensure all columns exist (for existing tables)
+DO $$ 
+BEGIN
+  -- Add image_url if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'image_url'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN image_url VARCHAR(500);
+  END IF;
+  
+  -- Add near_city if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'near_city'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN near_city VARCHAR(120);
+  END IF;
+  
+  -- Add location_by if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'location_by'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN location_by BOOLEAN DEFAULT false;
+  END IF;
+  
+  -- Add is_applicable if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'is_applicable'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN is_applicable BOOLEAN DEFAULT true;
+  END IF;
+  
+  -- Add rating if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'rating'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN rating DECIMAL(3,2) DEFAULT 0.0;
+  END IF;
+  
+  -- Add geo_id if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'geo_id'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN geo_id BIGINT REFERENCES geopoints(id);
+  END IF;
+  
+  -- Add lat if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'lat'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN lat DECIMAL(10,7);
+  END IF;
+  
+  -- Add lng if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'lng'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN lng DECIMAL(10,7);
+  END IF;
+  
+  -- Add website_url if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'website_url'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN website_url VARCHAR(500);
+  END IF;
+END $$;
+
 -- Provider ratings table (per-user ratings)
 CREATE TABLE IF NOT EXISTS provider_ratings (
   id BIGSERIAL PRIMARY KEY,
@@ -412,6 +572,23 @@ CREATE TABLE IF NOT EXISTS provider_problems (
   problem_id BIGINT NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (provider_id, problem_id)
+);
+
+-- ============================================
+-- PROJECT IDENTIFICATION TABLES
+-- ============================================
+
+-- Project Identifications table (for rating tracking)
+-- Each user can generate multiple project IDs to track their ratings
+CREATE TABLE IF NOT EXISTS project_identifications (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  project_id VARCHAR(36) UNIQUE NOT NULL,  -- UUID format: "277CA003-06I0-478F-9385-4D2732771EBE"
+  used BOOLEAN DEFAULT false,              -- Has this ID been used for a rating?
+  manager_id BIGINT REFERENCES managers(id) ON DELETE SET NULL,   -- If used for manager rating
+  provider_id BIGINT REFERENCES providers(id) ON DELETE SET NULL, -- If used for provider rating
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  used_at TIMESTAMP  -- When the ID was used
 );
 
 -- ============================================
@@ -518,6 +695,14 @@ CREATE INDEX IF NOT EXISTS idx_provider_problems_problem_id ON provider_problems
 -- Provider ratings indexes
 CREATE INDEX IF NOT EXISTS idx_provider_ratings_provider_id ON provider_ratings(provider_id);
 CREATE INDEX IF NOT EXISTS idx_provider_ratings_user_id ON provider_ratings(user_id);
+
+-- Project identifications indexes
+CREATE INDEX IF NOT EXISTS idx_project_identifications_user_id ON project_identifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_project_identifications_project_id ON project_identifications(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_identifications_used ON project_identifications(used);
+CREATE INDEX IF NOT EXISTS idx_project_identifications_manager_id ON project_identifications(manager_id);
+CREATE INDEX IF NOT EXISTS idx_project_identifications_provider_id ON project_identifications(provider_id);
+CREATE INDEX IF NOT EXISTS idx_project_identifications_created_at ON project_identifications(created_at);
 
 -- ============================================
 -- GRANT PERMISSIONS
