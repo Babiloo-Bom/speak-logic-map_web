@@ -1,6 +1,20 @@
+import { Rule } from "antd/es/form";
+
 export const getAuthToken = () => {
   return localStorage.getItem("accessToken");
 };
+
+export type FormFieldType = "input" | "email" | "phone" | "textarea" | "radio" | "date";
+
+export interface FormField {
+  name: string;
+  label: string;
+  type: FormFieldType;
+  placeholder?: string;
+  rules?: Rule[];
+  colSpan?: number; // dùng cho responsive grid
+  validatoCustom?: any;
+}
 
 // Convert dataRequest object to query string params
 export const buildQueryParams = (filters: Record<string, any>) => {

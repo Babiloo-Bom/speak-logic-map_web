@@ -1,12 +1,56 @@
 import { Button, message, Steps, theme } from "antd";
 import React, { useState } from "react";
+import { useRouter } from "next/router";
 import AboutUser from "./_components/AboutUser/AboutUser";
+import { baseDataRequestRating } from "./request";
+import AboutManager from "./_components/AboutManager/AboutManager";
+import AboutFunction from "./_components/AboutFunction/AboutFunction";
+import AboutFeedback from "./_components/AboutFeedback/AboutFeedback";
+import { IDataRequestRating } from "./type";
+import { getAuthToken } from "@/utils/constants";
+import dayjs from "dayjs";
+
 const ManagerRating = () => {
+  const router = useRouter();
+  const { managerId } = router.query;
   const { token } = theme.useToken();
   const [currentStep, setCurrentStep] = useState(0);
+  const [dataRequestRating, setDataRequestRating] = useState(baseDataRequestRating);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const onChange = (value: number) => {
-    setCurrentStep(value);
+  const fetchRatingManager = async (req: IDataRequestRating) => {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        setError("No authentication token found");
+        return;
+      }
+      const newRequest = {
+        ...req,
+        function_execution_date: req.function_execution_date ? dayjs(req.function_execution_date).format("YYYY-MM-DD") : "",
+      };
+
+      const url = `/api/managers/${managerId}/rating`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newRequest),
+      });
+
+      if (response.ok) {
+        router.push("/manager-search");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to fetch managers");
+      }
+    } catch (error) {
+      setError("Network error. Please try again.");
+      console.error("Fetch error:", error);
+    }
   };
 
   const next = () => {
@@ -17,22 +61,26 @@ const ManagerRating = () => {
     setCurrentStep(currentStep - 1);
   };
 
+  const handleSubmit = () => {
+    fetchRatingManager(dataRequestRating);
+  };
+
   const steps = [
     {
       title: "About User",
-      content: <AboutUser />,
+      content: <AboutUser dataRequestRating={dataRequestRating} setDataRequestRating={setDataRequestRating} nextStep={next} />,
     },
     {
       title: <span className="whitespace-nowrap">About Manager</span>,
-      content: "Second-content",
+      content: <AboutManager dataRequestRating={dataRequestRating} setDataRequestRating={setDataRequestRating} nextStep={next} prevStep={prev} />,
     },
     {
       title: <span className="whitespace-nowrap">About Function and Problem</span>,
-      content: "Last-content",
+      content: <AboutFunction dataRequestRating={dataRequestRating} setDataRequestRating={setDataRequestRating} nextStep={next} prevStep={prev} />,
     },
     {
       title: <span className="whitespace-nowrap">About Feedback</span>,
-      content: "Last-content",
+      content: <AboutFeedback dataRequestRating={dataRequestRating} setDataRequestRating={setDataRequestRating} handleSubmit={handleSubmit} prevStep={prev} />,
     },
   ];
 

@@ -1,19 +1,8 @@
-import { Rule } from "antd/es/form";
-
-export type FormFieldType = "input" | "email" | "phone" | "textarea";
-
-export interface FormField {
-  name: string;
-  label: string;
-  type: FormFieldType;
-  placeholder?: string;
-  rules?: Rule[];
-  colSpan?: number; // dùng cho responsive grid
-}
+import { FormField } from "@/utils/constants";
 
 export const USER_FORM_FIELDS: FormField[] = [
   {
-    name: "username",
+    name: "reviewer_name",
     label: "User Name",
     type: "input",
     placeholder: "Enter User Name",
@@ -21,7 +10,7 @@ export const USER_FORM_FIELDS: FormField[] = [
     colSpan: 1,
   },
   {
-    name: "fullName",
+    name: "reviewer_full_name",
     label: "Full Name",
     type: "input",
     placeholder: "Enter Full Name",
@@ -29,7 +18,7 @@ export const USER_FORM_FIELDS: FormField[] = [
     colSpan: 1,
   },
   {
-    name: "email",
+    name: "reviewer_email",
     label: "Email Address",
     type: "email",
     placeholder: "Enter email",
@@ -40,7 +29,7 @@ export const USER_FORM_FIELDS: FormField[] = [
     colSpan: 1,
   },
   {
-    name: "phone",
+    name: "reviewer_phone",
     label: "Phone Number",
     type: "phone",
     placeholder: "Enter Phone Number",
@@ -48,7 +37,7 @@ export const USER_FORM_FIELDS: FormField[] = [
     colSpan: 1,
   },
   {
-    name: "address",
+    name: "reviewer_address",
     label: "Address (Optional)",
     type: "textarea",
     placeholder: "Enter Address",
