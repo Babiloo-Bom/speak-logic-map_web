@@ -65,10 +65,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Use BuildKit for better caching and faster builds
+      args:
+        BUILDKIT_INLINE_CACHE: 1
     container_name: speak-logic-map-app
     restart: unless-stopped
     ports:
       - "3000:3000"
+    volumes:
+      # Mount uploads directory as volume (not in image)
+      - uploads_data:/app/public/uploads
     environment:
       # Database Configuration
       DB_HOST: postgres
@@ -104,6 +110,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  uploads_data:
     driver: local
 
 networks:

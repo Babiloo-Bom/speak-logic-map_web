@@ -1,15 +1,21 @@
 # Dockerfile for Next.js development
+# Optimized for faster builds
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better caching
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies with cache mount for faster rebuilds
+# Try npm ci first (faster and more reliable), fallback to npm install if lock file is out of sync
+RUN --mount=type=cache,target=/root/.npm \
+    (npm ci --legacy-peer-deps --no-audit --loglevel=error || \
+     npm install --legacy-peer-deps --no-audit --loglevel=error) && \
+    npm cache clean --force
 
-# Copy source code
+# Copy source code (large files excluded via .dockerignore)
+# Note: uploads and other large files should be excluded
 COPY . .
 
 # Expose port
