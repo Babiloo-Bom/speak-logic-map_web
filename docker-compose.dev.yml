@@ -84,6 +84,8 @@ services:
       - .:/app
       - /app/node_modules
       - /app/.next
+      # Mount uploads directory as volume (not in image)
+      - uploads_data_dev:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -92,6 +94,8 @@ services:
 
 volumes:
   postgres_data_dev:
+    driver: local
+  uploads_data_dev:
     driver: local
 
 networks:
