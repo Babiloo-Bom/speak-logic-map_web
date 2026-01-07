@@ -25,6 +25,7 @@ export const UNVERIFIED_ALLOWED_ROUTES: string[] = [
   "/manager-search",
   "/manager-rating",
   "/manager-search/manager-rating",
+  "/my-rating",
 ];
 
 // Check if a route is public (doesn't require authentication)
