@@ -1001,7 +1001,7 @@ export const PrincipleLineIcon: React.NamedExoticComponent<IconProps> = memo(fun
 
 export const ScrollFeatureIcon: React.NamedExoticComponent<IconProps> = memo(function PersonIC(): React.ReactElement {
   return (
-      <MergeCellsOutlined style={{fontSize: '30px'}} rev={undefined} />
+      <MergeCellsOutlined style={{fontSize: '30px'}} />
   );
 });
 

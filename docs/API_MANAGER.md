@@ -39,8 +39,7 @@ Authorization: Bearer <access_token>
   role: "manager";               // Role cố định
 
   // ========== Manager Image ==========
-  image_id?: number;             // ID ảnh đại diện manager
-  image_url?: string;            // URL ảnh đại diện manager
+  image_url?: string;            // URL ảnh đại diện manager (e.g., '/uploads/managers/alice.jpg')
 
   // ========== Location Info ==========
   lat?: number;                  // Latitude
@@ -94,6 +93,28 @@ Authorization: Bearer <access_token>
 
 ## 🔗 Endpoints
 
+| # | Method | Endpoint | Mô tả |
+|---|--------|----------|-------|
+| 1 | POST | `/api/managers` | Tạo manager mới |
+| 2 | GET | `/api/managers/search` | Tìm kiếm managers |
+| 3 | GET | `/api/managers/{id}` | Lấy thông tin manager |
+| 4 | PUT/PATCH | `/api/managers/{id}` | Cập nhật manager |
+| 5 | DELETE | `/api/managers/{id}` | Xóa manager |
+| 6 | GET | `/api/managers/{id}/rating` | Lấy đánh giá manager |
+| 7 | POST | `/api/managers/{id}/rating` | Thêm/cập nhật đánh giá |
+| 8 | DELETE | `/api/managers/{id}/rating` | Xóa đánh giá |
+
+### Project Identification Endpoints
+
+| # | Method | Endpoint | Mô tả |
+|---|--------|----------|-------|
+| 9 | GET | `/api/ratings/project-identification` | Lấy danh sách Project ID |
+| 10 | POST | `/api/ratings/project-identification` | Tạo Project ID mới |
+| 11 | GET | `/api/ratings/project-identification/{projectId}` | Lấy chi tiết Project ID |
+| 12 | DELETE | `/api/ratings/project-identification/{projectId}` | Xóa Project ID |
+
+---
+
 ### 1. Tạo Manager Mới
 
 **POST** `/api/managers`
@@ -111,7 +132,7 @@ Tạo một tài khoản manager mới.
   "expertise": "Project Management, Agile, Scrum",
   "status": "active",
   "is_given_set": true,
-  "image_id": 15,
+  "image_url": "/uploads/managers/nguyen-van-a.jpg",
   "lat": 21.0285,
   "lng": 105.8542,
   "geo_id": 1,
@@ -140,7 +161,7 @@ Tạo một tài khoản manager mới.
 | `expertise` | string | No | `null` | Chuyên môn/kỹ năng |
 | `status` | string | No | `"active"` | Trạng thái: `"active"`, `"pending"`, `"suspended"` |
 | `is_given_set` | boolean | No | `false` | Thuộc "The Given Set" |
-| `image_id` | number | No | `null` | ID ảnh đại diện (từ file_assets) |
+| `image_url` | string | No | `null` | URL ảnh đại diện (e.g., '/uploads/managers/photo.jpg') |
 | `lat` | number | No | `null` | Latitude |
 | `lng` | number | No | `null` | Longitude |
 | `geo_id` | number | No | `null` | ID vị trí địa lý (từ geopoints) |
@@ -178,8 +199,7 @@ Tạo một tài khoản manager mới.
   "is_given_set": true,
   "status": "active",
   "created_at": "2026-01-01T10:30:00.000Z",
-  "image_id": 15,
-  "image_url": "/uploads/manager_image.jpg",
+  "image_url": "/uploads/managers/nguyen-van-a.jpg",
   "lat": 21.0285,
   "lng": 105.8542,
   "city": "Hà Nội",
@@ -346,8 +366,7 @@ GET /api/managers/search?managers=nguyen&functions=development&operation=and&rat
       "is_given_set": true,
       "status": "active",
       "created_at": "2026-01-01T10:30:00.000Z",
-      "image_id": 15,
-      "image_url": "/uploads/manager_image.jpg",
+      "image_url": "/uploads/managers/nguyen-van-a.jpg",
       "lat": 21.0285,
       "lng": 105.8542,
       "city": "Hà Nội",
@@ -435,8 +454,7 @@ Lấy thông tin chi tiết của một manager theo ID.
   "is_given_set": true,
   "status": "active",
   "created_at": "2026-01-01T10:30:00.000Z",
-  "image_id": 15,
-  "image_url": "/uploads/manager_image.jpg",
+  "image_url": "/uploads/managers/nguyen-van-a.jpg",
   "lat": 21.0285,
   "lng": 105.8542,
   "city": "Hà Nội",
@@ -491,7 +509,7 @@ Cập nhật thông tin manager.
   "status": "suspended",
   "password": "newSecurePassword",
   "is_given_set": false,
-  "image_id": 20,
+  "image_url": "/uploads/managers/updated-photo.jpg",
   "lat": 10.7769,
   "lng": 106.7009,
   "geo_id": 2,
@@ -519,7 +537,7 @@ Cập nhật thông tin manager.
 | `status` | string | No | Trạng thái |
 | `password` | string | No | Mật khẩu mới |
 | `is_given_set` | boolean | No | Thuộc Given Set |
-| `image_id` | number | No | ID ảnh đại diện mới |
+| `image_url` | string | No | URL ảnh đại diện mới |
 | `lat` | number | No | Latitude |
 | `lng` | number | No | Longitude |
 | `geo_id` | number | No | ID vị trí địa lý |
@@ -565,6 +583,472 @@ Xóa một manager khỏi hệ thống (bao gồm user account và tất cả d�
 | Status | Message | Mô tả |
 |--------|---------|-------|
 | 400 | `Invalid manager id` | ID không hợp lệ |
+
+---
+
+### 6. Lấy Đánh Giá Manager
+
+**GET** `/api/managers/{id}/rating`
+
+Lấy thông tin tổng hợp đánh giá của một manager. Form rating gồm 4 bước: About User, About Manager, About Function And Problem, About Feedback.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `id` | number | ✅ **Yes** | Manager ID |
+
+#### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `my_rating` | boolean | No | Nếu `true`, chỉ trả về rating của user hiện tại |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "averageRating": 4.5,
+  "ratingCount": 25,
+  "ratings": [
+    {
+      "id": 1,
+      "manager_id": 42,
+      "user_id": 100,
+      
+      "reviewer_name": "Nguyen Van A",
+      "reviewer_full_name": "Nguyen Van A",
+      "reviewer_email": "user@example.com",
+      "reviewer_phone": "+84123456789",
+      "reviewer_address": "123 Street, District 1, HCMC",
+      
+      "manager_name": "Tran Van B",
+      "manager_user_name": "tranvanb",
+      "manager_location": "Ha Noi",
+      "job_location": "Ho Chi Minh City",
+      "manager_url": "https://example.com/manager/42",
+      
+      "function_name": "Software Development",
+      "function_manager": "Tran Van B",
+      "used_function_from_manager": true,
+      "function_execution_date": "2026-01-01",
+      "problem_solver_manager_name": "Tran Van B",
+      "problem_to_be_solved": "Build a web application",
+      "manager_helped_identify_problem": true,
+      "function_solved_problem": true,
+      "problem_existed_before_function": true,
+      "problem_existed_after_function": false,
+      "function_provided_solved_problem": true,
+      
+      "provided_feedback_after_function": true,
+      "manager_applied_feedback": true,
+      
+      "rating": 5,
+      "comment": "Excellent manager, very helpful!",
+      "created_at": "2026-01-01T10:30:00.000Z",
+      "updated_at": "2026-01-01T10:30:00.000Z",
+      "user_email": "user@example.com",
+      "user_name": "Nguyen Van A"
+    }
+  ]
+}
+```
+
+#### Rating Object Fields
+
+##### Step 1: About User (Reviewer Info)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `reviewer_name` | string | User Name - Tên người đánh giá |
+| `reviewer_full_name` | string | Full Name - Họ tên đầy đủ |
+| `reviewer_email` | string | Email Address - Địa chỉ email |
+| `reviewer_phone` | string | Phone Number - Số điện thoại |
+| `reviewer_address` | string | Address (Optional) - Địa chỉ |
+
+##### Step 2: About Manager
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `manager_name` | string | Manager name - Tên manager |
+| `manager_user_name` | string | User Name - Username của manager |
+| `manager_location` | string | Manager Location - Vị trí manager |
+| `job_location` | string | Job Location - Vị trí công việc |
+| `manager_url` | string | Manager URL - URL profile manager |
+
+##### Step 3: About Function And Problem
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `function_name` | string | Function Name - Tên function |
+| `function_manager` | string | Function Manager - Manager của function |
+| `used_function_from_manager` | boolean | Did you use the function from the Manager? |
+| `function_execution_date` | string | Function Execution Date (ISO date) |
+| `problem_solver_manager_name` | string | Manager name who helped you solve the problem? |
+| `problem_to_be_solved` | string | Problem to be solved by the function executed by the Manager |
+| `manager_helped_identify_problem` | boolean | Did the manager help you identify the problem properly? |
+| `function_solved_problem` | boolean | Did the function solve the problem? |
+| `problem_existed_before_function` | boolean | Did the problem exist before the function executed by the Manager? |
+| `problem_existed_after_function` | boolean | Did the problem exist after the function executed by the Manager? |
+| `function_provided_solved_problem` | boolean | Is the function provided by the Manager solved the problem? |
+
+##### Step 4: About Feedback
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `provided_feedback_after_function` | boolean | Did you provide feedback to the Manager after function executed to help the function executed properly to solve the problem? |
+| `manager_applied_feedback` | boolean | Did the Manager apply the feedback to help solve the problem? |
+
+##### Legacy/Computed Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `rating` | number | Overall rating (1-5, optional) |
+| `comment` | string | Additional comments |
+| `created_at` | string | Thời gian tạo (ISO 8601) |
+| `updated_at` | string | Thời gian cập nhật (ISO 8601) |
+| `user_email` | string | Email của user đánh giá |
+| `user_name` | string | Tên của user đánh giá |
+
+#### Error Responses
+
+| Status | Message | Mô tả |
+|--------|---------|-------|
+| 400 | `Invalid manager id` | ID không hợp lệ |
+| 404 | `Manager not found` | Không tìm thấy manager |
+
+---
+
+### 7. Thêm/Cập Nhật Đánh Giá Manager
+
+**POST** `/api/managers/{id}/rating`
+
+Thêm hoặc cập nhật đánh giá của user hiện tại cho manager. Form rating gồm 4 bước với nhiều trường thông tin chi tiết. Mỗi user chỉ có thể đánh giá một manager một lần, nếu đánh giá lại sẽ cập nhật đánh giá cũ.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `id` | number | ✅ **Yes** | Manager ID |
+
+#### Request Body
+
+```json
+{
+  "reviewer_name": "Nguyen Van A",
+  "reviewer_full_name": "Nguyen Van A",
+  "reviewer_email": "user@example.com",
+  "reviewer_phone": "+84123456789",
+  "reviewer_address": "123 Street, District 1, HCMC",
+  
+  "manager_name": "Tran Van B",
+  "manager_user_name": "tranvanb",
+  "manager_location": "Ha Noi",
+  "job_location": "Ho Chi Minh City",
+  "manager_url": "https://example.com/manager/42",
+  
+  "function_name": "Software Development",
+  "function_manager": "Tran Van B",
+  "used_function_from_manager": true,
+  "function_execution_date": "2026-01-01",
+  "problem_solver_manager_name": "Tran Van B",
+  "problem_to_be_solved": "Build a web application",
+  "manager_helped_identify_problem": true,
+  "function_solved_problem": true,
+  "problem_existed_before_function": true,
+  "problem_existed_after_function": false,
+  "function_provided_solved_problem": true,
+  
+  "provided_feedback_after_function": true,
+  "manager_applied_feedback": true,
+  
+  "rating": 5,
+  "comment": "Excellent manager, very professional!"
+}
+```
+
+#### Request Body Fields
+
+##### Step 1: About User (Reviewer Info)
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `reviewer_name` | string | No | User Name - Tên người đánh giá |
+| `reviewer_full_name` | string | No | Full Name - Họ tên đầy đủ |
+| `reviewer_email` | string | No | Email Address - Địa chỉ email |
+| `reviewer_phone` | string | No | Phone Number - Số điện thoại |
+| `reviewer_address` | string | No | Address (Optional) - Địa chỉ |
+
+##### Step 2: About Manager
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `manager_name` | string | No | Manager name - Tên manager |
+| `manager_user_name` | string | No | User Name - Username của manager |
+| `manager_location` | string | No | Manager Location - Vị trí manager |
+| `job_location` | string | No | Job Location - Vị trí công việc |
+| `manager_url` | string | No | Manager URL - URL profile manager |
+
+##### Step 3: About Function And Problem
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `function_name` | string | No | Function Name - Tên function |
+| `function_manager` | string | No | Function Manager - Manager của function |
+| `used_function_from_manager` | boolean | No | Did you use the function from the Manager? |
+| `function_execution_date` | string | No | Function Execution Date (ISO date: YYYY-MM-DD) |
+| `problem_solver_manager_name` | string | No | Manager name who helped you solve the problem? |
+| `problem_to_be_solved` | string | No | Problem to be solved by the function executed by the Manager |
+| `manager_helped_identify_problem` | boolean | No | Did the manager help you identify the problem properly? |
+| `function_solved_problem` | boolean | No | Did the function solve the problem? |
+| `problem_existed_before_function` | boolean | No | Did the problem exist before the function executed by the Manager? |
+| `problem_existed_after_function` | boolean | No | Did the problem exist after the function executed by the Manager? |
+| `function_provided_solved_problem` | boolean | No | Is the function provided by the Manager solved the problem? |
+
+##### Step 4: About Feedback
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `provided_feedback_after_function` | boolean | No | Did you provide feedback to the Manager after function executed? |
+| `manager_applied_feedback` | boolean | No | Did the Manager apply the feedback to help solve the problem? |
+
+##### Legacy/Optional Fields
+
+| Field | Type | Required | Description |
+|-------|------|:--------:|-------------|
+| `rating` | number | No | Overall rating (1-5) |
+| `comment` | string | No | Additional comments |
+
+#### Response
+
+**200 OK** - Trả về rating summary sau khi cập nhật
+
+```json
+{
+  "averageRating": 4.6,
+  "ratingCount": 26,
+  "ratings": [
+    {
+      "id": 50,
+      "manager_id": 42,
+      "user_id": 102,
+      "reviewer_name": "Current User",
+      "reviewer_full_name": "Current User Full Name",
+      "reviewer_email": "current.user@example.com",
+      "function_name": "Software Development",
+      "function_solved_problem": true,
+      "rating": 5,
+      "comment": "Excellent manager, very professional!",
+      "created_at": "2026-01-03T09:15:00.000Z",
+      "updated_at": "2026-01-03T09:15:00.000Z"
+    }
+  ]
+}
+```
+
+#### Error Responses
+
+| Status | Message | Mô tả |
+|--------|---------|-------|
+| 400 | `Invalid manager id` | ID không hợp lệ |
+| 400 | `Rating must be between 1 and 5` | Rating không hợp lệ |
+| 401 | `Unauthorized` | Chưa đăng nhập |
+| 404 | `Manager not found` | Không tìm thấy manager |
+
+---
+
+### 8. Xóa Đánh Giá Manager
+
+**DELETE** `/api/managers/{id}/rating`
+
+Xóa đánh giá của user hiện tại cho manager.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `id` | number | ✅ **Yes** | Manager ID |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "message": "Rating deleted successfully",
+  "averageRating": 4.4,
+  "ratingCount": 24
+}
+```
+
+#### Error Responses
+
+| Status | Message | Mô tả |
+|--------|---------|-------|
+| 400 | `Invalid manager id` | ID không hợp lệ |
+| 401 | `Unauthorized` | Chưa đăng nhập |
+| 404 | `Manager not found` | Không tìm thấy manager |
+
+---
+
+## 🆔 Project Identification API
+
+Project Identification là mã UUID duy nhất dùng để theo dõi và quản lý các đánh giá (ratings). Mỗi user có thể tạo nhiều Project ID để sử dụng khi đánh giá managers/providers.
+
+### 9. Lấy Danh Sách Project Identification
+
+**GET** `/api/ratings/project-identification`
+
+Lấy danh sách tất cả Project ID của user hiện tại.
+
+#### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|:--------:|---------|-------------|
+| `page` | number | No | `1` | Số trang |
+| `limit` | number | No | `20` | Số kết quả/trang (max: 100) |
+| `used` | boolean | No | - | Filter: `true` = đã sử dụng, `false` = chưa sử dụng |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "user_id": 100,
+      "project_id": "277CA003-06I0-478F-9385-4D2732771EBE",
+      "used": true,
+      "manager_id": 42,
+      "created_at": "2026-01-01T10:30:00.000Z",
+      "used_at": "2026-01-02T14:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "user_id": 100,
+      "project_id": "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+      "used": false,
+      "created_at": "2026-01-03T09:00:00.000Z"
+    }
+  ],
+  "total": 5,
+  "page": 1,
+  "limit": 20,
+  "totalPages": 1
+}
+```
+
+#### Project Identification Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | number | ID trong database |
+| `user_id` | number | ID của user sở hữu |
+| `project_id` | string | UUID duy nhất (e.g., "277CA003-06I0-478F-9385-4D2732771EBE") |
+| `used` | boolean | Đã sử dụng để rating chưa |
+| `manager_id` | number | ID manager được rating (nếu đã dùng) |
+| `provider_id` | number | ID provider được rating (nếu đã dùng) |
+| `created_at` | string | Thời gian tạo (ISO 8601) |
+| `used_at` | string | Thời gian sử dụng (ISO 8601) |
+
+---
+
+### 10. Tạo Project Identification Mới
+
+**POST** `/api/ratings/project-identification`
+
+Tạo một Project ID mới (Generate Project Identification).
+
+#### Request Body
+
+Không cần body - API tự động generate UUID.
+
+#### Response
+
+**201 Created**
+
+```json
+{
+  "id": 3,
+  "user_id": 100,
+  "project_id": "F9E8D7C6-B5A4-3210-9876-543210FEDCBA",
+  "used": false,
+  "created_at": "2026-01-04T08:00:00.000Z"
+}
+```
+
+---
+
+### 11. Lấy Chi Tiết Project Identification
+
+**GET** `/api/ratings/project-identification/{projectId}`
+
+Lấy thông tin chi tiết của một Project ID theo UUID.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `projectId` | string | ✅ **Yes** | UUID của Project ID |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "id": 1,
+  "user_id": 100,
+  "project_id": "277CA003-06I0-478F-9385-4D2732771EBE",
+  "used": true,
+  "manager_id": 42,
+  "created_at": "2026-01-01T10:30:00.000Z",
+  "used_at": "2026-01-02T14:00:00.000Z"
+}
+```
+
+#### Error Responses
+
+| Status | Message | Mô tả |
+|--------|---------|-------|
+| 400 | `Invalid project ID` | Project ID không hợp lệ |
+| 404 | `Project identification not found` | Không tìm thấy hoặc không thuộc user |
+
+---
+
+### 12. Xóa Project Identification
+
+**DELETE** `/api/ratings/project-identification/{projectId}`
+
+Xóa một Project ID. **Chỉ có thể xóa Project ID chưa được sử dụng**.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `projectId` | string | ✅ **Yes** | UUID của Project ID |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "message": "Project identification deleted successfully"
+}
+```
+
+#### Error Responses
+
+| Status | Message | Mô tả |
+|--------|---------|-------|
+| 400 | `Invalid project ID` | Project ID không hợp lệ |
+| 400 | `Cannot delete a used project identification` | Không thể xóa Project ID đã sử dụng |
+| 404 | `Project identification not found` | Không tìm thấy hoặc không thuộc user |
 
 ---
 
@@ -619,7 +1103,7 @@ const createManager = async (token, data) => {
       description: 'Experienced manager...',
       expertise: 'Project Management, Agile',
       is_given_set: true,
-      image_id: 15,
+      image_url: '/uploads/managers/john-doe.jpg',
       profile: {
         first_name: 'John',
         last_name: 'Doe',
@@ -679,6 +1163,44 @@ const deleteManager = async (token, id) => {
   return response.status === 204;
 };
 
+// Lấy đánh giá manager
+const getManagerRatings = async (token, id) => {
+  const response = await fetch(`${API_BASE}/${id}/rating`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// Thêm/cập nhật đánh giá manager (4-step form)
+const rateManager = async (token, id, ratingData) => {
+  const response = await fetch(`${API_BASE}/${id}/rating`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(ratingData)
+  });
+  return response.json();
+};
+
+// Lấy rating của user hiện tại
+const getMyRating = async (token, id) => {
+  const response = await fetch(`${API_BASE}/${id}/rating?my_rating=true`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// Xóa đánh giá manager
+const deleteManagerRating = async (token, id) => {
+  const response = await fetch(`${API_BASE}/${id}/rating`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
 // ============================================
 // USAGE EXAMPLES
 // ============================================
@@ -710,6 +1232,103 @@ const specificManagers = await searchManagers(token, {
 const managersStartWithN = await searchManagers(token, {
   starts_with: 'N'
 });
+
+// Lấy đánh giá của manager
+const ratings = await getManagerRatings(token, 42);
+console.log(`Average: ${ratings.averageRating}, Total: ${ratings.ratingCount}`);
+
+// Đánh giá manager với 4-step form
+const newRating = await rateManager(token, 42, {
+  // Step 1: About User
+  reviewer_name: 'Nguyen Van A',
+  reviewer_full_name: 'Nguyen Van A',
+  reviewer_email: 'user@example.com',
+  reviewer_phone: '+84123456789',
+  
+  // Step 2: About Manager
+  manager_name: 'Tran Van B',
+  manager_location: 'Ha Noi',
+  job_location: 'Ho Chi Minh City',
+  
+  // Step 3: About Function And Problem
+  function_name: 'Software Development',
+  used_function_from_manager: true,
+  function_execution_date: '2026-01-01',
+  problem_to_be_solved: 'Build web app',
+  function_solved_problem: true,
+  
+  // Step 4: About Feedback
+  provided_feedback_after_function: true,
+  manager_applied_feedback: true,
+  
+  // Optional
+  rating: 5,
+  comment: 'Excellent manager!'
+});
+console.log('New average:', newRating.averageRating);
+
+// Lấy rating của mình cho manager
+const myRating = await getMyRating(token, 42);
+console.log('My rating:', myRating);
+
+// Xóa đánh giá của mình
+const result = await deleteManagerRating(token, 42);
+console.log('Rating deleted, new average:', result.averageRating);
+
+// ============================================
+// PROJECT IDENTIFICATION API
+// ============================================
+
+// Lấy danh sách Project IDs
+const getProjectIdentifications = async (token, filters = {}) => {
+  const params = new URLSearchParams(filters);
+  const response = await fetch(`/api/ratings/project-identification?${params}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// Generate Project Identification mới
+const generateProjectId = async (token) => {
+  const response = await fetch('/api/ratings/project-identification', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// Lấy chi tiết Project ID
+const getProjectIdDetail = async (token, projectId) => {
+  const response = await fetch(`/api/ratings/project-identification/${projectId}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// Xóa Project ID (chỉ khi chưa used)
+const deleteProjectId = async (token, projectId) => {
+  const response = await fetch(`/api/ratings/project-identification/${projectId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// USAGE: Generate và view Project IDs
+const newProjectId = await generateProjectId(token);
+console.log('New Project ID:', newProjectId.project_id);
+// Output: "277CA003-06I0-478F-9385-4D2732771EBE"
+
+// Lấy tất cả Project IDs
+const allProjectIds = await getProjectIdentifications(token);
+console.log('Total:', allProjectIds.total);
+
+// Lấy chỉ những Project ID chưa dùng
+const unusedProjectIds = await getProjectIdentifications(token, { used: 'false' });
+console.log('Unused:', unusedProjectIds.items);
+
+// Copy to clipboard (browser)
+navigator.clipboard.writeText(newProjectId.project_id);
 ```
 
 ### cURL
@@ -726,7 +1345,7 @@ curl -X POST http://localhost:3000/api/managers \
     "description": "Test description",
     "expertise": "Testing, QA",
     "is_given_set": true,
-    "image_id": 15,
+    "image_url": "/uploads/managers/test-manager.jpg",
     "function_ids": [1, 2],
     "problem_ids": [1]
   }'
@@ -751,12 +1370,71 @@ curl -X PUT http://localhost:3000/api/managers/42 \
     "name": "Updated Name",
     "status": "suspended",
     "is_given_set": false,
-    "image_id": 20,
+    "image_url": "/uploads/managers/updated-photo.jpg",
     "function_ids": [1, 3, 5]
   }'
 
 # Xóa
 curl -X DELETE http://localhost:3000/api/managers/42 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Lấy đánh giá manager
+curl http://localhost:3000/api/managers/42/rating \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Thêm/cập nhật đánh giá (4-step form)
+curl -X POST http://localhost:3000/api/managers/42/rating \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reviewer_name": "Nguyen Van A",
+    "reviewer_full_name": "Nguyen Van A",
+    "reviewer_email": "user@example.com",
+    "reviewer_phone": "+84123456789",
+    "manager_name": "Tran Van B",
+    "manager_location": "Ha Noi",
+    "job_location": "Ho Chi Minh City",
+    "function_name": "Software Development",
+    "used_function_from_manager": true,
+    "function_execution_date": "2026-01-01",
+    "problem_to_be_solved": "Build web app",
+    "function_solved_problem": true,
+    "provided_feedback_after_function": true,
+    "manager_applied_feedback": true,
+    "rating": 5,
+    "comment": "Excellent manager, very professional!"
+  }'
+
+# Lấy rating của user hiện tại
+curl "http://localhost:3000/api/managers/42/rating?my_rating=true" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Xóa đánh giá của mình
+curl -X DELETE http://localhost:3000/api/managers/42/rating \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# ============================================
+# PROJECT IDENTIFICATION API
+# ============================================
+
+# Generate Project Identification mới
+curl -X POST http://localhost:3000/api/ratings/project-identification \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Lấy danh sách tất cả Project IDs
+curl "http://localhost:3000/api/ratings/project-identification" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Lấy danh sách Project IDs chưa sử dụng
+curl "http://localhost:3000/api/ratings/project-identification?used=false" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Lấy chi tiết một Project ID
+curl "http://localhost:3000/api/ratings/project-identification/277CA003-06I0-478F-9385-4D2732771EBE" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Xóa Project ID (chỉ khi chưa used)
+curl -X DELETE "http://localhost:3000/api/ratings/project-identification/277CA003-06I0-478F-9385-4D2732771EBE" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -803,7 +1481,9 @@ CREATE TABLE managers (
   name VARCHAR(255) NOT NULL,                                       -- Required
   description TEXT,
   expertise TEXT,
-  image_id BIGINT REFERENCES file_assets(id),
+  -- Image: Lưu URL trực tiếp thay vì ID
+  -- Ví dụ: '/uploads/managers/alice.jpg' hoặc 'https://cdn.example.com/alice.jpg'
+  image_url VARCHAR(500),
   geo_id BIGINT REFERENCES geopoints(id),
   lat DECIMAL(10,7),
   lng DECIMAL(10,7),
@@ -822,11 +1502,46 @@ CREATE TABLE managers (
 ```sql
 CREATE TABLE manager_ratings (
   id BIGSERIAL PRIMARY KEY,
-  manager_id BIGINT NOT NULL REFERENCES managers(id) ON DELETE CASCADE,  -- Required
-  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,        -- Required
-  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),           -- Required
-  comment TEXT,
+  manager_id BIGINT NOT NULL REFERENCES managers(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  
+  -- Step 1: About User (Reviewer Info)
+  reviewer_name VARCHAR(255),                    -- User Name
+  reviewer_full_name VARCHAR(255),               -- Full Name
+  reviewer_email VARCHAR(255),                   -- Email Address
+  reviewer_phone VARCHAR(50),                    -- Phone Number
+  reviewer_address TEXT,                         -- Address (Optional)
+  
+  -- Step 2: About Manager
+  manager_name VARCHAR(255),                     -- Manager name
+  manager_user_name VARCHAR(255),                -- User Name (of manager)
+  manager_location VARCHAR(255),                 -- Manager Location
+  job_location VARCHAR(255),                     -- Job Location
+  manager_url VARCHAR(500),                      -- Manager URL
+  
+  -- Step 3: About Function And Problem
+  function_name VARCHAR(255),                    -- Function Name
+  function_manager VARCHAR(255),                 -- Function Manager
+  used_function_from_manager BOOLEAN,            -- Did you use the function from the Manager?
+  function_execution_date DATE,                  -- Function Execution Date
+  problem_solver_manager_name VARCHAR(255),      -- Manager name who helped you solve the problem?
+  problem_to_be_solved TEXT,                     -- Problem to be solved
+  manager_helped_identify_problem BOOLEAN,       -- Did the manager help you identify the problem properly?
+  function_solved_problem BOOLEAN,               -- Did the function solve the problem?
+  problem_existed_before_function BOOLEAN,       -- Did the problem exist before the function executed?
+  problem_existed_after_function BOOLEAN,        -- Did the problem exist after the function executed?
+  function_provided_solved_problem BOOLEAN,      -- Is the function provided by the Manager solved the problem?
+  
+  -- Step 4: About Feedback
+  provided_feedback_after_function BOOLEAN,      -- Did you provide feedback after function executed?
+  manager_applied_feedback BOOLEAN,              -- Did the Manager apply the feedback?
+  
+  -- Legacy/Computed Fields
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),  -- Overall computed rating (optional)
+  comment TEXT,                                  -- Additional comments
+  
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (manager_id, user_id)
 );
 ```
@@ -851,6 +1566,26 @@ CREATE TABLE manager_problems (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (manager_id, problem_id)
 );
+```
+
+### Table: `project_identifications`
+
+```sql
+CREATE TABLE project_identifications (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  project_id VARCHAR(36) UNIQUE NOT NULL,  -- UUID format: "277CA003-06I0-478F-9385-4D2732771EBE"
+  used BOOLEAN DEFAULT false,              -- Has this ID been used for a rating?
+  manager_id BIGINT REFERENCES managers(id) ON DELETE SET NULL,   -- If used for manager rating
+  provider_id BIGINT REFERENCES providers(id) ON DELETE SET NULL, -- If used for provider rating
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  used_at TIMESTAMP  -- When the ID was used
+);
+
+-- Indexes
+CREATE INDEX idx_project_identifications_user_id ON project_identifications(user_id);
+CREATE INDEX idx_project_identifications_project_id ON project_identifications(project_id);
+CREATE INDEX idx_project_identifications_used ON project_identifications(used);
 ```
 
 ---
@@ -922,6 +1657,50 @@ Response từ search API bao gồm `aggregations` để hiển thị counts trê
 | Parameter | Required |
 |-----------|:--------:|
 | All query params | ❌ |
+
+### GET `/api/managers/{id}/rating` (Get Ratings)
+
+| Parameter | Required |
+|-----------|:--------:|
+| `id` (path) | ✅ |
+
+### POST `/api/managers/{id}/rating` (Add/Update Rating)
+
+| Parameter | Required |
+|-----------|:--------:|
+| `id` (path) | ✅ |
+| `rating` (body) | ✅ |
+| `comment` (body) | ❌ |
+
+### DELETE `/api/managers/{id}/rating` (Delete Rating)
+
+| Parameter | Required |
+|-----------|:--------:|
+| `id` (path) | ✅ |
+
+### GET `/api/ratings/project-identification` (List Project IDs)
+
+| Parameter | Required |
+|-----------|:--------:|
+| All query params | ❌ |
+
+### POST `/api/ratings/project-identification` (Generate Project ID)
+
+| Parameter | Required |
+|-----------|:--------:|
+| No body required | - |
+
+### GET `/api/ratings/project-identification/{projectId}` (Get Project ID)
+
+| Parameter | Required |
+|-----------|:--------:|
+| `projectId` (path) | ✅ |
+
+### DELETE `/api/ratings/project-identification/{projectId}` (Delete Project ID)
+
+| Parameter | Required |
+|-----------|:--------:|
+| `projectId` (path) | ✅ |
 
 ### All Endpoints
 

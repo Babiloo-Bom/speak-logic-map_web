@@ -37,7 +37,17 @@ const VerifyEmailForm: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    formData.email = validateToken(token);
+    const tokenValue = Array.isArray(token) ? token[0] : token;
+    if (!tokenValue) {
+      setErrors({ general: 'Token is required' });
+      return;
+    }
+    const validatedEmail = validateToken(tokenValue);
+    if (!validatedEmail) {
+      setErrors({ general: 'Invalid or expired token' });
+      return;
+    }
+    formData.email = validatedEmail;
 
     setIsLoading(true);
     setErrors({});
@@ -69,7 +79,17 @@ const VerifyEmailForm: React.FC = () => {
 
   const handleResendCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    formData.email = validateToken(token);
+    const tokenValue = Array.isArray(token) ? token[0] : token;
+    if (!tokenValue) {
+      setErrors({ general: 'Token is required' });
+      return;
+    }
+    const validatedEmail = validateToken(tokenValue);
+    if (!validatedEmail) {
+      setErrors({ general: 'Invalid or expired token' });
+      return;
+    }
+    formData.email = validatedEmail;
 
     setIsLoading(true);
     setErrors({});

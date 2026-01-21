@@ -1,5 +1,7 @@
 # Docker Compose for Development
 # Usage: docker-compose -f docker-compose.dev.yml up
+#
+# Migration tự động chạy mỗi lần docker-compose up
 
 services:
   postgres:
@@ -15,7 +17,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+      - ./init-database.sql:/docker-entrypoint-initdb.d/01-init-database.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -23,6 +25,29 @@ services:
       retries: 5
     networks:
       - speak-logic-map-network
+
+  # Service chạy migration mỗi lần docker-compose up
+  db-migrate:
+    image: postgres:15-alpine
+    container_name: speak-logic-map-db-migrate-dev
+    volumes:
+      - ./init-database.sql:/init-database.sql:ro
+    environment:
+      PGPASSWORD: password123
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL...' &&
+        until pg_isready -h postgres -U postgres -d function_provider; do sleep 2; done &&
+        echo 'Running database migration...' &&
+        psql -h postgres -U postgres -d function_provider -f /init-database.sql &&
+        echo 'Migration complete!'
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - speak-logic-map-network
+    restart: "no"
 
   # Next.js Application in Development Mode
   app:
@@ -59,6 +84,8 @@ services:
       - .:/app
       - /app/node_modules
       - /app/.next
+      # Mount uploads directory as volume (not in image)
+      - uploads_data_dev:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -67,6 +94,8 @@ services:
 
 volumes:
   postgres_data_dev:
+    driver: local
+  uploads_data_dev:
     driver: local
 
 networks:
