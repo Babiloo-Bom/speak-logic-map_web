@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { observer } from 'mobx-react-lite';
-import { useUserStore } from '@/providers/RootStoreProvider';
-import { isPublicRoute, allowsUnverifiedUsers, getRequiredRoles } from '@/utils/routeConfig';
-import LoadingMain from '@/components/Loading/LoadingMain';
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { observer } from "mobx-react-lite";
+import { useUserStore } from "@/providers/RootStoreProvider";
+import { isPublicRoute, allowsUnverifiedUsers, getRequiredRoles } from "@/utils/routeConfig";
+import LoadingMain from "@/components/Loading/LoadingMain";
 
 interface RouteGuardProps {
   children: React.ReactNode;
@@ -19,7 +19,13 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
     const checkRouteAccess = async () => {
       const { pathname } = router;
 
-      // Allow public routes
+      // If user is authenticated and on a public route, redirect to dashboard
+      if (userStore.isAuthenticated && isPublicRoute(pathname)) {
+        router.replace("/dashboard");
+        return;
+      }
+
+      // Allow public routes for unauthenticated users
       if (isPublicRoute(pathname)) {
         setIsAuthorized(true);
         setIsLoading(false);
@@ -30,30 +36,30 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
       if (!userStore.isAuthenticated) {
         // Try to refresh the token
         const refreshSuccess = await userStore.refreshToken();
-        
+
         if (!refreshSuccess) {
           // Redirect to sign in if not authenticated
-          router.replace('/auth/sign-in');
+          router.replace("/auth/sign-in");
           return;
         }
       }
 
       // Check if user exists
       if (!userStore.user) {
-        router.replace('/auth/sign-in');
+        router.replace("/auth/sign-in");
         return;
       }
 
       // Check email verification requirement
-      if (userStore.user.status !== 'active' && !allowsUnverifiedUsers(pathname)) {
-        router.replace('/auth/verify');
+      if (userStore.user.status !== "active" && !allowsUnverifiedUsers(pathname)) {
+        router.replace("/auth/verify");
         return;
       }
 
       // Check role requirements
       const requiredRoles = getRequiredRoles(pathname);
       if (requiredRoles.length > 0 && !userStore.hasAnyRole(requiredRoles)) {
-        router.replace('/unauthorized');
+        router.replace("/unauthorized");
         return;
       }
 
@@ -79,12 +85,12 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
       // The main useEffect will handle the authorization check
     };
 
-    router.events.on('routeChangeStart', handleRouteChange);
-    router.events.on('routeChangeComplete', handleRouteChangeComplete);
+    router.events.on("routeChangeStart", handleRouteChange);
+    router.events.on("routeChangeComplete", handleRouteChangeComplete);
 
     return () => {
-      router.events.off('routeChangeStart', handleRouteChange);
-      router.events.off('routeChangeComplete', handleRouteChangeComplete);
+      router.events.off("routeChangeStart", handleRouteChange);
+      router.events.off("routeChangeComplete", handleRouteChangeComplete);
     };
   }, [router.events]);
 

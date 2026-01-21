@@ -21,21 +21,19 @@ const toNumber = (value: any, defaultValue: number): number => {
 };
 
 const toBoolean = (value: any): boolean | undefined => {
-  if (value === undefined || value === null || value === '') return undefined;
-  if (value === true || value === 'true' || value === '1') return true;
-  if (value === false || value === 'false' || value === '0') return false;
+  if (value === undefined || value === null || value === "") return undefined;
+  if (value === true || value === "true" || value === "1") return true;
+  if (value === false || value === "false" || value === "0") return false;
   return undefined;
 };
 
 // Haversine formula to calculate distance between two points
 const haversineDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
   const R = 6371; // Earth's radius in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
@@ -56,7 +54,6 @@ export async function getManagerById(id: number): Promise<Manager | null> {
           m.name,
           m.description,
           m.expertise,
-          m.image_id,
           m.lat,
           m.lng,
           m.rating,
@@ -70,20 +67,17 @@ export async function getManagerById(id: number): Promise<Manager | null> {
           p.last_name,
           p.title,
           p.function,
-          p.location,
           p.geo_id,
           p.avatar_id,
           p.pen_name,
           g.city,
           g.country,
-          fa_avatar.url as avatar_url,
-          fa_image.url as image_url
+          fa_avatar.url as avatar_url
         FROM managers m
         INNER JOIN users u ON u.id = m.user_id
         LEFT JOIN profiles p ON p.user_id = u.id
         LEFT JOIN geopoints g ON g.id = m.geo_id
         LEFT JOIN file_assets fa_avatar ON fa_avatar.id = p.avatar_id
-        LEFT JOIN file_assets fa_image ON fa_image.id = m.image_id
         WHERE m.id = $1
       `,
       [id]
@@ -94,7 +88,7 @@ export async function getManagerById(id: number): Promise<Manager | null> {
     }
 
     const row = result.rows[0];
-    
+
     // Get functions
     const functionsResult = await client.query(
       `
@@ -130,8 +124,6 @@ export async function getManagerById(id: number): Promise<Manager | null> {
       rating: parseFloat(row.rating) || 0,
       rating_count: row.rating_count || 0,
       is_given_set: row.is_given_set || false,
-      image_id: row.image_id ?? undefined,
-      image_url: row.image_url ?? undefined,
       lat: row.lat ? parseFloat(row.lat) : undefined,
       lng: row.lng ? parseFloat(row.lng) : undefined,
       geo_id: row.geo_id ?? undefined,
@@ -159,9 +151,7 @@ export async function getManagerById(id: number): Promise<Manager | null> {
 // SEARCH MANAGERS - Advanced Search
 // ============================================
 
-export async function searchManagers(
-  params: ManagerSearchParams
-): Promise<ManagerSearchResponse> {
+export async function searchManagers(params: ManagerSearchParams): Promise<ManagerSearchResponse> {
   const {
     q,
     managers: managersSearch,
@@ -169,7 +159,7 @@ export async function searchManagers(
     functions: functionsSearch,
     expertise: expertiseSearch,
     descriptions: descriptionsSearch,
-    operation = 'or',
+    operation = "or",
     rating,
     rating_min,
     rating_max,
@@ -182,8 +172,8 @@ export async function searchManagers(
     starts_with,
     page: rawPage,
     limit: rawLimit,
-    sort_by = 'created_at',
-    sort_order = 'desc',
+    sort_by = "created_at",
+    sort_order = "desc",
     status,
     include_functions,
     include_problems,
@@ -215,23 +205,23 @@ export async function searchManagers(
 
   // Alphabet filter (starts_with)
   if (starts_with && starts_with.length === 1) {
-    values.push(starts_with.toUpperCase() + '%');
+    values.push(starts_with.toUpperCase() + "%");
     where.push(`UPPER(m.name) LIKE $${values.length}`);
   }
 
   // Rating filters
   if (rating) {
     switch (rating) {
-      case '5':
+      case "5":
         where.push(`m.rating >= 4.5`);
         break;
-      case '4':
+      case "4":
         where.push(`m.rating >= 3.5 AND m.rating < 4.5`);
         break;
-      case '3':
+      case "3":
         where.push(`m.rating >= 2.5 AND m.rating < 3.5`);
         break;
-      case 'below2':
+      case "below2":
         where.push(`m.rating < 2.5`);
         break;
     }
@@ -251,11 +241,11 @@ export async function searchManagers(
 
   // General search (q)
   if (q && q.trim().length > 0) {
-    const term = operation === 'exact' ? q.trim() : `%${q.trim()}%`;
+    const term = operation === "exact" ? q.trim() : `%${q.trim()}%`;
     values.push(term);
     const idx = values.length;
-    
-    if (operation === 'exact') {
+
+    if (operation === "exact") {
       searchConditions.push(`(
         m.name = $${idx}
         OR m.description = $${idx}
@@ -276,11 +266,11 @@ export async function searchManagers(
 
   // Manager name search
   if (managersSearch && managersSearch.trim().length > 0) {
-    const term = operation === 'exact' ? managersSearch.trim() : `%${managersSearch.trim()}%`;
+    const term = operation === "exact" ? managersSearch.trim() : `%${managersSearch.trim()}%`;
     values.push(term);
     const idx = values.length;
-    
-    if (operation === 'exact') {
+
+    if (operation === "exact") {
       searchConditions.push(`m.name = $${idx}`);
     } else {
       searchConditions.push(`m.name ILIKE $${idx}`);
@@ -289,11 +279,11 @@ export async function searchManagers(
 
   // Description search
   if (descriptionsSearch && descriptionsSearch.trim().length > 0) {
-    const term = operation === 'exact' ? descriptionsSearch.trim() : `%${descriptionsSearch.trim()}%`;
+    const term = operation === "exact" ? descriptionsSearch.trim() : `%${descriptionsSearch.trim()}%`;
     values.push(term);
     const idx = values.length;
-    
-    if (operation === 'exact') {
+
+    if (operation === "exact") {
       searchConditions.push(`m.description = $${idx}`);
     } else {
       searchConditions.push(`m.description ILIKE $${idx}`);
@@ -302,11 +292,11 @@ export async function searchManagers(
 
   // Expertise search
   if (expertiseSearch && expertiseSearch.trim().length > 0) {
-    const term = operation === 'exact' ? expertiseSearch.trim() : `%${expertiseSearch.trim()}%`;
+    const term = operation === "exact" ? expertiseSearch.trim() : `%${expertiseSearch.trim()}%`;
     values.push(term);
     const idx = values.length;
-    
-    if (operation === 'exact') {
+
+    if (operation === "exact") {
       searchConditions.push(`m.expertise = $${idx}`);
     } else {
       searchConditions.push(`m.expertise ILIKE $${idx}`);
@@ -316,11 +306,11 @@ export async function searchManagers(
   // Functions search (requires join)
   if (functionsSearch && functionsSearch.trim().length > 0) {
     needsFunctionJoin = true;
-    const term = operation === 'exact' ? functionsSearch.trim() : `%${functionsSearch.trim()}%`;
+    const term = operation === "exact" ? functionsSearch.trim() : `%${functionsSearch.trim()}%`;
     values.push(term);
     const idx = values.length;
-    
-    if (operation === 'exact') {
+
+    if (operation === "exact") {
       searchConditions.push(`f.name = $${idx}`);
     } else {
       searchConditions.push(`f.name ILIKE $${idx}`);
@@ -330,11 +320,11 @@ export async function searchManagers(
   // Problems search (requires join)
   if (problemsSearch && problemsSearch.trim().length > 0) {
     needsProblemJoin = true;
-    const term = operation === 'exact' ? problemsSearch.trim() : `%${problemsSearch.trim()}%`;
+    const term = operation === "exact" ? problemsSearch.trim() : `%${problemsSearch.trim()}%`;
     values.push(term);
     const idx = values.length;
-    
-    if (operation === 'exact') {
+
+    if (operation === "exact") {
       searchConditions.push(`pr.name = $${idx}`);
     } else {
       searchConditions.push(`pr.name ILIKE $${idx}`);
@@ -343,7 +333,7 @@ export async function searchManagers(
 
   // Combine search conditions based on operation
   if (searchConditions.length > 0) {
-    const combiner = operation === 'and' ? ' AND ' : ' OR ';
+    const combiner = operation === "and" ? " AND " : " OR ";
     where.push(`(${searchConditions.join(combiner)})`);
   }
 
@@ -370,15 +360,9 @@ export async function searchManagers(
     try {
       let cityResult;
       if (city_id) {
-        cityResult = await client.query(
-          `SELECT lat, lng FROM cities_metadata WHERE id = $1`,
-          [city_id]
-        );
+        cityResult = await client.query(`SELECT lat, lng FROM cities_metadata WHERE id = $1`, [city_id]);
       } else if (near_city) {
-        cityResult = await client.query(
-          `SELECT lat, lng FROM cities_metadata WHERE name ILIKE $1 LIMIT 1`,
-          [`%${near_city}%`]
-        );
+        cityResult = await client.query(`SELECT lat, lng FROM cities_metadata WHERE name ILIKE $1 LIMIT 1`, [`%${near_city}%`]);
       }
       if (cityResult && cityResult.rows.length > 0) {
         locationLat = parseFloat(cityResult.rows[0].lat);
@@ -394,31 +378,31 @@ export async function searchManagers(
   const joinsSql = joins.join("\n");
 
   // Determine sort column
-  let orderBy = 'm.created_at';
+  let orderBy = "m.created_at";
   switch (sort_by) {
-    case 'name':
-      orderBy = 'm.name';
+    case "name":
+      orderBy = "m.name";
       break;
-    case 'rating':
-      orderBy = 'm.rating';
+    case "rating":
+      orderBy = "m.rating";
       break;
-    case 'distance':
+    case "distance":
       if (locationLat !== null && locationLng !== null) {
-        orderBy = 'distance_km';
+        orderBy = "distance_km";
       }
       break;
-    case 'created_at':
+    case "created_at":
     default:
-      orderBy = 'm.created_at';
+      orderBy = "m.created_at";
   }
 
   const client = await pool.connect();
 
   try {
     // Build distance calculation if location search
-    let distanceSelect = '';
-    let distanceOrderBy = '';
-    
+    let distanceSelect = "";
+    let distanceOrderBy = "";
+
     if (locationLat !== null && locationLng !== null) {
       // Using Haversine formula in SQL
       distanceSelect = `,
@@ -427,7 +411,7 @@ export async function searchManagers(
           cos(radians(m.lng) - radians(${locationLng})) +
           sin(radians(${locationLat})) * sin(radians(m.lat))
         )) as distance_km`;
-      
+
       // Add distance filter
       const distanceFilter = `
         m.lat IS NOT NULL AND m.lng IS NOT NULL AND
@@ -436,15 +420,15 @@ export async function searchManagers(
           cos(radians(m.lng) - radians(${locationLng})) +
           sin(radians(${locationLat})) * sin(radians(m.lat))
         )) <= ${radius}`;
-      
+
       if (where.length > 0) {
         where.push(distanceFilter);
       } else {
         where.push(distanceFilter);
       }
 
-      if (sort_by === 'distance') {
-        distanceOrderBy = 'distance_km';
+      if (sort_by === "distance") {
+        distanceOrderBy = "distance_km";
       }
     }
 
@@ -478,7 +462,6 @@ export async function searchManagers(
           m.name,
           m.description,
           m.expertise,
-          m.image_id,
           m.lat,
           m.lng,
           m.rating,
@@ -486,27 +469,25 @@ export async function searchManagers(
           m.status,
           m.is_given_set,
           m.created_at,
+          m.image_url,
           u.email,
           u.role,
           p.first_name,
           p.last_name,
           p.title,
           p.function,
-          p.location,
           p.geo_id,
           p.avatar_id,
           p.pen_name,
           g.city,
           g.country,
-          fa_avatar.url as avatar_url,
-          fa_image.url as image_url
+          fa_avatar.url as avatar_url
           ${distanceSelect}
         FROM managers m
         INNER JOIN users u ON u.id = m.user_id
         LEFT JOIN profiles p ON p.user_id = u.id
         LEFT JOIN geopoints g ON g.id = m.geo_id
         LEFT JOIN file_assets fa_avatar ON fa_avatar.id = p.avatar_id
-        LEFT JOIN file_assets fa_image ON fa_image.id = m.image_id
         ${joinsSql}
         ${finalWhereSql}
         ORDER BY ${finalOrderBy} ${sort_order.toUpperCase()}
@@ -531,7 +512,6 @@ export async function searchManagers(
           rating: parseFloat(row.rating) || 0,
           rating_count: row.rating_count || 0,
           is_given_set: row.is_given_set || false,
-          image_id: row.image_id ?? undefined,
           image_url: row.image_url ?? undefined,
           lat: row.lat ? parseFloat(row.lat) : undefined,
           lng: row.lng ? parseFloat(row.lng) : undefined,
@@ -605,16 +585,16 @@ async function getManagerAggregations(client: any): Promise<ManagerAggregations>
 
   // With problems
   const problemsResult = await client.query(`
-    SELECT COUNT(DISTINCT m.id) as count 
-    FROM managers m 
+    SELECT COUNT(DISTINCT m.id) as count
+    FROM managers m
     INNER JOIN manager_problems mp ON mp.manager_id = m.id
   `);
   const total_with_problems = parseInt(problemsResult.rows[0].count);
 
   // With functions
   const functionsResult = await client.query(`
-    SELECT COUNT(DISTINCT m.id) as count 
-    FROM managers m 
+    SELECT COUNT(DISTINCT m.id) as count
+    FROM managers m
     INNER JOIN manager_functions mf ON mf.manager_id = m.id
   `);
   const total_with_functions = parseInt(functionsResult.rows[0].count);
@@ -643,8 +623,8 @@ async function getManagerAggregations(client: any): Promise<ManagerAggregations>
 
   // By alphabet
   const alphabetResult = await client.query(`
-    SELECT UPPER(LEFT(name, 1)) as letter, COUNT(*) as count 
-    FROM managers 
+    SELECT UPPER(LEFT(name, 1)) as letter, COUNT(*) as count
+    FROM managers
     GROUP BY UPPER(LEFT(name, 1))
     ORDER BY letter
   `);
@@ -660,10 +640,10 @@ async function getManagerAggregations(client: any): Promise<ManagerAggregations>
     total_with_expertise,
     total_with_descriptions,
     by_rating: {
-      '5': parseInt(rating5Result.rows[0].count),
-      '4': parseInt(rating4Result.rows[0].count),
-      '3': parseInt(rating3Result.rows[0].count),
-      'below2': parseInt(ratingBelow2Result.rows[0].count),
+      "5": parseInt(rating5Result.rows[0].count),
+      "4": parseInt(rating4Result.rows[0].count),
+      "3": parseInt(rating3Result.rows[0].count),
+      below2: parseInt(ratingBelow2Result.rows[0].count),
     },
     total_in_given_set,
     by_alphabet,
@@ -674,9 +654,7 @@ async function getManagerAggregations(client: any): Promise<ManagerAggregations>
 // CREATE MANAGER
 // ============================================
 
-export async function createManager(
-  input: ManagerCreateInput
-): Promise<Manager> {
+export async function createManager(input: ManagerCreateInput): Promise<Manager> {
   const client = await pool.connect();
 
   try {
@@ -708,16 +686,15 @@ export async function createManager(
     // Create manager record
     const managerResult = await client.query(
       `
-        INSERT INTO managers (user_id, name, description, expertise, image_id, lat, lng, geo_id, status, is_given_set)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        RETURNING id, user_id, name, description, expertise, image_id, lat, lng, geo_id, rating, rating_count, status, is_given_set, created_at
+        INSERT INTO managers (user_id, name, description, expertise, lat, lng, geo_id, status, is_given_set)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING id, user_id, name, description, expertise, lat, lng, geo_id, rating, rating_count, status, is_given_set, created_at
       `,
       [
         userRow.id,
         input.name,
         input.description ?? null,
         input.expertise ?? null,
-        input.image_id ?? null,
         input.lat ?? null,
         input.lng ?? null,
         input.geo_id ?? null,
@@ -731,20 +708,14 @@ export async function createManager(
     // Link functions
     if (input.function_ids && input.function_ids.length > 0) {
       for (const funcId of input.function_ids) {
-        await client.query(
-          `INSERT INTO manager_functions (manager_id, function_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-          [managerRow.id, funcId]
-        );
+        await client.query(`INSERT INTO manager_functions (manager_id, function_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [managerRow.id, funcId]);
       }
     }
 
     // Link problems
     if (input.problem_ids && input.problem_ids.length > 0) {
       for (const probId of input.problem_ids) {
-        await client.query(
-          `INSERT INTO manager_problems (manager_id, problem_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-          [managerRow.id, probId]
-        );
+        await client.query(`INSERT INTO manager_problems (manager_id, problem_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [managerRow.id, probId]);
       }
     }
 
@@ -764,20 +735,14 @@ export async function createManager(
 // UPDATE MANAGER
 // ============================================
 
-export async function updateManager(
-  id: number,
-  input: ManagerUpdateInput
-): Promise<Manager | null> {
+export async function updateManager(id: number, input: ManagerUpdateInput): Promise<Manager | null> {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
     // Get manager to find user_id
-    const managerCheck = await client.query(
-      `SELECT user_id FROM managers WHERE id = $1`,
-      [id]
-    );
+    const managerCheck = await client.query(`SELECT user_id FROM managers WHERE id = $1`, [id]);
 
     if (managerCheck.rows.length === 0) {
       await client.query("ROLLBACK");
@@ -788,19 +753,13 @@ export async function updateManager(
 
     // Update user status if provided
     if (input.status) {
-      await client.query(
-        `UPDATE users SET status = $2 WHERE id = $1`,
-        [userId, input.status]
-      );
+      await client.query(`UPDATE users SET status = $2 WHERE id = $1`, [userId, input.status]);
     }
 
     // Update password if provided
     if (input.password) {
       const passwordHash = await hashPassword(input.password);
-      await client.query(
-        `UPDATE users SET password_hash = $2 WHERE id = $1`,
-        [userId, passwordHash]
-      );
+      await client.query(`UPDATE users SET password_hash = $2 WHERE id = $1`, [userId, passwordHash]);
     }
 
     // Update profile if provided
@@ -836,10 +795,6 @@ export async function updateManager(
       updates.push(`is_given_set = $${paramIndex++}`);
       updateValues.push(input.is_given_set);
     }
-    if (input.image_id !== undefined) {
-      updates.push(`image_id = $${paramIndex++}`);
-      updateValues.push(input.image_id);
-    }
     if (input.lat !== undefined) {
       updates.push(`lat = $${paramIndex++}`);
       updateValues.push(input.lat);
@@ -855,20 +810,14 @@ export async function updateManager(
 
     if (updates.length > 0) {
       updates.push(`updated_at = CURRENT_TIMESTAMP`);
-      await client.query(
-        `UPDATE managers SET ${updates.join(', ')} WHERE id = $1`,
-        updateValues
-      );
+      await client.query(`UPDATE managers SET ${updates.join(", ")} WHERE id = $1`, updateValues);
     }
 
     // Update function links
     if (input.function_ids !== undefined) {
       await client.query(`DELETE FROM manager_functions WHERE manager_id = $1`, [id]);
       for (const funcId of input.function_ids) {
-        await client.query(
-          `INSERT INTO manager_functions (manager_id, function_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-          [id, funcId]
-        );
+        await client.query(`INSERT INTO manager_functions (manager_id, function_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [id, funcId]);
       }
     }
 
@@ -876,10 +825,7 @@ export async function updateManager(
     if (input.problem_ids !== undefined) {
       await client.query(`DELETE FROM manager_problems WHERE manager_id = $1`, [id]);
       for (const probId of input.problem_ids) {
-        await client.query(
-          `INSERT INTO manager_problems (manager_id, problem_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-          [id, probId]
-        );
+        await client.query(`INSERT INTO manager_problems (manager_id, problem_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [id, probId]);
       }
     }
 
@@ -905,10 +851,7 @@ export async function deleteManager(id: number): Promise<void> {
     await client.query("BEGIN");
 
     // Get user_id first
-    const managerResult = await client.query(
-      `SELECT user_id FROM managers WHERE id = $1`,
-      [id]
-    );
+    const managerResult = await client.query(`SELECT user_id FROM managers WHERE id = $1`, [id]);
 
     if (managerResult.rows.length > 0) {
       const userId = managerResult.rows[0].user_id;
@@ -933,12 +876,7 @@ export async function deleteManager(id: number): Promise<void> {
 // RATE MANAGER
 // ============================================
 
-export async function rateManager(
-  managerId: number,
-  userId: number,
-  rating: number,
-  comment?: string
-): Promise<void> {
+export async function rateManager(managerId: number, userId: number, rating: number, comment?: string): Promise<void> {
   const client = await pool.connect();
 
   try {
@@ -949,7 +887,7 @@ export async function rateManager(
       `
         INSERT INTO manager_ratings (manager_id, user_id, rating, comment)
         VALUES ($1, $2, $3, $4)
-        ON CONFLICT (manager_id, user_id) 
+        ON CONFLICT (manager_id, user_id)
         DO UPDATE SET rating = $3, comment = $4, created_at = CURRENT_TIMESTAMP
       `,
       [managerId, userId, rating, comment ?? null]
@@ -965,10 +903,7 @@ export async function rateManager(
       [managerId]
     );
 
-    await client.query(
-      `UPDATE managers SET rating = $2, rating_count = $3 WHERE id = $1`,
-      [managerId, avgResult.rows[0].avg_rating, avgResult.rows[0].count]
-    );
+    await client.query(`UPDATE managers SET rating = $2, rating_count = $3 WHERE id = $1`, [managerId, avgResult.rows[0].avg_rating, avgResult.rows[0].count]);
 
     await client.query("COMMIT");
   } catch (error) {

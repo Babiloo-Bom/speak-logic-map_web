@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS problems (
 -- Option 2: image_id (BIGINT FK -> file_assets)
 --   Pros: Quản lý file tập trung, có metadata (size, mime_type)
 --   Cons: Cần JOIN khi query để lấy URL
---   Usage: 
+--   Usage:
 --     INSERT INTO file_assets (url, mime_type, size_bytes) VALUES ('/uploads/alice.jpg', 'image/jpeg', 102400);
 --     UPDATE managers SET image_id = (SELECT id FROM file_assets WHERE url = '/uploads/alice.jpg') WHERE name = 'Alice';
 --     SELECT m.*, fa.url as image_url FROM managers m LEFT JOIN file_assets fa ON m.image_id = fa.id;
@@ -252,28 +252,28 @@ CREATE TABLE IF NOT EXISTS managers (
   name VARCHAR(255) NOT NULL,
   description TEXT,
   expertise TEXT,  -- Manager's expertise/skills (comma-separated)
-  
+
   -- Image: Lưu URL trực tiếp thay vì ID
   -- Ví dụ: '/uploads/managers/alice.jpg' hoặc 'https://cdn.example.com/alice.jpg'
   image_url VARCHAR(500),
-  
+
   -- Location
   geo_id BIGINT REFERENCES geopoints(id),
   lat DECIMAL(10,7),
   lng DECIMAL(10,7),
   near_city VARCHAR(120),  -- Thành phố gần nhất (e.g., "Hà Nội", "Ho Chi Minh City")
-  
+
   -- Rating
   rating DECIMAL(3,2) DEFAULT 0.0 CHECK (rating >= 0.0 AND rating <= 5.0),
   rating_count INTEGER DEFAULT 0,
-  
+
   -- Status & Flags
   status VARCHAR(20) DEFAULT 'active',  -- active, inactive, pending, suspended
-  
+
   -- Boolean flags (TRUE/FALSE only)
   is_given_set BOOLEAN DEFAULT false,  -- "Manager using the Given Set" (TRUE = Yes, FALSE = No)
   location_by BOOLEAN DEFAULT false,   -- "Location by" flag (TRUE = enabled, FALSE = disabled)
-  
+
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(user_id)
@@ -447,26 +447,26 @@ CREATE TABLE IF NOT EXISTS providers (
   url VARCHAR(500),          -- Internal URL identifier (e.g., www.urlofprovider.com)
   website_url VARCHAR(500),  -- External website URL (https://...)
   description TEXT,
-  
+
   -- Image: Lưu URL trực tiếp
   image_url VARCHAR(500),
-  
+
   -- Location
   geo_id BIGINT REFERENCES geopoints(id),
   lat DECIMAL(10,7),
   lng DECIMAL(10,7),
   near_city VARCHAR(120),  -- Thành phố gần nhất
-  
+
   -- Rating
   rating DECIMAL(3,2) DEFAULT 0.0 CHECK (rating >= 0.0 AND rating <= 5.0),
-  
+
   -- Status & Flags
   status VARCHAR(20) DEFAULT 'active',  -- active, inactive, pending, suspended
-  
+
   -- Boolean flags (TRUE/FALSE only)
   is_applicable BOOLEAN DEFAULT true,  -- "The Given Set Applicable" (TRUE = Yes, FALSE = No)
   location_by BOOLEAN DEFAULT false,   -- "Location by" flag (TRUE = enabled, FALSE = disabled)
-  
+
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -719,31 +719,31 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres;
 -- ============================================
 
 -- Test Admin User (password: admin123)
-INSERT INTO users (email, password_hash, role, status) 
+INSERT INTO users (email, password_hash, role, status)
 VALUES (
-  'admin@speaklogicmap.com', 
-  '$2a$12$yzOpJpvS0Mm5ZhcxA1YZTOCepabpX1nuKq.EpFKO2f7Wqwe9AX9ge', 
-  'admin', 
+  'admin@speaklogicmap.com',
+  '$2a$12$yzOpJpvS0Mm5ZhcxA1YZTOCepabpX1nuKq.EpFKO2f7Wqwe9AX9ge',
+  'admin',
   'active'
 )
 ON CONFLICT (email) DO NOTHING;
 
 -- Test Regular User (password: user123)
-INSERT INTO users (email, password_hash, role, status) 
+INSERT INTO users (email, password_hash, role, status)
 VALUES (
-  'user@speaklogicmap.com', 
-  '$2a$12$1XQSRRgMWzsL88VKI3uSgeuh7/.Xer.PdxH/gaVSs7ncCW3rF4wJW', 
-  'user', 
+  'user@speaklogicmap.com',
+  '$2a$12$1XQSRRgMWzsL88VKI3uSgeuh7/.Xer.PdxH/gaVSs7ncCW3rF4wJW',
+  'user',
   'active'
 )
 ON CONFLICT (email) DO NOTHING;
 
 -- Test Developer User (password: dev123)
-INSERT INTO users (email, password_hash, role, status) 
+INSERT INTO users (email, password_hash, role, status)
 VALUES (
-  'dev@speaklogicmap.com', 
-  '$2a$12$SpdpzUb4DpcCG8cDjwQunubaC1/XniTa6jzBwJlW5dMic05sq.RQ.', 
-  'user', 
+  'dev@speaklogicmap.com',
+  '$2a$12$SpdpzUb4DpcCG8cDjwQunubaC1/XniTa6jzBwJlW5dMic05sq.RQ.',
+  'user',
   'active'
 )
 ON CONFLICT (email) DO NOTHING;
@@ -752,8 +752,8 @@ ON CONFLICT (email) DO NOTHING;
 -- 8.2 INSERT TEST PROFILES
 -- ============================================
 
-INSERT INTO profiles (user_id, first_name, last_name, title, function, pen_name) 
-VALUES 
+INSERT INTO profiles (user_id, first_name, last_name, title, function, pen_name)
+VALUES
   (1, 'Admin', 'User', 'System Administrator', 'Admin', 'Admin')
 ON CONFLICT (user_id) DO UPDATE SET
   first_name = EXCLUDED.first_name,
@@ -761,8 +761,8 @@ ON CONFLICT (user_id) DO UPDATE SET
   title = EXCLUDED.title,
   function = EXCLUDED.function;
 
-INSERT INTO profiles (user_id, first_name, last_name, title, function) 
-VALUES 
+INSERT INTO profiles (user_id, first_name, last_name, title, function)
+VALUES
   (2, 'Test', 'User', 'Developer', 'Software Engineer')
 ON CONFLICT (user_id) DO UPDATE SET
   first_name = EXCLUDED.first_name,
@@ -770,8 +770,8 @@ ON CONFLICT (user_id) DO UPDATE SET
   title = EXCLUDED.title,
   function = EXCLUDED.function;
 
-INSERT INTO profiles (user_id, first_name, last_name, title, function) 
-VALUES 
+INSERT INTO profiles (user_id, first_name, last_name, title, function)
+VALUES
   (3, 'Developer', 'Test', 'Frontend Developer', 'React Developer')
 ON CONFLICT (user_id) DO UPDATE SET
   first_name = EXCLUDED.first_name,
@@ -1078,7 +1078,7 @@ ON CONFLICT (user_id) DO UPDATE SET first_name = EXCLUDED.first_name, last_name 
 
 -- Insert managers with image_url, near_city, is_given_set (boolean), location_by (boolean)
 INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
-SELECT 
+SELECT
   id,
   'Alice Johnson',
   'Experienced project manager with 10+ years in software development. Specializes in Agile methodologies.',
@@ -1090,7 +1090,7 @@ FROM users WHERE email = 'manager1@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
 INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
-SELECT 
+SELECT
   id,
   'Bob Smith',
   'Operations manager focused on process optimization and efficiency.',
@@ -1102,7 +1102,7 @@ FROM users WHERE email = 'manager2@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
 INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
-SELECT 
+SELECT
   id,
   'Charlie Brown',
   'Technical manager with deep expertise in cloud architecture and DevOps.',
@@ -1114,7 +1114,7 @@ FROM users WHERE email = 'manager3@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
 INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
-SELECT 
+SELECT
   id,
   'Diana Wilson',
   'Product manager passionate about user experience and data-driven decisions.',
@@ -1126,7 +1126,7 @@ FROM users WHERE email = 'manager4@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
 INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
-SELECT 
+SELECT
   id,
   'Edward Davis',
   'Regional manager overseeing operations across Southeast Asia.',
@@ -1138,7 +1138,7 @@ FROM users WHERE email = 'manager5@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
 INSERT INTO managers (user_id, name, description, expertise, image_url, lat, lng, near_city, rating, rating_count, status, is_given_set, location_by)
-SELECT 
+SELECT
   id,
   'Nguyen Van Minh',
   'Area manager with extensive experience in Vietnam market.',
@@ -1309,7 +1309,7 @@ BEGIN
   SELECT COUNT(*) INTO manager_rating_count FROM manager_ratings;
   SELECT COUNT(*) INTO table_count FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
   SELECT COUNT(*) INTO index_count FROM pg_indexes WHERE schemaname = 'public';
-  
+
   RAISE NOTICE '============================================';
   RAISE NOTICE 'DATABASE INITIALIZED SUCCESSFULLY!';
   RAISE NOTICE '============================================';
@@ -1347,7 +1347,7 @@ USAGE EXAMPLES
 ============================================
 
 -- 1. Query managers with image_url (direct URL)
-SELECT 
+SELECT
   m.id,
   m.name,
   m.image_url,  -- Direct URL: '/uploads/managers/alice.jpg'
@@ -1358,7 +1358,7 @@ FROM managers m
 WHERE m.status = 'active';
 
 -- 2. Query providers with filters
-SELECT 
+SELECT
   p.id,
   p.name,
   p.image_url,
@@ -1370,7 +1370,7 @@ WHERE p.is_applicable = true
   AND p.near_city = 'Hà Nội';
 
 -- 3. Update manager image (direct URL)
-UPDATE managers 
+UPDATE managers
 SET image_url = '/uploads/managers/new-image.jpg'
 WHERE name = 'Alice Johnson';
 
@@ -1389,8 +1389,8 @@ SELECT * FROM managers WHERE near_city ILIKE '%Ho Chi Minh%';
 SELECT * FROM providers WHERE near_city = 'Da Nang';
 
 -- 6. Full-text search
-SELECT * FROM managers 
-WHERE to_tsvector('english', name || ' ' || COALESCE(description, '')) 
+SELECT * FROM managers
+WHERE to_tsvector('english', name || ' ' || COALESCE(description, ''))
       @@ plainto_tsquery('english', 'project management');
 
 ============================================
