@@ -1,0 +1,25 @@
+import { IDataRequestGetList } from "./types";
+
+export const baseDataRequestGetList: IDataRequestGetList = {
+  q: "",
+  providers: "",
+  problems: "",
+  functions: "",
+  expertise: "",
+  descriptions: "",
+  operation: "and",
+  rating: "",
+  rating_min: "",
+  rating_max: "",
+  given_set: "",
+  near_city: "",
+  city_id: "",
+  lat: "",
+  lng: "",
+  radius: "",
+  starts_with: "",
+  page: 1,
+  limit: 9,
+  sort_by: "relevance",
+  sort_order: "desc",
+};

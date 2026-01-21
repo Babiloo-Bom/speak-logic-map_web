@@ -1,0 +1,2 @@
+ALTER TABLE managers
+ADD COLUMN IF NOT EXISTS image_id BIGINT REFERENCES file_assets(id);
