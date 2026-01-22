@@ -1,6 +1,6 @@
 import { Button, Rate, Skeleton } from "antd";
 import Image from "next/image";
-import { ProviderItem } from "./types";
+import { ProviderItem } from "@/lib/pages/provider-search/types";
 
 interface Props {
   data?: ProviderItem;

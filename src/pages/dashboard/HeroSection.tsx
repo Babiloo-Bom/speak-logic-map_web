@@ -2,10 +2,10 @@ import { Button, Image, Input, Radio } from "antd";
 import FeatureItem from "./FeatureItem";
 import { MenuOutlined, SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
-import { DASHBOARD_HEADER_TABS, itemsTabs } from "./constants";
+import { DASHBOARD_HEADER_TABS, itemsTabs } from "@/lib/pages/dashboard/constants";
 import { useState } from "react";
 import AdvanceSearch from "./AdvanceSearch";
-import { baseDataRequest } from "./request";
+import { baseDataRequest } from "@/lib/pages/dashboard/request";
 
 const MapIcon = () => <Image preview={false} src="/icons/solar_map-outline.svg" alt="map" style={{ width: "1em", height: "1em" }} />;
 

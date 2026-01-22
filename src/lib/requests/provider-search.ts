@@ -1,4 +1,4 @@
-import { IDataRequestGetList } from "./types";
+import { IDataRequestGetList } from "@/pages/provider-search/types";
 
 export const baseDataRequestGetList: IDataRequestGetList = {
   q: "",
@@ -23,3 +23,4 @@ export const baseDataRequestGetList: IDataRequestGetList = {
   sort_by: "relevance",
   sort_order: "desc",
 };
+

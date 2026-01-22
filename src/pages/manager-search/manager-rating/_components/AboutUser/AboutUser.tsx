@@ -1,7 +1,7 @@
 import { Form, Input, Button, Radio, DatePicker } from "antd";
 import React from "react";
-import { USER_FORM_FIELDS } from "./constants";
-import { IDataRequestRating } from "../../type";
+import { USER_FORM_FIELDS } from "@/lib/pages/manager-search/manager-rating/_components/AboutUser/constants";
+import { IDataRequestRating } from "@/lib/pages/manager-search/manager-rating/type";
 import { FormField } from "@/utils/constants";
 
 type Props = {

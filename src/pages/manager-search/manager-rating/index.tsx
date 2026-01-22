@@ -2,11 +2,11 @@ import { Button, message, Steps, theme } from "antd";
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import AboutUser from "./_components/AboutUser/AboutUser";
-import { baseDataRequestRating } from "./request";
+import { baseDataRequestRating } from "@/lib/pages/manager-search/manager-rating/request";
 import AboutManager from "./_components/AboutManager/AboutManager";
 import AboutFunction from "./_components/AboutFunction/AboutFunction";
 import AboutFeedback from "./_components/AboutFeedback/AboutFeedback";
-import { IDataRequestRating } from "./type";
+import { IDataRequestRating } from "@/lib/pages/manager-search/manager-rating/type";
 import { getAuthToken } from "@/utils/constants";
 import dayjs from "dayjs";
 

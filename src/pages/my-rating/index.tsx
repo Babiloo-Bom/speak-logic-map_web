@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { Typography } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
 import { buildQueryParams, getAuthToken } from "@/utils/constants";
-import { baseDataRequestGetMyRating } from "./request";
-import { IDataRequestGetMyRating, IResponseGetMyRating } from "./type";
+import { baseDataRequestGetMyRating } from "@/lib/pages/my-rating/request";
+import { IDataRequestGetMyRating, IResponseGetMyRating } from "@/lib/pages/my-rating/type";
 import dayjs from "dayjs";
 
 const { Text } = Typography;

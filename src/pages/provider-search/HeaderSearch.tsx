@@ -1,7 +1,7 @@
 import { Input, Select, Button } from "antd";
 import { SearchOutlined, FilterOutlined, MenuOutlined } from "@ant-design/icons";
 import Image from "next/image";
-import { IDataRequestGetList } from "./types";
+import { IDataRequestGetList } from "@/lib/pages/provider-search/types";
 
 interface HeaderSearchProps {
   title?: string;

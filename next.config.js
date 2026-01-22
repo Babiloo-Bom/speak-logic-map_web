@@ -4,9 +4,9 @@ const nextConfig = {
   output: "standalone", // Enable standalone output for Docker
   // Optimize for faster builds
   swcMinify: true, // Use SWC minifier (faster than Terser)
-  // Only treat JS/JSX/TSX as pages. Plain .ts files under pages (constants, types, request helpers)
-  // will no longer be considered as page routes, fixing build errors.
-  pageExtensions: ["js", "jsx", "tsx"],
+  // Allow .ts files in pages/api/ for API routes, but only .js/.jsx/.tsx for regular pages
+  // This prevents non-component .ts files (constants, types, request helpers) from being treated as pages
+  pageExtensions: ["js", "jsx", "tsx", "ts"],
   compiler: {
     removeConsole:
       process.env.NODE_ENV === "production"

@@ -1,8 +1,8 @@
 import { Form, Input, Button, Radio, DatePicker } from "antd";
 import React, { useEffect } from "react";
-import { IDataRequestRating } from "../../type";
+import { IDataRequestRating } from "@/lib/pages/manager-search/manager-rating/type";
 import { FormField } from "@/utils/constants";
-import { FUNCTION_FORM_FIELDS } from "./constants";
+import { FUNCTION_FORM_FIELDS } from "@/lib/pages/manager-search/manager-rating/_components/AboutFunction/constants";
 
 type Props = {
   dataRequestRating: IDataRequestRating;

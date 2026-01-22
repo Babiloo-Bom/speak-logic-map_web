@@ -1,6 +1,6 @@
 import { Button, Rate, Skeleton } from "antd";
 import Image from "next/image";
-import { ManagerItem } from "./types";
+import { ManagerItem } from "@/lib/pages/manager-search/types";
 import { useRouter } from "next/router";
 
 interface Props {

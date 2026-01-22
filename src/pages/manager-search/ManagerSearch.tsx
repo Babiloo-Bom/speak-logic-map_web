@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import ProfileList from "./ProfileList";
-import { IDataRequestGetList, IDataResponseGetList } from "./types";
+import { IDataRequestGetList, IDataResponseGetList } from "@/lib/pages/manager-search/types";
 import HeaderSearch from "./HeaderSearch";
 import { buildQueryParams, getAuthToken } from "@/utils/constants";
-import { baseDataRequestGetList } from "./request";
+import { baseDataRequestGetList } from "@/lib/requests/manager-search";
 import { Pagination, PaginationProps } from "antd";
 import AdvanceSearch from "./AdvanceSearch";
 

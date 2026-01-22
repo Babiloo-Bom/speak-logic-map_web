@@ -1,7 +1,7 @@
 import { Button, Checkbox, Drawer, Radio } from "antd";
 import React from "react";
-import { ADVANCE_SEARCH_FILTERS } from "./constants";
-import { IDataRequestGetList } from "./type";
+import { ADVANCE_SEARCH_FILTERS } from "@/lib/pages/dashboard/constants";
+import { IDataRequestGetList } from "@/lib/pages/dashboard/type";
 
 type Props = {
   open: boolean;

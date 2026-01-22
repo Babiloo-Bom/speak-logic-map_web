@@ -1,6 +1,6 @@
 import { Pagination } from "antd";
 import ProfileItem from "./ProfileItem";
-import { ManagerItem } from "./types";
+import { ManagerItem } from "@/lib/pages/manager-search/types";
 
 interface Props {
   data?: ManagerItem[];

@@ -1,12 +1,17 @@
 import { Pool } from 'pg';
 
+// Determine SSL setting from environment variable
+// DB_SSL can be: 'true', '1', 'false', '0', or undefined
+const dbSslEnv = process.env.DB_SSL?.toLowerCase();
+const useSsl = dbSslEnv === 'true' || dbSslEnv === '1';
+
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
   database: process.env.DB_NAME || 'function_provider',
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'password',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: useSsl ? (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false) : false,
 });
 
 export default pool;

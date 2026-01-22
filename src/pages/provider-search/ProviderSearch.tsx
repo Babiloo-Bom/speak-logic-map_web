@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import ProfileList from "./ProfileList";
-import { IDataRequestGetList, ProviderItem, IDataResponseGetList } from "./types";
+import { IDataRequestGetList, ProviderItem, IDataResponseGetList } from "@/lib/pages/provider-search/types";
 import HeaderSearch from "./HeaderSearch";
 import { buildQueryParams, getAuthToken } from "@/utils/constants";
-import { baseDataRequestGetList } from "./request";
+import { baseDataRequestGetList } from "@/lib/requests/provider-search";
 import { Pagination, PaginationProps } from "antd";
 import AdvanceSearch from "./AdvanceSearch";
 
