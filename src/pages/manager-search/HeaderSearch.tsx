@@ -46,8 +46,11 @@ export default function HeaderSearch({
           defaultValue="Sort By"
           className="w-full md:w-40"
           options={[
-            { value: "rating", label: "Rating" },
-            { value: "newest", label: "Newest" },
+            { value: "functions", label: "Functions" },
+            { value: "problems", label: "Problems" },
+            { value: "providers", label: "Providers" },
+            { value: "descriptions", label: "Descriptions" },
+            { value: "all", label: "All" },
           ]}
         />
 

@@ -54,11 +54,17 @@ export default function ProfileItem({ data }: Props) {
       </div>
 
       {/* Button */}
-      <div className="mt-auto pt-4 flex items-center gap-4">
-        <Button loading={!data} block size="large" className="bg-primary text-white hover:text-primary ">
+      <div className="mt-auto pt-4 grid grid-cols-2">
+        <Button
+          loading={!data}
+          block
+          size="large"
+          className="bg-primary text-white hover:text-primary col-span-1"
+          onClick={() => router.push(`/manager-search/manager-detail?managerId=${data?.id}`)}
+        >
           More Details
         </Button>
-        <Button
+        {/* <Button
           onClick={() => router.push(`/manager-search/manager-rating?managerId=${data?.id}`)}
           loading={!data}
           block
@@ -66,7 +72,7 @@ export default function ProfileItem({ data }: Props) {
           className="bg-white text-primary border border-primary hover:bg-primary hover:text-white"
         >
           Rating
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

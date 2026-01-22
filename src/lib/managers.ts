@@ -61,6 +61,7 @@ export async function getManagerById(id: number): Promise<Manager | null> {
           m.status,
           m.is_given_set,
           m.created_at,
+          m.image_url,
           u.email,
           u.role,
           p.first_name,
@@ -72,7 +73,7 @@ export async function getManagerById(id: number): Promise<Manager | null> {
           p.pen_name,
           g.city,
           g.country,
-          fa_avatar.url as avatar_url
+          COALESCE(fa_avatar.url, p.pen_name) as avatar_url
         FROM managers m
         INNER JOIN users u ON u.id = m.user_id
         LEFT JOIN profiles p ON p.user_id = u.id
@@ -124,6 +125,7 @@ export async function getManagerById(id: number): Promise<Manager | null> {
       rating: parseFloat(row.rating) || 0,
       rating_count: row.rating_count || 0,
       is_given_set: row.is_given_set || false,
+      image_url: row.image_url ?? undefined,
       lat: row.lat ? parseFloat(row.lat) : undefined,
       lng: row.lng ? parseFloat(row.lng) : undefined,
       geo_id: row.geo_id ?? undefined,
@@ -139,6 +141,7 @@ export async function getManagerById(id: number): Promise<Manager | null> {
       pen_name: row.pen_name ?? undefined,
       functions: functionsResult.rows as ManagerFunction[],
       problems: problemsResult.rows as ManagerProblem[],
+      avatar: row.image_url ?? row.avatar_url ?? undefined,
     };
 
     return manager;
@@ -527,6 +530,7 @@ export async function searchManagers(params: ManagerSearchParams): Promise<Manag
           avatar_url: row.avatar_url ?? undefined,
           pen_name: row.pen_name ?? undefined,
           distance_km: row.distance_km ? parseFloat(row.distance_km) : undefined,
+          avatar: row.image_url ?? row.avatar_url ?? undefined,
         };
 
         // Include functions if requested
