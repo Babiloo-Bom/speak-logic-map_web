@@ -23,7 +23,6 @@ COPY tsconfig.json ./
 COPY postcss.config.js ./
 COPY tailwind.config.js ./
 COPY src ./src
-COPY pages ./pages
 # Only copy essential public files (exclude uploads via .dockerignore)
 COPY public ./public
 

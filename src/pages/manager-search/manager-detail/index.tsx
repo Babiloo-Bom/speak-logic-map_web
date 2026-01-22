@@ -4,7 +4,7 @@ import { Card, Avatar, Rate, Divider, theme, message } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { IManagerDetail } from "./type";
+import { IManagerDetail } from "@/lib/pages/manager-search/manager-detail/type";
 
 export default function ManagerDetail() {
   const router = useRouter();
