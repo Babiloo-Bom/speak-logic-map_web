@@ -9,7 +9,7 @@ interface HeaderSearchProps {
   onOpenAdvanceSearch?: () => void;
   dataRequest: IDataRequestGetList;
   setDataRequest: React.Dispatch<React.SetStateAction<IDataRequestGetList>>;
-  handleSearch: () => void;
+  handleSearch: (newDataRequest?: IDataRequestGetList) => void;
 }
 
 export default function HeaderSearch({
@@ -43,15 +43,31 @@ export default function HeaderSearch({
 
         <Select
           size="large"
-          defaultValue="Sort By"
-          className="w-full md:w-40"
+          placeholder="Sort By"
+          className="w-full md:w-48"
+          value={dataRequest.sort_by && dataRequest.sort_order ? `${dataRequest.sort_by}_${dataRequest.sort_order}` : undefined}
+          onChange={(value) => {
+            if (value) {
+              const [sortBy, sortOrder] = value.split("_");
+              const newDataRequest = { ...dataRequest, sort_by: sortBy, sort_order: sortOrder, page: 1 };
+              setDataRequest(newDataRequest);
+              handleSearch(newDataRequest);
+            }
+          }}
           options={[
-            { value: "rating", label: "Rating" },
-            { value: "newest", label: "Newest" },
+            { value: "rating_desc", label: "⭐ Rating: High to Low" },
+            { value: "rating_asc", label: "⭐ Rating: Low to High" },
+            { value: "name_asc", label: "🔤 Name: A-Z" },
+            { value: "name_desc", label: "🔤 Name: Z-A" },
+            { value: "created_at_desc", label: "🆕 Newest First" },
+            { value: "created_at_asc", label: "🕐 Oldest First" },
+            ...(dataRequest.near_city || dataRequest.city_id || dataRequest.radius
+              ? [{ value: "distance_asc", label: "📍 Distance: Nearest" }]
+              : []),
           ]}
         />
 
-        <Button size="large" icon={<SearchOutlined />} className="border-primary text-white bg-primary"></Button>
+        <Button size="large" icon={<SearchOutlined />} onClick={handleSearch} className="border-primary text-white bg-primary"></Button>
         <Button size="large" icon={<MenuOutlined />} onClick={onOpenAdvanceSearch} className="border-primary text-primary hover:text-primary"></Button>
       </div>
     </div>

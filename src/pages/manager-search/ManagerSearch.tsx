@@ -26,8 +26,8 @@ function ManagerSearch() {
       }
       const newRequest = {
         ...req,
-        given_set: req.given_set ? true : false,
-        near_city: req.near_city ? true : false,
+        // Keep near_city as string for city name search
+        // given_set is handled separately if needed
       };
 
       const queryString = buildQueryParams(newRequest);
@@ -87,13 +87,13 @@ function ManagerSearch() {
     fetchProfile(newDataRequest);
   };
 
-  const handleSearch = () => {
-    const newDataRequest = {
+  const handleSearch = (newDataRequest?: IDataRequestGetList) => {
+    const requestToUse = newDataRequest || {
       ...dataRequest,
       page: 1,
     };
-    setDataRequest(newDataRequest);
-    fetchProfile(newDataRequest);
+    setDataRequest(requestToUse);
+    fetchProfile(requestToUse);
     setOpenAdvanceSearch(false);
   };
 
