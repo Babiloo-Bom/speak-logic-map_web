@@ -3,13 +3,15 @@
 -- This script creates all tables, indexes, and seed data
 -- Run this script to initialize the complete database
 -- ============================================
--- Version: 2.0
+-- Version: 3.0 (Consolidated)
 -- Last Updated: 2026-01-03
+-- Source: Consolidated from init-database.sql and backup files
 -- ============================================
 
 -- ============================================
 -- DROP EXISTING TABLES (Optional - uncomment if needed)
 -- ============================================
+-- DROP TABLE IF EXISTS project_identifications CASCADE;
 -- DROP TABLE IF EXISTS manager_ratings CASCADE;
 -- DROP TABLE IF EXISTS manager_problems CASCADE;
 -- DROP TABLE IF EXISTS manager_functions CASCADE;
@@ -1395,3 +1397,4 @@ WHERE to_tsvector('english', name || ' ' || COALESCE(description, ''))
 
 ============================================
 */
+

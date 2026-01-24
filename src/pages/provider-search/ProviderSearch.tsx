@@ -60,13 +60,13 @@ function ProviderSearch() {
     fetchProfile(newDataRequest);
   };
 
-  const handleSearch = (newDataRequest?: IDataRequestGetList) => {
-    const requestToUse = newDataRequest || {
+  const handleSearch = () => {
+    const newDataRequest = {
       ...dataRequest,
       page: 1,
     };
-    setDataRequest(requestToUse);
-    fetchProfile(requestToUse);
+    setDataRequest(newDataRequest);
+    fetchProfile(newDataRequest);
   };
 
   const handleClearAllFormSearch = () => {

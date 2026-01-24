@@ -40,4 +40,10 @@ export const ADVANCE_SEARCH_FILTERS: FilterSection[] = [
     type: "radio",
     options: [{ label: "Provider using the Given Set", value: "using_given_set" }],
   },
+  {
+    key: "location",
+    title: "Location By",
+    type: "radio",
+    options: [{ label: "Near by City", value: "near_city" }],
+  },
 ];
