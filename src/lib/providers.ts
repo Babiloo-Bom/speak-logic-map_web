@@ -4,6 +4,8 @@ import type {
   ProviderWithRelations,
   ProviderSearchParams,
   ProviderSearchResponse,
+  ProviderCreateInput,
+  ProviderUpdateInput,
   Function as ProviderFunction,
   Problem as ProviderProblem,
 } from "@/types/provider";
@@ -29,6 +31,7 @@ export async function getProviderById(
           p.url,
           p.website_url,
           p.description,
+          p.image_url,
           p.geo_id,
           p.lat,
           p.lng,
@@ -84,6 +87,7 @@ export async function getProviderById(
       url: providerRow.url,
       website_url: providerRow.website_url,
       description: providerRow.description,
+      image_url: providerRow.image_url ?? undefined,
       geo_id: providerRow.geo_id,
       lat: providerRow.lat,
       lng: providerRow.lng,
@@ -482,6 +486,243 @@ export async function getProviderRatingSummary(
         created_at: row.created_at,
       })),
     };
+  } finally {
+    client.release();
+  }
+}
+
+// ============================================
+// CREATE PROVIDER
+// ============================================
+
+export async function createProvider(input: ProviderCreateInput): Promise<ProviderWithRelations> {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Validate required field
+    if (!input.name || input.name.trim().length === 0) {
+      throw new Error("Provider name is required");
+    }
+
+    const status = input.status ?? "active";
+    const isApplicable = input.is_applicable ?? true;
+    const locationBy = input.location_by ?? false;
+
+    // Create provider record
+    const providerResult = await client.query(
+      `
+        INSERT INTO providers (
+          user_id, name, url, website_url, description, image_url,
+          geo_id, lat, lng, near_city,
+          status, is_applicable, location_by
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        RETURNING id, user_id, name, url, website_url, description, image_url,
+                  geo_id, lat, lng, near_city, rating, status, is_applicable,
+                  location_by, created_at, updated_at
+      `,
+      [
+        input.user_id ?? null,
+        input.name.trim(),
+        input.url ?? null,
+        input.website_url ?? null,
+        input.description ?? null,
+        input.image_url ?? null,
+        input.geo_id ?? null,
+        input.lat ?? null,
+        input.lng ?? null,
+        input.near_city ?? null,
+        status,
+        isApplicable,
+        locationBy,
+      ]
+    );
+
+    const providerRow = providerResult.rows[0];
+    const providerId = providerRow.id;
+
+    // Link functions
+    if (input.function_ids && input.function_ids.length > 0) {
+      for (const funcId of input.function_ids) {
+        await client.query(
+          `INSERT INTO provider_functions (provider_id, function_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+          [providerId, funcId]
+        );
+      }
+    }
+
+    // Link problems
+    if (input.problem_ids && input.problem_ids.length > 0) {
+      for (const probId of input.problem_ids) {
+        await client.query(
+          `INSERT INTO provider_problems (provider_id, problem_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+          [providerId, probId]
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+
+    // Return full provider with relations
+    return (await getProviderById(providerId))!;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+// ============================================
+// UPDATE PROVIDER
+// ============================================
+
+export async function updateProvider(
+  id: number,
+  input: ProviderUpdateInput
+): Promise<ProviderWithRelations | null> {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Check if provider exists
+    const providerCheck = await client.query(`SELECT id FROM providers WHERE id = $1`, [id]);
+    if (providerCheck.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return null;
+    }
+
+    // Build update query dynamically
+    const updates: string[] = [];
+    const updateValues: any[] = [id];
+    let paramIndex = 2;
+
+    if (input.name !== undefined) {
+      if (!input.name || input.name.trim().length === 0) {
+        throw new Error("Provider name cannot be empty");
+      }
+      updates.push(`name = $${paramIndex++}`);
+      updateValues.push(input.name.trim());
+    }
+    if (input.user_id !== undefined) {
+      updates.push(`user_id = $${paramIndex++}`);
+      updateValues.push(input.user_id ?? null);
+    }
+    if (input.url !== undefined) {
+      updates.push(`url = $${paramIndex++}`);
+      updateValues.push(input.url ?? null);
+    }
+    if (input.website_url !== undefined) {
+      updates.push(`website_url = $${paramIndex++}`);
+      updateValues.push(input.website_url ?? null);
+    }
+    if (input.description !== undefined) {
+      updates.push(`description = $${paramIndex++}`);
+      updateValues.push(input.description ?? null);
+    }
+    if (input.image_url !== undefined) {
+      updates.push(`image_url = $${paramIndex++}`);
+      updateValues.push(input.image_url ?? null);
+    }
+    if (input.geo_id !== undefined) {
+      updates.push(`geo_id = $${paramIndex++}`);
+      updateValues.push(input.geo_id ?? null);
+    }
+    if (input.lat !== undefined) {
+      updates.push(`lat = $${paramIndex++}`);
+      updateValues.push(input.lat ?? null);
+    }
+    if (input.lng !== undefined) {
+      updates.push(`lng = $${paramIndex++}`);
+      updateValues.push(input.lng ?? null);
+    }
+    if (input.near_city !== undefined) {
+      updates.push(`near_city = $${paramIndex++}`);
+      updateValues.push(input.near_city ?? null);
+    }
+    if (input.status !== undefined) {
+      updates.push(`status = $${paramIndex++}`);
+      updateValues.push(input.status);
+    }
+    if (input.is_applicable !== undefined) {
+      updates.push(`is_applicable = $${paramIndex++}`);
+      updateValues.push(input.is_applicable);
+    }
+    if (input.location_by !== undefined) {
+      updates.push(`location_by = $${paramIndex++}`);
+      updateValues.push(input.location_by);
+    }
+
+    if (updates.length > 0) {
+      updates.push(`updated_at = CURRENT_TIMESTAMP`);
+      await client.query(`UPDATE providers SET ${updates.join(", ")} WHERE id = $1`, updateValues);
+    }
+
+    // Update function links (replace all)
+    if (input.function_ids !== undefined) {
+      await client.query(`DELETE FROM provider_functions WHERE provider_id = $1`, [id]);
+      if (input.function_ids.length > 0) {
+        for (const funcId of input.function_ids) {
+          await client.query(
+            `INSERT INTO provider_functions (provider_id, function_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+            [id, funcId]
+          );
+        }
+      }
+    }
+
+    // Update problem links (replace all)
+    if (input.problem_ids !== undefined) {
+      await client.query(`DELETE FROM provider_problems WHERE provider_id = $1`, [id]);
+      if (input.problem_ids.length > 0) {
+        for (const probId of input.problem_ids) {
+          await client.query(
+            `INSERT INTO provider_problems (provider_id, problem_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+            [id, probId]
+          );
+        }
+      }
+    }
+
+    await client.query("COMMIT");
+
+    return await getProviderById(id);
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+// ============================================
+// DELETE PROVIDER
+// ============================================
+
+export async function deleteProvider(id: number): Promise<void> {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Check if provider exists
+    const providerResult = await client.query(`SELECT id FROM providers WHERE id = $1`, [id]);
+    if (providerResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      throw new Error("Provider not found");
+    }
+
+    // Delete provider (cascades to provider_functions, provider_problems, provider_ratings)
+    // Note: user_id is optional, so we don't delete user
+    await client.query(`DELETE FROM providers WHERE id = $1`, [id]);
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
   } finally {
     client.release();
   }

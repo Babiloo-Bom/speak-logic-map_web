@@ -25,6 +25,7 @@ export interface Provider {
   url?: string;  // Internal URL identifier (e.g., www.urlofprovider.com)
   website_url?: string;  // External website URL
   description?: string;
+  image_url?: string;  // Provider image URL
   geo_id?: number;
   lat?: number;
   lng?: number;
@@ -80,5 +81,45 @@ export interface ProviderProblem {
   provider_id: number;
   problem_id: number;
   created_at: string;
+}
+
+// ============================================
+// CRUD INPUT TYPES
+// ============================================
+
+export interface ProviderCreateInput {
+  name: string; // Required
+  user_id?: number; // Optional - link to existing user
+  url?: string;
+  website_url?: string;
+  description?: string;
+  image_url?: string;
+  geo_id?: number;
+  lat?: number;
+  lng?: number;
+  near_city?: string;
+  status?: 'active' | 'inactive' | 'pending' | 'suspended';
+  is_applicable?: boolean;
+  location_by?: boolean;
+  function_ids?: number[]; // Link to functions
+  problem_ids?: number[]; // Link to problems
+}
+
+export interface ProviderUpdateInput {
+  name?: string;
+  user_id?: number;
+  url?: string;
+  website_url?: string;
+  description?: string;
+  image_url?: string;
+  geo_id?: number;
+  lat?: number;
+  lng?: number;
+  near_city?: string;
+  status?: 'active' | 'inactive' | 'pending' | 'suspended';
+  is_applicable?: boolean;
+  location_by?: boolean;
+  function_ids?: number[]; // Replace all linked functions
+  problem_ids?: number[]; // Replace all linked problems
 }
 

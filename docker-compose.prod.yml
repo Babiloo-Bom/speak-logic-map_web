@@ -1,0 +1,155 @@
+# Load environment variables from production.env file
+# Usage: docker compose -f docker-compose.prod.yml --env-file production.env up -d
+# Note: docker-compose v2 doesn't require 'version' field
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: speak-logic-map-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-function_provider}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-database.sql:/docker-entrypoint-initdb.d/01-init-database.sql:ro
+    networks:
+      - speak-logic-map-network
+    restart: unless-stopped
+    command: >
+      postgres
+      -c listen_addresses='*'
+      -c max_connections=100
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-function_provider}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+
+  # Database Migration Service
+  db-migrate:
+    image: postgres:15-alpine
+    container_name: speak-logic-map-db-migrate
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./init-database.sql:/init-database.sql:ro
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL...' &&
+        until pg_isready -h postgres -U ${DB_USER:-postgres} -d ${DB_NAME:-function_provider}; do sleep 2; done &&
+        echo 'Running database migration...' &&
+        psql -h postgres -U ${DB_USER:-postgres} -d ${DB_NAME:-function_provider} -f /init-database.sql &&
+        echo 'Migration complete!'
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - speak-logic-map-network
+    restart: "no"
+
+  # Adminer (Database Admin Tool)
+  adminer:
+    image: adminer:latest
+    container_name: speak-logic-map-adminer
+    ports:
+      - "${ADMINER_PORT:-1041}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - speak-logic-map-network
+    restart: unless-stopped
+
+  # Next.js Application (Frontend + Backend API)
+  app:
+    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_IMAGE_PREFIX:-speak-logic-map}-web:${IMAGE_TAG:-latest}
+    container_name: speak-logic-map-app
+    environment:
+      # Environment
+      - NODE_ENV=production
+      - ENVIRONMENT=production
+      
+      # Database Configuration
+      - DB_HOST=postgres
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-function_provider}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_SSL=${DB_SSL:-false}
+      
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      
+      # Email Configuration
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - EMAIL_ENABLED=${EMAIL_ENABLED:-true}
+      
+      # NextAuth Configuration
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      
+      # Google OAuth
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      
+      # Facebook OAuth
+      - FACEBOOK_CLIENT_ID=${FACEBOOK_CLIENT_ID:-}
+      - FACEBOOK_CLIENT_SECRET=${FACEBOOK_CLIENT_SECRET:-}
+      
+      # Apple OAuth (custom flow + optional NextAuth)
+      - APPLE_CLIENT_ID=${APPLE_CLIENT_ID:-}
+      - APPLE_TEAM_ID=${APPLE_TEAM_ID:-}
+      - APPLE_KEY_ID=${APPLE_KEY_ID:-}
+      - APPLE_PRIVATE_KEY=${APPLE_PRIVATE_KEY:-}
+      - APPLE_CLIENT_SECRET=${APPLE_CLIENT_SECRET:-}
+      - APPLE_ISSUER=${APPLE_ISSUER:-https://appleid.apple.com}
+      
+      # Application URLs
+      - API_URL=${API_URL:-${NEXTAUTH_URL}}
+      - FRONTEND_URL=${FRONTEND_URL:-${NEXTAUTH_URL}}
+      
+      # Allowed Origins and Hosts
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-${NEXTAUTH_URL}}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+    volumes:
+      # Mount uploads directory to persist uploaded files
+      - uploads_data:/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-1040}:3000"
+    networks:
+      - speak-logic-map-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/hello', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+      - 1.1.1.1
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  speak-logic-map-network:
+    driver: bridge

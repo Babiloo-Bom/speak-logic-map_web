@@ -1,5 +1,6 @@
 import { Button, Rate, Skeleton } from "antd";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { ProviderItem } from "@/lib/pages/provider-search/types";
 
 interface Props {
@@ -7,6 +8,14 @@ interface Props {
 }
 
 export default function ProfileItem({ data }: Props) {
+  const router = useRouter();
+
+  const handleViewDetails = () => {
+    if (data?.id) {
+      router.push(`/provider-search/provider-detail?providerId=${data.id}`);
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl border border-[#CCCCCC] border-solid shadow-sm p-5 flex flex-col">
       {/* Header */}
@@ -53,7 +62,14 @@ export default function ProfileItem({ data }: Props) {
 
       {/* Button */}
       <div className="mt-auto pt-4">
-        <Button loading={!data} block size="large" className="bg-primary text-white hover:text-primary ">
+        <Button
+          loading={!data}
+          block
+          size="large"
+          className="bg-primary text-white hover:text-primary"
+          onClick={handleViewDetails}
+          disabled={!data?.id}
+        >
           More Details
         </Button>
       </div>

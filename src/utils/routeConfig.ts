@@ -62,5 +62,15 @@ export const getRequiredRoles = (pathname: string): string[] => {
     // Add more role-based routes as needed
   };
 
-  return roleBasedRoutes[pathname] || [];
+  // Check if pathname matches any role-based route
+  if (roleBasedRoutes[pathname]) {
+    return roleBasedRoutes[pathname];
+  }
+
+  // Check if pathname starts with admin routes (for sub-routes)
+  if (pathname.startsWith("/admin")) {
+    return ["admin"];
+  }
+
+  return [];
 };
