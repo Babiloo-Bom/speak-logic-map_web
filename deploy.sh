@@ -42,14 +42,14 @@ if [ "$EUID" -eq 0 ]; then
     log_warn "Running as root. Consider using a non-root user with sudo privileges."
 fi
 
-# Navigate to project directory (ưu tiên /opt, rồi /var/www nếu không set DEPLOY_PROJECT_DIR)
+# Navigate to project directory (ưu tiên DEPLOY_PROJECT_DIR, rồi /opt, rồi /var/www)
 if [ -z "$PROJECT_DIR" ]; then
     if [ -d "/opt/speak-logic-map_web" ]; then
         PROJECT_DIR="/opt/speak-logic-map_web"
     elif [ -d "/var/www/speak-logic-map_web" ]; then
         PROJECT_DIR="/var/www/speak-logic-map_web"
     else
-        PROJECT_DIR="/var/www/speak-logic-map_web"
+        PROJECT_DIR="/opt/speak-logic-map_web"
     fi
 fi
 log_info "Navigating to project directory: $PROJECT_DIR"
