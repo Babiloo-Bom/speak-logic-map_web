@@ -99,8 +99,9 @@ jobs:
             export APP_IMAGE="${{ steps.image.outputs.name }}:latest"
             export GHCR_USERNAME="${{ github.repository_owner }}"
             export GHCR_PULL_TOKEN="${{ secrets.GHCR_PULL_TOKEN }}"
+            export DEPLOY_PROJECT_DIR="/opt/speak-logic-map_web"
             
-            cd /opt/speak-logic-map_web || cd /var/www/speak-logic-map_web || exit 1
+            cd "$DEPLOY_PROJECT_DIR" || exit 1
             
             chmod +x deploy.sh
             ./deploy.sh

@@ -19,10 +19,10 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Configuration
-PROJECT_DIR="/var/www/speak-logic-map_web"
+# Configuration (ưu tiên DEPLOY_PROJECT_DIR từ env - workflow có thể set)
 COMPOSE_FILE="docker-compose.prod.yml"
 ENV_FILE="production.env"
+PROJECT_DIR="${DEPLOY_PROJECT_DIR:-}"
 
 # Logging function
 log_info() {
@@ -42,13 +42,17 @@ if [ "$EUID" -eq 0 ]; then
     log_warn "Running as root. Consider using a non-root user with sudo privileges."
 fi
 
-# Navigate to project directory (support /opt hoặc /var/www)
-log_info "Navigating to project directory..."
-if [ -d "/opt/speak-logic-map_web" ]; then
-    PROJECT_DIR="/opt/speak-logic-map_web"
-elif [ -d "/var/www/speak-logic-map_web" ]; then
-    PROJECT_DIR="/var/www/speak-logic-map_web"
+# Navigate to project directory (ưu tiên /opt, rồi /var/www nếu không set DEPLOY_PROJECT_DIR)
+if [ -z "$PROJECT_DIR" ]; then
+    if [ -d "/opt/speak-logic-map_web" ]; then
+        PROJECT_DIR="/opt/speak-logic-map_web"
+    elif [ -d "/var/www/speak-logic-map_web" ]; then
+        PROJECT_DIR="/var/www/speak-logic-map_web"
+    else
+        PROJECT_DIR="/var/www/speak-logic-map_web"
+    fi
 fi
+log_info "Navigating to project directory: $PROJECT_DIR"
 cd "$PROJECT_DIR" || {
     log_error "Failed to navigate to $PROJECT_DIR"
     exit 1
