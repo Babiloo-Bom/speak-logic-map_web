@@ -103,7 +103,8 @@ jobs:
             
             cd "$DEPLOY_PROJECT_DIR" || exit 1
             
-            git fetch origin && (git pull origin main || git pull origin master) || true
+            git fetch origin
+            git reset --hard origin/main || git reset --hard origin/master
             
             chmod +x deploy.sh
             ./deploy.sh
