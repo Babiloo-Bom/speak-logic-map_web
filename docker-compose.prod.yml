@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-database.sql:/docker-entrypoint-initdb.d/01-init-database.sql:ro
+      - ./database.sql:/docker-entrypoint-initdb.d/01-init-database.sql:ro
     networks:
       - speak-logic-map-network
     restart: unless-stopped
@@ -38,7 +38,7 @@ services:
     environment:
       PGPASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./init-database.sql:/init-database.sql:ro
+      - ./database.sql:/init-database.sql:ro
     command: >
       sh -c "
         echo 'Waiting for PostgreSQL...' &&

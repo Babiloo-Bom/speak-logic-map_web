@@ -46,6 +46,7 @@
     "react-leaflet": "^4.1.0",
     "react-modal": "^3.16.1",
     "react-switch": "^7.0.0",
+    "sharp": "^0.33.2",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

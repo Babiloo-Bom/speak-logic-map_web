@@ -50,7 +50,7 @@ if [ -z "$PROJECT_DIR" ]; then
         PROJECT_DIR="/var/www/speak-logic-map_web"
     else
         PROJECT_DIR="/opt/speak-logic-map_web"
-        
+
     fi
 fi
 log_info "Navigating to project directory: $PROJECT_DIR"
@@ -142,16 +142,13 @@ docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d || {
 
 # Step 7: Wait for services to be healthy
 log_info "Step 7: Waiting for services to be healthy..."
-sleep 10
+sleep 20
 
-# Check if app container is running
-if docker ps | grep -q "speak-logic-map-app"; then
+# Kiểm tra app container (chỉ cảnh báo; quyết định pass/fail dựa vào health check bên dưới)
+if docker ps --format '{{.Names}}' | grep -q "speak-logic-map-app"; then
     log_info "App container is running"
 else
-    log_error "App container is not running!"
-    log_info "Checking logs..."
-    docker compose -f "$COMPOSE_FILE" logs app --tail=50
-    exit 1
+    log_warn "App container not seen in docker ps yet; continuing to health check..."
 fi
 
 # Step 8: Health check
