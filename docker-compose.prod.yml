@@ -67,8 +67,9 @@ services:
     restart: unless-stopped
 
   # Next.js Application (Frontend + Backend API)
+  # APP_IMAGE dùng khi pull từ GHCR: ghcr.io/owner/repo:latest
   app:
-    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_IMAGE_PREFIX:-speak-logic-map}-web:${IMAGE_TAG:-latest}
+    image: ${APP_IMAGE:-${DOCKER_REGISTRY:-docker.io}/${DOCKER_IMAGE_PREFIX:-speak-logic-map}-web:${IMAGE_TAG:-latest}}
     container_name: speak-logic-map-app
     environment:
       # Environment

@@ -5,8 +5,8 @@
 # ============================================
 # Script này sẽ:
 # 1. Pull code mới nhất từ git
-# 2. Login vào Docker Hub
-# 3. Pull Docker image mới nhất
+# 2. Login vào registry (GHCR hoặc Docker Hub) nếu cần
+# 3. Pull Docker image mới nhất (từ ghcr.io hoặc docker.io)
 # 4. Restart containers với image mới
 # 5. Cleanup old images
 # ============================================
@@ -23,7 +23,6 @@ NC='\033[0m' # No Color
 PROJECT_DIR="/var/www/speak-logic-map_web"
 COMPOSE_FILE="docker-compose.prod.yml"
 ENV_FILE="production.env"
-IMAGE_NAME="${DOCKERHUB_USER:-YOUR_DOCKERHUB_USER}/speak-logic-map-web:latest"
 
 # Logging function
 log_info() {
@@ -43,12 +42,30 @@ if [ "$EUID" -eq 0 ]; then
     log_warn "Running as root. Consider using a non-root user with sudo privileges."
 fi
 
-# Navigate to project directory
-log_info "Navigating to project directory: $PROJECT_DIR"
+# Navigate to project directory (support /opt hoặc /var/www)
+log_info "Navigating to project directory..."
+if [ -d "/opt/speak-logic-map_web" ]; then
+    PROJECT_DIR="/opt/speak-logic-map_web"
+elif [ -d "/var/www/speak-logic-map_web" ]; then
+    PROJECT_DIR="/var/www/speak-logic-map_web"
+fi
 cd "$PROJECT_DIR" || {
     log_error "Failed to navigate to $PROJECT_DIR"
     exit 1
 }
+
+# Load production.env để lấy APP_IMAGE (và các biến khác)
+if [ -f "$ENV_FILE" ]; then
+    set +u
+    set -a
+    # shellcheck source=/dev/null
+    source "$ENV_FILE" 2>/dev/null || true
+    set +a
+    set -u
+fi
+
+# Image để pull: ưu tiên APP_IMAGE (GHCR), không thì Docker Hub
+IMAGE_NAME="${APP_IMAGE:-${DOCKER_REGISTRY:-docker.io}/${DOCKER_IMAGE_PREFIX:-speak-logic-map}-web:${IMAGE_TAG:-latest}}"
 
 # Step 1: Pull latest code from git
 log_info "Step 1: Pulling latest code from git..."
@@ -71,17 +88,27 @@ if [ ! -f "$ENV_FILE" ]; then
     exit 1
 fi
 
-# Step 3: Login to Docker Hub (if credentials provided)
-log_info "Step 3: Logging into Docker Hub..."
-if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
+# Step 3: Login vào registry (GHCR hoặc Docker Hub) nếu cần
+log_info "Step 3: Registry login (if required)..."
+if [ -n "${APP_IMAGE}" ] && echo "$APP_IMAGE" | grep -q '^ghcr\.io/'; then
+    # GitHub Container Registry
+    if [ -n "${GHCR_PULL_TOKEN}" ]; then
+        echo "$GHCR_PULL_TOKEN" | docker login ghcr.io -u "${GHCR_USERNAME:-$GITHUB_REPOSITORY_OWNER}" --password-stdin 2>/dev/null || {
+            log_error "GHCR login failed!"
+            exit 1
+        }
+        log_info "Logged into ghcr.io"
+    else
+        log_warn "GHCR_PULL_TOKEN not set. Nếu package private thì pull sẽ fail; nếu public thì không cần."
+    fi
+elif [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
     echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin || {
-        log_error "Docker login failed!"
+        log_error "Docker Hub login failed!"
         exit 1
     }
-    log_info "Successfully logged into Docker Hub"
+    log_info "Logged into Docker Hub"
 else
-    log_warn "DOCKERHUB_USERNAME or DOCKERHUB_TOKEN not set, skipping Docker login..."
-    log_warn "Make sure you're already logged in or images are publicly accessible"
+    log_warn "No registry credentials set. OK nếu image public."
 fi
 
 # Step 4: Pull latest Docker image
@@ -102,7 +129,8 @@ set -e  # Re-enable exit on error
 
 # Step 6: Start containers with new image
 log_info "Step 6: Starting containers with new image..."
-docker compose -f "$COMPOSE_FILE" up -d || {
+export APP_IMAGE="$IMAGE_NAME"
+docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d || {
     log_error "Failed to start containers!"
     exit 1
 }
