@@ -50,6 +50,7 @@ if [ -z "$PROJECT_DIR" ]; then
         PROJECT_DIR="/var/www/speak-logic-map_web"
     else
         PROJECT_DIR="/opt/speak-logic-map_web"
+        
     fi
 fi
 log_info "Navigating to project directory: $PROJECT_DIR"
