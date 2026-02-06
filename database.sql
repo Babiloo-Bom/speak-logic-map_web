@@ -124,6 +124,34 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Device FCM tokens (mobile push - đăng ký token thiết bị)
+CREATE TABLE IF NOT EXISTS device_fcm_tokens (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  fcm_token VARCHAR(512) NOT NULL,
+  device_id VARCHAR(255),
+  platform VARCHAR(20),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(fcm_token)
+);
+CREATE INDEX IF NOT EXISTS idx_device_fcm_tokens_user_id ON device_fcm_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_device_fcm_tokens_device_id ON device_fcm_tokens(device_id);
+
+-- Notifications (lịch sử thông báo)
+CREATE TABLE IF NOT EXISTS notifications (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  title VARCHAR(255),
+  body TEXT,
+  data JSONB,
+  read_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_read_at ON notifications(read_at);
+
 -- ============================================
 -- 2. GEOGRAPHIC & FILE TABLES
 -- ============================================
