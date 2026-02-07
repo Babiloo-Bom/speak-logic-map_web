@@ -6,6 +6,14 @@ Backend phục vụ push notification cho mobile: đăng ký FCM token, gửi th
 
 - **Firebase:** Set `FIREBASE_SERVICE_ACCOUNT_JSON` (chuỗi JSON service account) hoặc `GOOGLE_APPLICATION_CREDENTIALS` (đường dẫn file). Lấy từ Firebase Console → Project Settings → Service accounts → Generate new private key.
 
+### Docker (production)
+
+- Trong `docker-compose.prod.yml`, app container đã được truyền `FIREBASE_SERVICE_ACCOUNT_JSON` và `GOOGLE_APPLICATION_CREDENTIALS` từ file `production.env`.
+- Nếu JSON dài hoặc có ký tự đặc biệt khiến env bị lỗi, dùng **base64** trong `production.env`:
+  - Trên server: `base64 -w0 logic-map-mobile-firebase-adminsdk-....json` → copy chuỗi ra.
+  - Trong `production.env`: `FIREBASE_SERVICE_ACCOUNT_JSON=base64:<chuỗi_base64>`.
+- Sau khi sửa env, cần **restart app**: `docker compose -f docker-compose.prod.yml --env-file production.env up -d app`.
+
 ## Bảng DB
 
 - **device_fcm_tokens:** `user_id`, `fcm_token`, `device_id`, `platform`, `created_at`, `updated_at`. Một token chỉ lưu một lần (UNIQUE), cập nhật `user_id` khi đăng ký lại.
