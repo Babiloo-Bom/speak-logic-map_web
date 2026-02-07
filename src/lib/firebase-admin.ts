@@ -53,7 +53,12 @@ export async function sendMulticast(
   tokens: string[],
   notification: { title: string; body?: string },
   data?: Record<string, string>
-): Promise<{ successCount: number; failureCount: number; failedTokens: string[] }> {
+): Promise<{
+  successCount: number;
+  failureCount: number;
+  failedTokens: string[];
+  errors?: { token: string; code?: string; message?: string }[];
+}> {
   const app = getFirebaseApp();
   if (!app) {
     throw new Error('Firebase Admin chưa cấu hình (FIREBASE_SERVICE_ACCOUNT_JSON hoặc GOOGLE_APPLICATION_CREDENTIALS)');
@@ -73,12 +78,23 @@ export async function sendMulticast(
   };
   const result = await admin.messaging().sendEachForMulticast(message);
   const failedTokens: string[] = [];
+  const errors: { token: string; code?: string; message?: string }[] = [];
   result.responses.forEach((resp, i) => {
-    if (!resp.success) failedTokens.push(tokens[i]);
+    if (!resp.success) {
+      const token = tokens[i];
+      failedTokens.push(token);
+      const err = (resp as { error?: { code?: string; message?: string } }).error;
+      errors.push({
+        token: token.slice(0, 20) + '...',
+        code: err?.code,
+        message: err?.message,
+      });
+    }
   });
   return {
     successCount: result.successCount,
     failureCount: result.failureCount,
     failedTokens,
+    errors: errors.length > 0 ? errors : undefined,
   };
 }

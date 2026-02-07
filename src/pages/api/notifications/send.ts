@@ -61,6 +61,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       successCount: result.successCount,
       failureCount: result.failureCount,
       totalTokens: tokens.length,
+      errors: result.errors,
     });
   } catch (e) {
     console.error('Send notifications error:', e);

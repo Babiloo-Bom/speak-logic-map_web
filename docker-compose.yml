@@ -12,7 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-database.sql:/docker-entrypoint-initdb.d/01-init-database.sql:ro
+      - ./database.sql:/docker-entrypoint-initdb.d/01-init-database.sql:ro
     command: >
       postgres
       -c listen_addresses='*'
@@ -30,7 +30,7 @@ services:
     image: postgres:15-alpine
     container_name: speak-logic-map-db-migrate
     volumes:
-      - ./init-database.sql:/init-database.sql:ro
+      - ./database.sql:/init-database.sql:ro
     environment:
       PGPASSWORD: password123
     command: >
@@ -75,6 +75,8 @@ services:
     volumes:
       # Mount uploads directory as volume (not in image)
       - uploads_data:/app/public/uploads
+      # Firebase: mount file SA (optional) - nếu có file .json thì set GOOGLE_APPLICATION_CREDENTIALS
+      - ./logic-map-mobile-firebase-adminsdk-fbsvc-89e59e32fa.json:/app/secrets/firebase-sa.json:ro
     environment:
       # Database Configuration
       DB_HOST: postgres
@@ -101,6 +103,9 @@ services:
       # Facebook OAuth
       FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID}
       FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET}
+      # Firebase FCM (local: dùng file mount ở trên hoặc set trong .env)
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON:-}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS:-/app/secrets/firebase-sa.json}
       # Node Environment
       NODE_ENV: production
     depends_on:
