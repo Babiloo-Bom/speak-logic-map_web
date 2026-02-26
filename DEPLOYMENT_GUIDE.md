@@ -78,7 +78,8 @@ cd /var/www/speak-logic-map_web
 ### 3.2. Tạo file production.env
 
 ```bash
-cp production.env production.env
+# File mẫu đã có trong repo; copy ra và chỉnh
+cp env.example production.env
 nano production.env
 ```
 
@@ -121,13 +122,16 @@ sudo certbot renew --dry-run
 
 ## Bước 6: Deploy Docker Containers
 
-### 6.1. Login và pull image
+### 6.1. Image từ GHCR (khuyến nghị)
+
+Trong `production.env` set `APP_IMAGE=ghcr.io/<owner>/speak-logic-map_web:latest`. Deploy dùng script:
 
 ```bash
-cd /var/www/speak-logic-map_web
-docker login -u YOUR_DOCKERHUB_USERNAME
-docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE_PREFIX}-web:${IMAGE_TAG}
+cd /opt/speak-logic-map_web   # hoặc /var/www/speak-logic-map_web
+./deploy.sh
 ```
+
+Script sẽ pull image từ GHCR (login nếu có `GHCR_PULL_TOKEN`), rồi `docker compose up -d`.
 
 ### 6.2. Start containers
 
@@ -187,25 +191,28 @@ docker compose -f docker-compose.prod.yml logs app --tail=50
 
 ## Bước 10: Deploy Updates
 
-### Sử dụng deploy.sh
+### Sử dụng deploy.sh (khuyến nghị)
 
 ```bash
-cd /var/www/speak-logic-map_web
-export DOCKERHUB_USERNAME="your-username"
-export DOCKERHUB_TOKEN="your-token"
-export DOCKERHUB_USER="your-username"
+cd /opt/speak-logic-map_web   # hoặc /var/www/speak-logic-map_web
+# Nếu image GHCR private: export GHCR_PULL_TOKEN="ghp_xxx"
 ./deploy.sh
 ```
+
+Script: git pull → pull image từ GHCR (theo APP_IMAGE trong production.env) → down/up containers → health check.
 
 ### Manual deploy
 
 ```bash
-cd /var/www/speak-logic-map_web
-git pull origin main
-docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE_PREFIX}-web:${IMAGE_TAG}
+cd /opt/speak-logic-map_web
+git fetch origin && git reset --hard origin/main
+docker pull ghcr.io/<owner>/speak-logic-map_web:latest
+export APP_IMAGE=ghcr.io/<owner>/speak-logic-map_web:latest
 docker compose -f docker-compose.prod.yml --env-file production.env up -d --force-recreate
 docker image prune -f
 ```
+
+Chi tiết đầy đủ: xem [docs/DEPLOY_SERVER.md](docs/DEPLOY_SERVER.md).
 
 ## Troubleshooting
 

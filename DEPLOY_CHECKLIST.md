@@ -15,16 +15,15 @@
 - [ ] Đã kiểm tra DNS propagation (`dig map.rugal.vn`)
 
 ### Repository Setup
-- [ ] Đã clone repository về `/var/www/speak-logic-map_web`
+- [ ] Đã clone repository về `/opt/speak-logic-map_web` (hoặc `/var/www/speak-logic-map_web`)
 - [ ] Đã tạo file `production.env` với đầy đủ giá trị
 - [ ] Đã set permissions: `chmod 600 production.env`
 
 ## Configuration
 
 ### production.env
-- [ ] `DOCKER_REGISTRY` = docker.io
-- [ ] `DOCKER_IMAGE_PREFIX` = your-dockerhub-username
-- [ ] `IMAGE_TAG` = latest
+- [ ] `APP_IMAGE` = ghcr.io/&lt;owner&gt;/speak-logic-map_web:latest (owner viết thường)
+- [ ] Hoặc `DOCKER_REGISTRY` / `DOCKER_IMAGE_PREFIX` / `IMAGE_TAG` nếu dùng Docker Hub
 - [ ] `DB_PASSWORD` = strong password
 - [ ] `JWT_SECRET` = generated (openssl rand -base64 32)
 - [ ] `JWT_REFRESH_SECRET` = generated
@@ -38,6 +37,7 @@
 - [ ] Google OAuth credentials đã điền
 - [ ] Facebook OAuth credentials đã điền
 - [ ] Apple OAuth credentials (nếu cần)
+- [ ] `FIREBASE_SERVICE_ACCOUNT_JSON` hoặc `GOOGLE_APPLICATION_CREDENTIALS` (FCM push notification)
 
 ### Nginx
 - [ ] Đã copy `nginx.prod.conf` → `/etc/nginx/sites-available/map.rugal.vn.conf`
@@ -53,8 +53,8 @@
 ## Deployment
 
 ### Docker
-- [ ] Đã login Docker Hub: `docker login`
-- [ ] Đã pull image: `docker pull ...`
+- [ ] Trong production.env đã set APP_IMAGE (ghcr.io/owner/repo:latest). Nếu package private: set GHCR_PULL_TOKEN khi chạy deploy
+- [ ] Đã chạy deploy: `./deploy.sh` (pull image + up containers)
 - [ ] Đã start containers: `docker compose -f docker-compose.prod.yml --env-file production.env up -d`
 - [ ] Tất cả containers đang chạy: `docker compose ps`
 - [ ] Không có lỗi trong logs: `docker compose logs`
@@ -166,7 +166,7 @@
 
 ```bash
 # Deploy
-cd /var/www/speak-logic-map_web
+cd /opt/speak-logic-map_web
 ./deploy.sh
 
 # Check status

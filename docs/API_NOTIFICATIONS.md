@@ -6,6 +6,29 @@ Backend phục vụ push notification cho mobile: đăng ký FCM token, gửi th
 
 - **Firebase:** Set `FIREBASE_SERVICE_ACCOUNT_JSON` (chuỗi JSON service account) hoặc `GOOGLE_APPLICATION_CREDENTIALS` (đường dẫn file). Lấy từ Firebase Console → Project Settings → Service accounts → Generate new private key.
 
+### Kiểm tra credential có kết nối được hay không
+
+Chạy script (từ thư mục gốc project). Lần đầu cần cài dependency: **`npm install`** (project đã có `firebase-admin` trong package.json).
+
+```bash
+node scripts/check-firebase-credential.js
+```
+
+Hoặc chỉ định file JSON:
+
+```bash
+node scripts/check-firebase-credential.js --file=./logic-map-mobile-firebase-adminsdk-fbsvc-89e59e32fa.json
+```
+
+Hoặc dùng biến môi trường (chuỗi JSON hoặc base64):
+
+```bash
+FIREBASE_SERVICE_ACCOUNT_JSON=base64:xxx node scripts/check-firebase-credential.js
+```
+
+- Nếu in ra **"Kết nối Firebase OK. Credential hợp lệ."** → file/credential đúng, có thể dùng.
+- Nếu báo **"Credential không hợp lệ"** hoặc **Invalid JWT Signature** → cần tạo lại key trong Firebase Console hoặc kiểm tra format (dùng base64 nếu paste JSON bị lỗi).
+
 ### Docker (production)
 
 - Trong `docker-compose.prod.yml`, app container đã được truyền `FIREBASE_SERVICE_ACCOUNT_JSON` và `GOOGLE_APPLICATION_CREDENTIALS` từ file `production.env`.
