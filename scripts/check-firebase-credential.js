@@ -10,6 +10,7 @@
  * Script sẽ: init Firebase Admin với credential → gửi 1 message test tới token giả.
  * - Nếu credential đúng: FCM trả lỗi "invalid-registration-token" (nghĩa là đã kết nối được tới Google).
  * - Nếu credential sai: lỗi "invalid-credential" / "invalid_grant" / "Invalid JWT Signature".
+ * - Key đúng nhưng "sau vài phút không được" thường do ĐỒNG HỒ MÁY sai → đồng bộ NTP.
  */
 
 const path = require('path');
@@ -90,8 +91,16 @@ async function main() {
       lower.includes('invalid-credential') ||
       lower.includes('credential implementation')
     ) {
+      const now = new Date();
+      const timeStr = now.toISOString ? now.toISOString() : now.toString();
+      const keyId = credential && credential.private_key_id ? credential.private_key_id : '(không đọc được)';
       console.error('Credential không hợp lệ (sai key, key bị thu hồi, hoặc sai format).');
       console.error('Chi tiết:', message);
+      console.error('');
+      console.error('Thời gian máy:', timeStr);
+      console.error('Key ID trong file:', keyId);
+      console.error('→ Kiểm tra Firebase Console > Service accounts > Keys: key trên còn tồn tại không.');
+      console.error('→ Nếu không còn hoặc không chắc: tạo key MỚI (Generate new private key), dùng file mới test.');
       process.exit(1);
     }
     console.error('Lỗi khác:', code || message);

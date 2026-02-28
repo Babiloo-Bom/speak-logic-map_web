@@ -1,7 +1,10 @@
 import { Button, Rate, Skeleton } from "antd";
 import Image from "next/image";
+import type { StaticImageData } from "next/image";
+import { useEffect, useState } from "react";
 import { ManagerItem } from "@/lib/pages/manager-search/types";
 import { useRouter } from "next/router";
+import DEFAULT_AVATAR from "@/assets/images/user.jpg";
 
 interface Props {
   data?: ManagerItem;
@@ -9,14 +12,30 @@ interface Props {
 
 export default function ProfileItem({ data }: Props) {
   const router = useRouter();
+  const [avatarSrc, setAvatarSrc] = useState<string | StaticImageData>(DEFAULT_AVATAR);
+
+  useEffect(() => {
+    if (data?.image_url) {
+      setAvatarSrc(data.image_url);
+    } else {
+      setAvatarSrc(DEFAULT_AVATAR);
+    }
+  }, [data?.image_url]);
   return (
     <div className="bg-white rounded-xl border border-[#CCCCCC] border-solid shadow-sm p-5 flex flex-col">
       {/* Header */}
       <div className="flex gap-4">
-        {data?.image_url ? (
-          <Image src={data?.image_url} alt={data.name} width={65} height={65} className="rounded-full object-cover !w-[65px] !h-[65px]" />
-        ) : (
+        {!data ? (
           <Skeleton.Avatar active size={56} shape="circle" />
+        ) : (
+          <Image
+            src={avatarSrc}
+            alt={data?.name || "avatar"}
+            width={65}
+            height={65}
+            className="rounded-full object-cover !w-[65px] !h-[65px]"
+            onError={() => setAvatarSrc(DEFAULT_AVATAR)}
+          />
         )}
 
         <div className="flex-1">

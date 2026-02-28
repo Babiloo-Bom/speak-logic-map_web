@@ -119,5 +119,5 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-// Only admins can search managers in admin module
-export default requireAuth(["admin"])(handler);
+// Cho phép tất cả user đã đăng nhập tìm kiếm managers (không giới hạn admin)
+export default requireAuth()(handler);
