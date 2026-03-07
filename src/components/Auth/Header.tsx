@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import IMG_LOGO from "@/assets/images/Logo.png";
 import ICONUSER from "@/assets/images/IconUser.png";
 import ICONBELL from "@/assets/images/IconBell.png";
@@ -30,9 +31,9 @@ const Header: React.FC = () => {
                         <Image src={IMG_LOGO} alt="Logo" />
                     </div>
                     <ul className="flex space-x-8">
-                        <li><a href="#" className="font-bold text-gray-800">Provider</a></li>
-                        <li><a href="#" className="font-bold text-gray-800">Problem</a></li>
-                        <li><a href="#" className="font-bold text-gray-800">Function</a></li>
+                        <li><Link href="/providers" className="font-bold text-gray-800 hover:underline">Provider</Link></li>
+                        <li><Link href="/manager-search" className="font-bold text-gray-800 hover:underline">Problem</Link></li>
+                        <li><Link href="/manager-search" className="font-bold text-gray-800 hover:underline">Function</Link></li>
                         <li><a href="#" className="font-bold text-gray-800">News</a></li>
                     </ul>
                 </div>

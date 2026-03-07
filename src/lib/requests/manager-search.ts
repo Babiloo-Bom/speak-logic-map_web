@@ -20,7 +20,7 @@ export const baseDataRequestGetList: IDataRequestGetList = {
   starts_with: "",
   page: 1,
   limit: 9,
-  sort_by: "relevance",
+  sort_by: "all",
   sort_order: "desc",
   browse: [],
 };

@@ -40,7 +40,14 @@ function AdvanceSearch(props: Props) {
             {/* Divider */}
             <div className="h-6 w-px bg-blue-500/40" />
 
-            <Button type="text" onClick={handleSearch} className="w-1/2 h-12 text-primary font-semibold rounded-none hover:bg-transparent">
+            <Button
+              type="text"
+              onClick={() => {
+                handleSearch();
+                onClose();
+              }}
+              className="w-1/2 h-12 text-primary font-semibold rounded-none hover:bg-transparent"
+            >
               APPLY
             </Button>
           </div>

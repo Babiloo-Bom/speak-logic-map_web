@@ -175,7 +175,7 @@ export async function searchManagers(params: ManagerSearchParams): Promise<Manag
     starts_with,
     page: rawPage,
     limit: rawLimit,
-    sort_by = "created_at",
+    sort_by = "all",
     sort_order = "desc",
     status,
     include_functions,
@@ -380,8 +380,10 @@ export async function searchManagers(params: ManagerSearchParams): Promise<Manag
   const whereSql = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
   const joinsSql = joins.join("\n");
 
-  // Determine sort column
-  let orderBy = "m.created_at";
+  // Sort: use JOIN + SELECT column so ORDER BY works with SELECT DISTINCT in PostgreSQL
+  let orderBy = "m.rating DESC, m.created_at DESC";
+  let sortJoinSql = "";
+  let sortSelectSql = "";
   switch (sort_by) {
     case "name":
       orderBy = "m.name";
@@ -392,11 +394,35 @@ export async function searchManagers(params: ManagerSearchParams): Promise<Manag
     case "distance":
       if (locationLat !== null && locationLng !== null) {
         orderBy = "distance_km";
+      } else {
+        orderBy = "m.rating";
       }
       break;
     case "created_at":
-    default:
       orderBy = "m.created_at";
+      break;
+    case "functions":
+      sortJoinSql =
+        "LEFT JOIN (SELECT manager_id, COUNT(*) as cnt FROM manager_functions GROUP BY manager_id) _fn_cnt ON _fn_cnt.manager_id = m.id";
+      sortSelectSql = ", _fn_cnt.cnt as _sort_fn";
+      orderBy = "_sort_fn DESC NULLS LAST, m.rating DESC, m.created_at DESC";
+      break;
+    case "problems":
+      sortJoinSql =
+        "LEFT JOIN (SELECT manager_id, COUNT(*) as cnt FROM manager_problems GROUP BY manager_id) _mp_cnt ON _mp_cnt.manager_id = m.id";
+      sortSelectSql = ", _mp_cnt.cnt as _sort_mp";
+      orderBy = "_sort_mp DESC NULLS LAST, m.rating DESC, m.created_at DESC";
+      break;
+    case "description":
+      sortSelectSql =
+        ", (CASE WHEN m.description IS NOT NULL AND TRIM(COALESCE(m.description, '')) != '' THEN 1 ELSE 0 END) as _sort_desc";
+      orderBy = "_sort_desc DESC, m.rating DESC, m.created_at DESC";
+      break;
+    case "providers":
+    case "all":
+    default:
+      orderBy = "m.rating DESC, m.created_at DESC";
+      break;
   }
 
   const client = await pool.connect();
@@ -455,8 +481,12 @@ export async function searchManagers(params: ManagerSearchParams): Promise<Manag
     const total = Number(countResult.rows[0]?.total ?? 0);
     const totalPages = Math.ceil(total / limit) || 1;
 
-    // Data query
+    // Data query (orderBy may already contain DESC/ASC for functions/problems/description/all)
     const finalOrderBy = distanceOrderBy || orderBy;
+    const orderByClause =
+      String(finalOrderBy).includes(" DESC") || String(finalOrderBy).includes(" ASC")
+        ? finalOrderBy
+        : `${finalOrderBy} ${sort_order.toUpperCase()}`;
     const dataResult = await client.query(
       `
         SELECT DISTINCT
@@ -486,14 +516,16 @@ export async function searchManagers(params: ManagerSearchParams): Promise<Manag
           g.country,
           fa_avatar.url as avatar_url
           ${distanceSelect}
+          ${sortSelectSql}
         FROM managers m
         INNER JOIN users u ON u.id = m.user_id
         LEFT JOIN profiles p ON p.user_id = u.id
         LEFT JOIN geopoints g ON g.id = m.geo_id
         LEFT JOIN file_assets fa_avatar ON fa_avatar.id = p.avatar_id
+        ${sortJoinSql}
         ${joinsSql}
         ${finalWhereSql}
-        ORDER BY ${finalOrderBy} ${sort_order.toUpperCase()}
+        ORDER BY ${orderByClause}
         LIMIT ${limit} OFFSET ${offset}
       `,
       values

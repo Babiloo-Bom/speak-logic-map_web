@@ -32,6 +32,9 @@ export async function getProviderById(
           p.website_url,
           p.description,
           p.image_url,
+          p.contact_number,
+          p.address,
+          p.map_image_url,
           p.geo_id,
           p.lat,
           p.lng,
@@ -88,6 +91,9 @@ export async function getProviderById(
       website_url: providerRow.website_url,
       description: providerRow.description,
       image_url: providerRow.image_url ?? undefined,
+      contact_number: providerRow.contact_number ?? undefined,
+      address: providerRow.address ?? undefined,
+      map_image_url: providerRow.map_image_url ?? undefined,
       geo_id: providerRow.geo_id,
       lat: providerRow.lat,
       lng: providerRow.lng,
@@ -203,10 +209,42 @@ export async function searchProviders(
     }
 
     whereClauses.push(textCondition);
+  } else {
+    // Khi không có ô tìm kiếm (q trống): filter theo sortBy để kết quả thay đổi khi đổi dropdown
+    switch (sortBy) {
+      case "functions":
+        whereClauses.push(
+          "EXISTS (SELECT 1 FROM provider_functions pf WHERE pf.provider_id = p.id)"
+        );
+        break;
+      case "problems":
+        whereClauses.push(
+          "EXISTS (SELECT 1 FROM provider_problems pp WHERE pp.provider_id = p.id)"
+        );
+        break;
+      case "description":
+        whereClauses.push(
+          "p.description IS NOT NULL AND TRIM(COALESCE(p.description, '')) != ''"
+        );
+        break;
+      case "provider":
+      case "all":
+      default:
+        break;
+    }
   }
 
   const whereSql =
     whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+
+  const orderBySql =
+    sortBy === "functions"
+      ? "ORDER BY (SELECT COUNT(*) FROM provider_functions pf WHERE pf.provider_id = p.id) DESC, p.rating DESC, p.created_at DESC"
+      : sortBy === "problems"
+      ? "ORDER BY (SELECT COUNT(*) FROM provider_problems pp WHERE pp.provider_id = p.id) DESC, p.rating DESC, p.created_at DESC"
+      : sortBy === "description"
+      ? "ORDER BY (CASE WHEN p.description IS NOT NULL AND TRIM(COALESCE(p.description, '')) != '' THEN 1 ELSE 0 END) DESC, p.rating DESC, p.created_at DESC"
+      : "ORDER BY p.rating DESC, p.created_at DESC";
 
   const client = await pool.connect();
 
@@ -238,7 +276,7 @@ export async function searchProviders(
         LEFT JOIN geopoints g ON p.geo_id = g.id
         ${whereSql}
         GROUP BY p.id, g.id, g.lat, g.lng, g.city, g.country
-        ORDER BY p.rating DESC, p.created_at DESC
+        ${orderBySql}
         LIMIT ${limit} OFFSET ${offset}
       `,
       values
@@ -252,6 +290,10 @@ export async function searchProviders(
       url: row.url,
       website_url: row.website_url,
       description: row.description,
+      image_url: row.image_url ?? undefined,
+      contact_number: row.contact_number ?? undefined,
+      address: row.address ?? undefined,
+      map_image_url: row.map_image_url ?? undefined,
       geo_id: row.geo_id,
       lat: row.lat,
       lng: row.lng,
@@ -515,11 +557,13 @@ export async function createProvider(input: ProviderCreateInput): Promise<Provid
       `
         INSERT INTO providers (
           user_id, name, url, website_url, description, image_url,
+          contact_number, address, map_image_url,
           geo_id, lat, lng, near_city,
           status, is_applicable, location_by
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
         RETURNING id, user_id, name, url, website_url, description, image_url,
+                  contact_number, address, map_image_url,
                   geo_id, lat, lng, near_city, rating, status, is_applicable,
                   location_by, created_at, updated_at
       `,
@@ -530,6 +574,9 @@ export async function createProvider(input: ProviderCreateInput): Promise<Provid
         input.website_url ?? null,
         input.description ?? null,
         input.image_url ?? null,
+        input.contact_number ?? null,
+        input.address ?? null,
+        input.map_image_url ?? null,
         input.geo_id ?? null,
         input.lat ?? null,
         input.lng ?? null,
@@ -626,6 +673,18 @@ export async function updateProvider(
     if (input.image_url !== undefined) {
       updates.push(`image_url = $${paramIndex++}`);
       updateValues.push(input.image_url ?? null);
+    }
+    if (input.contact_number !== undefined) {
+      updates.push(`contact_number = $${paramIndex++}`);
+      updateValues.push(input.contact_number ?? null);
+    }
+    if (input.address !== undefined) {
+      updates.push(`address = $${paramIndex++}`);
+      updateValues.push(input.address ?? null);
+    }
+    if (input.map_image_url !== undefined) {
+      updates.push(`map_image_url = $${paramIndex++}`);
+      updateValues.push(input.map_image_url ?? null);
     }
     if (input.geo_id !== undefined) {
       updates.push(`geo_id = $${paramIndex++}`);

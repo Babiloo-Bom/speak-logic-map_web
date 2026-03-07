@@ -575,6 +575,30 @@ BEGIN
   ) THEN
     ALTER TABLE providers ADD COLUMN website_url VARCHAR(500);
   END IF;
+
+  -- Add contact_number if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'contact_number'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN contact_number VARCHAR(100);
+  END IF;
+
+  -- Add address if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'address'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN address TEXT;
+  END IF;
+
+  -- Add map_image_url if missing
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'providers' AND column_name = 'map_image_url'
+  ) THEN
+    ALTER TABLE providers ADD COLUMN map_image_url VARCHAR(500);
+  END IF;
 END $$;
 
 -- Provider ratings table (per-user ratings)
@@ -944,7 +968,7 @@ INSERT INTO providers (user_id, name, url, website_url, description, image_url, 
   (
     (SELECT id FROM users WHERE email = 'provider2@example.com' LIMIT 1),
     'Cloud Services Pro',
-    'wider.com',
+    'www.urlofprovider.com',
     'https://cloudpro.example.com',
     'Leading provider of cloud infrastructure and hosting services. We help businesses migrate to the cloud.',
     '/uploads/providers/cloud-pro.jpg',

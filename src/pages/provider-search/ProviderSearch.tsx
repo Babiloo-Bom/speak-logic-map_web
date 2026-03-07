@@ -23,9 +23,23 @@ function ProviderSearch() {
         return;
       }
 
-      const queryString = buildQueryParams(req);
+      const params = new URLSearchParams();
+      if (req.q) params.set("q", req.q);
+      params.set("page", String(req.page ?? 1));
+      params.set("limit", String(req.limit ?? 9));
+      const sortBy = req.sort_by && ["all", "provider", "functions", "problems", "description"].includes(req.sort_by)
+        ? req.sort_by
+        : "all";
+      params.set("sortBy", sortBy);
+      if (req.rating) {
+        const r = parseInt(String(req.rating), 10);
+        if (!Number.isNaN(r)) params.set("minRating", String(r));
+      }
+      if (req.given_set === "using_given_set" || req.given_set === "true") {
+        params.set("applicable", "true");
+      }
+      const queryString = params.toString();
       const url = `/api/providers/search${queryString ? `?${queryString}` : ""}`;
-      console.log("queryString; ", queryString);
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -61,12 +75,11 @@ function ProviderSearch() {
   };
 
   const handleSearch = () => {
-    const newDataRequest = {
-      ...dataRequest,
-      page: 1,
-    };
-    setDataRequest(newDataRequest);
-    fetchProfile(newDataRequest);
+    setDataRequest((prev) => {
+      const next = { ...prev, page: 1 };
+      fetchProfile(next);
+      return next;
+    });
   };
 
   const handleClearAllFormSearch = () => {
@@ -91,6 +104,13 @@ function ProviderSearch() {
           onOpenAdvanceSearch={() => setOpenAdvanceSearch(true)}
           imageUrl="/img/search-bar.png"
           handleSearch={handleSearch}
+          onSortChange={(sortBy) => {
+            setDataRequest((prev) => {
+              const next = { ...prev, sort_by: sortBy || "all", page: 1 };
+              fetchProfile(next);
+              return next;
+            });
+          }}
         />
         <div className="mx-8">
           <div className="mt-8">

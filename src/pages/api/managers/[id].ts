@@ -20,6 +20,13 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       return res.status(200).json(manager);
     }
 
+    // PUT, PATCH, DELETE require admin
+    if (req.method === "PUT" || req.method === "PATCH" || req.method === "DELETE") {
+      if (req.user?.role !== "admin") {
+        return res.status(403).json({ error: "Insufficient permissions" });
+      }
+    }
+
     if (req.method === "PUT" || req.method === "PATCH") {
       const updated = await updateManager(managerId, req.body);
       if (!updated) {
@@ -40,5 +47,5 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   }
 };
 
-// All manager CRUD operations are admin-only
-export default requireAuth(["admin"])(handler);
+// GET: any authenticated user; PUT/PATCH/DELETE: admin only (checked inside handler)
+export default requireAuth()(handler);

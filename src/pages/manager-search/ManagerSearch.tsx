@@ -28,10 +28,15 @@ function ManagerSearch() {
         ...req,
         given_set: req.given_set ? true : false,
         near_city: req.near_city ? true : false,
+        sort_by: req.sort_by || "all",
+        sort_order: req.sort_order || "desc",
       };
 
       const queryString = buildQueryParams(newRequest);
-      const url = `/api/managers/search${queryString ? `?${queryString}` : ""}`;
+      const params = new URLSearchParams(queryString);
+      params.set("sort_by", newRequest.sort_by);
+      params.set("sort_order", newRequest.sort_order);
+      const url = `/api/managers/search?${params.toString()}`;
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -88,12 +93,11 @@ function ManagerSearch() {
   };
 
   const handleSearch = () => {
-    const newDataRequest = {
-      ...dataRequest,
-      page: 1,
-    };
-    setDataRequest(newDataRequest);
-    fetchProfile(newDataRequest);
+    setDataRequest((prev) => {
+      const next = { ...prev, page: 1 };
+      fetchProfile(next);
+      return next;
+    });
     setOpenAdvanceSearch(false);
   };
 
@@ -119,13 +123,26 @@ function ManagerSearch() {
           onOpenAdvanceSearch={() => setOpenAdvanceSearch(true)}
           imageUrl="/img/search-bar.png"
           handleSearch={handleSearch}
+          onSortChange={(sortBy) => {
+            setDataRequest((prev) => {
+              const next = { ...prev, sort_by: sortBy || "all", page: 1 };
+              fetchProfile(next);
+              return next;
+            });
+          }}
         />
         <div className="mx-8">
           <div className="mt-8">
             <ProfileList data={data?.managers} />
           </div>
           <div className="mt-4">
-            <Pagination align="center" defaultCurrent={1} total={data?.total || 0} responsive onChange={onShowPageChange} />
+            <Pagination
+            align="center"
+            current={dataRequest.page}
+            total={data?.total || 0}
+            responsive
+            onChange={onShowPageChange}
+          />
           </div>
         </div>
       </div>

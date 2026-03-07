@@ -1,23 +1,28 @@
 export interface ProviderItem {
   id: string;
   user_id: string;
-  email: string;
-  role: string;
-  status: string;
-  created_at: string;
+  email?: string;
+  role?: string;
+  status?: string;
+  created_at?: string;
   name: string;
-  description: string;
-  expertise: string;
-  rating: number;
-  rating_count: number;
-  is_given_set: boolean;
-  lat: number;
-  lng: number;
-  first_name: string;
-  last_name: string;
-  title: string;
-  function: string;
-  image_url: string;
+  description?: string;
+  expertise?: string;
+  rating?: number;
+  rating_count?: number;
+  is_given_set?: boolean;
+  is_applicable?: boolean;
+  lat?: number;
+  lng?: number;
+  first_name?: string;
+  last_name?: string;
+  title?: string;
+  function?: string;
+  image_url?: string;
+  url?: string;
+  website_url?: string;
+  functions?: { id: number; name: string; description?: string }[];
+  problems?: { id: number; name: string; description?: string }[];
 }
 
 export interface IDataRequestGetList {

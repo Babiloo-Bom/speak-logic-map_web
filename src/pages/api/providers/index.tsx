@@ -35,6 +35,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-// Creating providers is an admin-only operation
-export default requireAuth(["admin"])(handler);
+// Any authenticated user can create a provider (e.g. from Add Providers form)
+export default requireAuth()(handler);
 

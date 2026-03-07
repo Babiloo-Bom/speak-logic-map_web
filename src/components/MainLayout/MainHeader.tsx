@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Image } from "antd";
 
 const MainHeader = () => (
@@ -7,10 +8,12 @@ const MainHeader = () => (
         <Image preview={false} src="/img/Logo.png" alt="Logo" className="h-10 w-auto max-w-full" />
       </div>
 
-      <nav className="hidden md:flex gap-6 text-sm font-medium">
-        <a href="#">Provider</a>
-        <a href="#">Problem</a>
-        <a href="#">Function</a>
+      <nav className="hidden md:flex gap-6 text-sm font-medium text-gray-800">
+        <Link href="/providers" className="font-bold hover:underline">
+          Provider
+        </Link>
+        <Link href="/manager-search">Problem</Link>
+        <Link href="/manager-search">Function</Link>
         <a href="#">News</a>
       </nav>
 

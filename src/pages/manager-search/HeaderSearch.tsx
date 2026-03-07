@@ -3,6 +3,14 @@ import { SearchOutlined, FilterOutlined, MenuOutlined } from "@ant-design/icons"
 import Image from "next/image";
 import { IDataRequestGetList } from "@/lib/pages/manager-search/types";
 
+const SORT_OPTIONS = [
+  { value: "functions", label: "Functions" },
+  { value: "problems", label: "Problems" },
+  { value: "providers", label: "Providers" },
+  { value: "description", label: "Descriptions" },
+  { value: "all", label: "Alls" },
+] as const;
+
 interface HeaderSearchProps {
   title?: string;
   imageUrl: string;
@@ -10,6 +18,7 @@ interface HeaderSearchProps {
   dataRequest: IDataRequestGetList;
   setDataRequest: React.Dispatch<React.SetStateAction<IDataRequestGetList>>;
   handleSearch: () => void;
+  onSortChange?: (sortBy: string) => void;
 }
 
 export default function HeaderSearch({
@@ -19,6 +28,7 @@ export default function HeaderSearch({
   dataRequest,
   setDataRequest,
   handleSearch,
+  onSortChange,
 }: HeaderSearchProps) {
   return (
     <div>
@@ -43,18 +53,29 @@ export default function HeaderSearch({
 
         <Select
           size="large"
-          defaultValue="Sort By"
+          placeholder="Sort By"
           className="w-full md:w-40"
-          options={[
-            { value: "functions", label: "Functions" },
-            { value: "problems", label: "Problems" },
-            { value: "providers", label: "Providers" },
-            { value: "descriptions", label: "Descriptions" },
-            { value: "all", label: "All" },
-          ]}
+          options={SORT_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+          value={
+            dataRequest.sort_by && SORT_OPTIONS.some((o) => o.value === dataRequest.sort_by)
+              ? dataRequest.sort_by
+              : "all"
+          }
+          onChange={(value: string | undefined) => onSortChange?.(String(value ?? "all"))}
+          optionRender={(option) => (
+            <div className="py-2 border-b border-gray-100 last:border-b-0">{option.label}</div>
+          )}
+          dropdownStyle={{ padding: 0 }}
+          popupMatchSelectWidth={true}
         />
 
-        <Button size="large" icon={<SearchOutlined />} className="border-primary text-white bg-primary"></Button>
+        <Button
+          size="large"
+          icon={<SearchOutlined />}
+          onClick={handleSearch}
+          className="border-primary text-white bg-primary"
+          aria-label="Search"
+        />
         <Button size="large" icon={<MenuOutlined />} onClick={onOpenAdvanceSearch} className="border-primary text-primary hover:text-primary"></Button>
       </div>
     </div>

@@ -20,11 +20,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       applicable,
     } = req.query;
 
+    const sortByVal = Array.isArray(sortBy) ? sortBy[0] : sortBy;
     const params: ProviderSearchParams = {
       q: typeof q === "string" ? q : undefined,
       sortBy:
-        typeof sortBy === "string"
-          ? (sortBy.toLowerCase() as ProviderSearchParams["sortBy"])
+        typeof sortByVal === "string" && sortByVal
+          ? (sortByVal.toLowerCase() as ProviderSearchParams["sortBy"])
           : "all",
       page: typeof page === "string" ? parseInt(page, 10) || 1 : 1,
       limit: typeof limit === "string" ? parseInt(limit, 10) || 20 : 20,

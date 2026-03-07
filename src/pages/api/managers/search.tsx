@@ -91,13 +91,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       page: typeof page === "string" ? parseInt(page, 10) || 1 : 1,
       limit: typeof limit === "string" ? parseInt(limit, 10) || 20 : 20,
       
-      // Sorting
-      sort_by: typeof sort_by === "string" && ['name', 'rating', 'created_at', 'distance'].includes(sort_by)
-        ? sort_by as 'name' | 'rating' | 'created_at' | 'distance'
-        : undefined,
-      sort_order: typeof sort_order === "string" && ['asc', 'desc'].includes(sort_order)
-        ? sort_order as 'asc' | 'desc'
-        : undefined,
+      // Sorting (UI: functions, problems, providers, description, all)
+      sort_by: (() => {
+        const v = Array.isArray(sort_by) ? sort_by[0] : sort_by;
+        return typeof v === "string" && ['name', 'rating', 'created_at', 'distance', 'functions', 'problems', 'providers', 'description', 'all'].includes(v)
+          ? v as 'name' | 'rating' | 'created_at' | 'distance' | 'functions' | 'problems' | 'providers' | 'description' | 'all'
+          : "all";
+      })(),
+      sort_order: (() => {
+        const v = Array.isArray(sort_order) ? sort_order[0] : sort_order;
+        return typeof v === "string" && ['asc', 'desc'].includes(v) ? v as 'asc' | 'desc' : "desc";
+      })(),
       
       // Status
       status: typeof status === "string" ? status : undefined,

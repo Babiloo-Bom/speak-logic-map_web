@@ -26,6 +26,9 @@ export interface Provider {
   website_url?: string;  // External website URL
   description?: string;
   image_url?: string;  // Provider image URL
+  contact_number?: string;
+  address?: string;
+  map_image_url?: string;
   geo_id?: number;
   lat?: number;
   lng?: number;
@@ -94,6 +97,9 @@ export interface ProviderCreateInput {
   website_url?: string;
   description?: string;
   image_url?: string;
+  contact_number?: string;
+  address?: string;
+  map_image_url?: string;
   geo_id?: number;
   lat?: number;
   lng?: number;
@@ -112,6 +118,9 @@ export interface ProviderUpdateInput {
   website_url?: string;
   description?: string;
   image_url?: string;
+  contact_number?: string;
+  address?: string;
+  map_image_url?: string;
   geo_id?: number;
   lat?: number;
   lng?: number;

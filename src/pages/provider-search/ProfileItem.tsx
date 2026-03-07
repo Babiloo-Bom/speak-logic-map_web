@@ -1,97 +1,115 @@
-import { Button, Rate, Skeleton } from "antd";
-import Image from "next/image";
-import type { StaticImageData } from "next/image";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useState } from "react";
+import { Button, Skeleton } from "antd";
+import { CheckOutlined } from "@ant-design/icons";
 import { ProviderItem } from "@/lib/pages/provider-search/types";
-import DEFAULT_AVATAR from "@/assets/images/user.jpg";
+import ShowMapModal from "./ShowMapModal";
+
+const DESC_MAX_LENGTH = 120;
 
 interface Props {
   data?: ProviderItem;
 }
 
 export default function ProfileItem({ data }: Props) {
-  const router = useRouter();
-  const [avatarSrc, setAvatarSrc] = useState<string | StaticImageData>(DEFAULT_AVATAR);
+  const [showMapOpen, setShowMapOpen] = useState(false);
 
-  useEffect(() => {
-    if (data?.image_url) {
-      setAvatarSrc(data.image_url);
-    } else {
-      setAvatarSrc(DEFAULT_AVATAR);
-    }
-  }, [data?.image_url]);
-
-  const handleViewDetails = () => {
+  const handleShowMap = () => {
     if (data?.id) {
-      router.push(`/provider-search/provider-detail?providerId=${data.id}`);
+      setShowMapOpen(true);
     }
   };
 
+  const handleCloseMap = () => setShowMapOpen(false);
+
+  const displayUrl = data?.url || data?.website_url || "";
+  const functionLabel = data?.function || data?.functions?.[0]?.name || "";
+  const problemLabel = data?.problems?.[0]?.name || "";
+  const givenSetApplicable = data?.is_applicable ?? data?.is_given_set ?? false;
+  const description = data?.description || "";
+  const truncatedDesc =
+    description.length > DESC_MAX_LENGTH
+      ? `${description.slice(0, DESC_MAX_LENGTH).trim()}...`
+      : description;
+
+  if (!data) {
+    return (
+      <div className="bg-white rounded-xl border border-[#CCCCCC] border-solid shadow-sm p-5 flex flex-col">
+        <Skeleton active paragraph={{ rows: 4 }} />
+        <Skeleton.Button active block className="mt-4" />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-xl border border-[#CCCCCC] border-solid shadow-sm p-5 flex flex-col">
-      {/* Header */}
-      <div className="flex gap-4">
-        {!data ? (
-          <Skeleton.Avatar active size={56} shape="circle" />
+      {/* URL (blue link) */}
+      {displayUrl && (
+        <a
+          href={displayUrl.startsWith("http") ? displayUrl : `https://${displayUrl}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline text-sm mb-2 block break-all"
+        >
+          {displayUrl}
+        </a>
+      )}
+
+      {/* Description + See More */}
+      {description && (
+        <p className="text-gray-700 text-sm mb-3 line-clamp-2">
+          {truncatedDesc}
+          {description.length > DESC_MAX_LENGTH && (
+            <button
+              type="button"
+              onClick={handleShowMap}
+              className="text-blue-600 hover:underline ml-1 font-medium"
+            >
+              See More
+            </button>
+          )}
+        </p>
+      )}
+
+      {/* Function Provided (value green) */}
+      <p className="text-sm mb-1.5">
+        <span className="text-gray-600">Function Provided</span>{" "}
+        <span className="text-green-600 font-medium">{functionLabel || "—"}</span>
+      </p>
+
+      {/* Problem Solved (value red) */}
+      <p className="text-sm mb-1.5">
+        <span className="text-gray-600">Problem Solved</span>{" "}
+        <span className="text-red-600 font-medium">{problemLabel || "—"}</span>
+      </p>
+
+      {/* The Given Set Applicable (checkmark) */}
+      <p className="text-sm mb-4 flex items-center gap-2">
+        <span className="text-gray-600">The Given Set Applicable</span>
+        {givenSetApplicable ? (
+          <CheckOutlined className="text-green-600" />
         ) : (
-          <Image
-            src={avatarSrc}
-            alt={data?.name || "avatar"}
-            width={65}
-            height={65}
-            className="rounded-full object-cover !w-[65px] !h-[65px]"
-            onError={() => setAvatarSrc(DEFAULT_AVATAR)}
-          />
+          <span className="text-gray-400">—</span>
         )}
+      </p>
 
-        <div className="flex-1">
-          <Skeleton active loading={!data} title={{ width: "60%" }} paragraph={false}>
-            <h3 className="font-semibold text-gray-800">{data?.name}</h3>
-          </Skeleton>
-
-          <Skeleton active loading={!data} title={{ width: "40%" }} paragraph={false}>
-            <Rate disabled value={data?.rating || 0} allowHalf={true} />
-            {/* <div className="text-yellow-400 text-sm">{"★".repeat(data?.rating || 0)}</div> */}
-          </Skeleton>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="mt-4 space-y-2 text-sm">
-        <Skeleton active loading={!data} paragraph={{ rows: 1 }}>
-          <p>
-            <span className="font-medium text-gray-700">Function Provided:</span> <span className="text-primary">{data?.function}</span>
-          </p>
-        </Skeleton>
-
-        <Skeleton active loading={!data} paragraph={{ rows: 1 }}>
-          <p>
-            <span className="font-medium text-gray-700">Expertise:</span> <span className="text-primary">{data?.expertise}</span>
-          </p>
-        </Skeleton>
-
-        <Skeleton active loading={!data} paragraph={{ rows: 1 }}>
-          <p>
-            <span className="font-medium text-gray-700">The Given Set Applicable:</span>{" "}
-            <span className="text-primary">{data?.is_given_set ? "Yes" : "No"}</span>
-          </p>
-        </Skeleton>
-      </div>
-
-      {/* Button */}
-      <div className="mt-auto pt-4">
+      {/* Show Map button */}
+      <div className="mt-auto pt-2">
         <Button
-          loading={!data}
           block
           size="large"
-          className="bg-primary text-white hover:text-primary"
-          onClick={handleViewDetails}
+          className="bg-[#324899] text-white hover:!bg-[#324899]/90 border-0"
+          onClick={handleShowMap}
           disabled={!data?.id}
         >
-          More Details
+          Show Map
         </Button>
       </div>
+
+      <ShowMapModal
+        open={showMapOpen}
+        onClose={handleCloseMap}
+        provider={data}
+      />
     </div>
   );
 }
