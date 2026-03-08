@@ -2,12 +2,18 @@
 import { Button, message, Steps, theme } from "antd";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import AboutUser from "./_components/AboutUser/AboutUser";
 import AboutProvider from "./_components/AboutProvider/AboutProvider";
-import RatingForm from "./_components/RatingForm/RatingForm";
+import AboutFunctionAndProblem from "./_components/AboutFunctionAndProblem/AboutFunctionAndProblem";
+import AboutFeedbackYes from "./_components/AboutFeedbackYes/AboutFeedbackYes";
+import AboutFeedbackNo from "./_components/AboutFeedbackNo/AboutFeedbackNo";
 import { baseProviderRatingRequest } from "@/lib/pages/provider-search/provider-rating/request";
 import { IProviderRatingRequest } from "@/lib/pages/provider-search/provider-rating/type";
 import { getAuthToken } from "@/utils/constants";
 import { ProviderWithRelations } from "@/types/provider";
+import type { InitialUserData } from "@/lib/pages/provider-search/provider-rating/type";
+
+const STEP_TITLES = ["About User", "About Provider", "About Function And Problem", "About Feedback"];
 
 const ProviderRating = () => {
   const router = useRouter();
@@ -16,18 +22,48 @@ const ProviderRating = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [dataRequestRating, setDataRequestRating] = useState<IProviderRatingRequest>(baseProviderRatingRequest);
   const [providerData, setProviderData] = useState<ProviderWithRelations | null>(null);
+  const [initialUserData, setInitialUserData] = useState<InitialUserData | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetchingProvider, setFetchingProvider] = useState(true);
 
-  // Fetch provider data on mount
+  // Fetch user profile for pre-fill (Step 1)
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const authToken = getAuthToken();
+      if (!authToken) return;
+      try {
+        const res = await fetch("/api/user/profile", {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const user = data.user;
+          const profile = data.profile;
+          const fullName = profile
+            ? [profile.first_name, profile.last_name].filter(Boolean).join(" ").trim()
+            : "";
+          setInitialUserData({
+            user_name: profile?.pen_name || profile?.first_name || (user?.email ? user.email.split("@")[0] : ""),
+            full_name: fullName || (user?.email ? user.email.split("@")[0] : ""),
+            email_address: user?.email || "",
+            address_optional: profile?.location || "",
+          });
+        }
+      } catch {
+        // ignore
+      }
+    };
+    fetchUserProfile();
+  }, []);
+
   useEffect(() => {
     const fetchProviderData = async () => {
       if (!providerId) return;
 
       try {
         setFetchingProvider(true);
-        const token = getAuthToken();
-        if (!token) {
+        const authToken = getAuthToken();
+        if (!authToken) {
           message.error("No authentication token found");
           return;
         }
@@ -36,7 +72,7 @@ const ProviderRating = () => {
         const response = await fetch(url, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
             "Content-Type": "application/json",
           },
         });
@@ -62,10 +98,16 @@ const ProviderRating = () => {
   }, [providerId]);
 
   const fetchRatingProvider = async (req: IProviderRatingRequest) => {
+    const rating = req.rating || 0;
+    if (rating < 1 || rating > 5) {
+      message.error("Please select a rating between 1 and 5");
+      return;
+    }
+
     try {
       setLoading(true);
-      const token = getAuthToken();
-      if (!token) {
+      const authToken = getAuthToken();
+      if (!authToken) {
         message.error("No authentication token found");
         return;
       }
@@ -74,11 +116,11 @@ const ProviderRating = () => {
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          rating: req.rating,
+          rating,
           comment: req.comment || undefined,
         }),
       });
@@ -98,42 +140,89 @@ const ProviderRating = () => {
     }
   };
 
-  const next = () => {
-    setCurrentStep(currentStep + 1);
+  const next = () => setCurrentStep((s) => s + 1);
+  const prev = () => setCurrentStep((s) => s - 1);
+
+  const handleSubmit = (payload?: IProviderRatingRequest) => {
+    const data = payload ?? dataRequestRating;
+    fetchRatingProvider(data);
   };
 
-  const prev = () => {
-    setCurrentStep(currentStep - 1);
+  const handleCancel = () => {
+    router.push(`/provider-search/provider-detail?providerId=${providerId}`);
   };
 
-  const handleSubmit = () => {
-    fetchRatingProvider(dataRequestRating);
-  };
+  const isStep4Yes = dataRequestRating.used_function_from_provider === true;
 
-  const steps = [
-    {
-      title: "About Provider",
-      content: <AboutProvider providerData={providerData} nextStep={next} />,
-    },
-    {
-      title: "Rating & Review",
-      content: (
-        <RatingForm
+  const step4Content =
+    currentStep === 3 ? (
+      isStep4Yes ? (
+        <AboutFeedbackYes
           dataRequestRating={dataRequestRating}
           setDataRequestRating={setDataRequestRating}
           handleSubmit={handleSubmit}
           prevStep={prev}
           loading={loading}
         />
+      ) : (
+        <AboutFeedbackNo
+          dataRequestRating={dataRequestRating}
+          setDataRequestRating={setDataRequestRating}
+          handleSubmit={handleSubmit}
+          prevStep={prev}
+          loading={loading}
+        />
+      )
+    ) : null;
+
+  const steps = [
+    {
+      title: STEP_TITLES[0],
+      content: (
+        <AboutUser
+          dataRequestRating={dataRequestRating}
+          setDataRequestRating={setDataRequestRating}
+          nextStep={next}
+          onCancel={handleCancel}
+          initialUserData={initialUserData}
+        />
       ),
+    },
+    {
+      title: STEP_TITLES[1],
+      content: (
+        <AboutProvider
+          dataRequestRating={dataRequestRating}
+          setDataRequestRating={setDataRequestRating}
+          nextStep={next}
+          prevStep={prev}
+          providerData={providerData}
+          initialUserData={initialUserData}
+        />
+      ),
+    },
+    {
+      title: STEP_TITLES[2],
+      content: (
+        <AboutFunctionAndProblem
+          dataRequestRating={dataRequestRating}
+          setDataRequestRating={setDataRequestRating}
+          nextStep={next}
+          prevStep={prev}
+          providerData={providerData}
+        />
+      ),
+    },
+    {
+      title: STEP_TITLES[3],
+      content: step4Content,
     },
   ];
 
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
 
   const contentStyle: React.CSSProperties = {
-    lineHeight: "260px",
-    textAlign: "center",
+    minHeight: 260,
     color: token.colorTextTertiary,
     marginTop: 16,
   };
@@ -148,11 +237,11 @@ const ProviderRating = () => {
     );
   }
 
-  if (!providerData) {
+  if (!providerId || Number.isNaN(Number(providerId))) {
     return (
       <div className="w-full bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg text-gray-600 mb-4">Provider not found</div>
+          <div className="text-lg text-gray-600 mb-4">Invalid provider</div>
           <Button type="primary" onClick={() => router.push("/provider-search")}>
             Back to Search
           </Button>
@@ -175,4 +264,3 @@ const ProviderRating = () => {
 };
 
 export default ProviderRating;
-

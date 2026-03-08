@@ -1,7 +1,28 @@
 import { IProviderRatingRequest } from "./type";
 
 export const baseProviderRatingRequest: IProviderRatingRequest = {
+  user_name: "",
+  full_name: "",
+  email_address: "",
+  phone_number: "",
+  address_optional: "",
+  provider_name: "",
+  provider_address: "",
+  provider_url: "",
+  person_name: "",
+  person_phone: "",
+  function_name: "",
+  problem_solved: "",
+  used_function_from_provider: true,
+  function_execution_date: "",
+  problem_to_be_solved: "",
+  problem_existed_before_function: false,
+  function_provided_solved_problem: false,
+  person_from_provider: "",
+  function_solved_problem: false,
+  problem_existed_after_function: false,
+  provided_feedback_after_function: false,
+  provider_applied_feedback: false,
   rating: 0,
   comment: "",
 };
-

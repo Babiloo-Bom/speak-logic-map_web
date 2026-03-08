@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Skeleton } from "antd";
 import { CheckOutlined } from "@ant-design/icons";
+import { useRouter } from "next/router";
 import { ProviderItem } from "@/lib/pages/provider-search/types";
 import ShowMapModal from "./ShowMapModal";
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function ProfileItem({ data }: Props) {
+  const router = useRouter();
   const [showMapOpen, setShowMapOpen] = useState(false);
 
   const handleShowMap = () => {
@@ -92,8 +94,17 @@ export default function ProfileItem({ data }: Props) {
         )}
       </p>
 
-      {/* Show Map button */}
-      <div className="mt-auto pt-2">
+      {/* More Details + Show Map */}
+      <div className="mt-auto pt-2 grid grid-cols-2 gap-2">
+        <Button
+          block
+          size="large"
+          className="bg-primary text-white hover:!bg-primary/90 border-0"
+          onClick={() => data?.id && router.push(`/provider-search/provider-detail?providerId=${data.id}`)}
+          disabled={!data?.id}
+        >
+          More Details
+        </Button>
         <Button
           block
           size="large"

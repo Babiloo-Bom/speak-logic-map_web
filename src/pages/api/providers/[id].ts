@@ -20,6 +20,12 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       return res.status(200).json(provider);
     }
 
+    if (req.method === "PUT" || req.method === "PATCH" || req.method === "DELETE") {
+      if (req.user?.role !== "admin") {
+        return res.status(403).json({ error: "Insufficient permissions" });
+      }
+    }
+
     if (req.method === "PUT" || req.method === "PATCH") {
       const updated = await updateProvider(providerId, req.body);
       if (!updated) {
@@ -36,8 +42,6 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
     return res.status(405).json({ error: "Method not allowed" });
   } catch (error: any) {
     console.error("Error handling provider request:", error);
-    
-    // Handle specific errors
     if (error?.message?.includes("not found")) {
       return res.status(404).json({ error: error.message });
     }
@@ -55,7 +59,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   }
 };
 
-// All provider CRUD operations are admin-only (consistent with Manager API)
-export default requireAuth(["admin"])(handler);
+// GET: any authenticated user (xem chi tiết hồ sơ); PUT/DELETE: admin only
+export default requireAuth()(handler);
 
 

@@ -1,134 +1,97 @@
-import { Card, Avatar, Rate, Tag, Button } from "antd";
-import React from "react";
-import Image from "next/image";
-import { ProviderWithRelations } from "@/types/provider";
+import { Form, Input, Button } from "antd";
+import React, { useEffect } from "react";
+import { IProviderRatingRequest, InitialUserData } from "@/lib/pages/provider-search/provider-rating/type";
+
+type ProviderDataShape = {
+  name?: string;
+  website_url?: string;
+  address?: string;
+  near_city?: string;
+  contact_number?: string;
+} | null;
 
 type Props = {
-  providerData: ProviderWithRelations | null;
+  dataRequestRating: IProviderRatingRequest;
+  setDataRequestRating: React.Dispatch<React.SetStateAction<IProviderRatingRequest>>;
   nextStep: () => void;
+  prevStep: () => void;
+  providerData?: ProviderDataShape;
+  initialUserData?: InitialUserData | null;
 };
 
 const AboutProvider = (props: Props) => {
-  const { providerData, nextStep } = props;
+  const { dataRequestRating, setDataRequestRating, nextStep, prevStep, providerData, initialUserData } = props;
+  const [form] = Form.useForm();
 
-  if (!providerData) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">Provider information not available</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const providerAddress =
+      dataRequestRating.provider_address ||
+      providerData?.address ||
+      providerData?.near_city ||
+      "";
+    const personName = dataRequestRating.person_name || initialUserData?.full_name || initialUserData?.user_name || "";
+    form.setFieldsValue({
+      provider_name: dataRequestRating.provider_name || providerData?.name || "",
+      provider_address: providerAddress,
+      provider_url: dataRequestRating.provider_url || providerData?.website_url || "",
+      person_name: personName,
+      person_phone: dataRequestRating.person_phone || initialUserData?.phone_number || "",
+    });
+  }, [dataRequestRating, providerData, initialUserData, form]);
+
+  const onSubmit = (values: Partial<IProviderRatingRequest>) => {
+    const next = { ...dataRequestRating, ...values };
+    setDataRequestRating(next);
+    nextStep();
+  };
 
   return (
-    <div className="bg-white border border-solid border-gray-300 rounded-lg p-6">
-      {/* Provider Header */}
-      <div className="flex flex-col items-center mb-6">
-        {providerData.image_url ? (
-          <Image
-            src={providerData.image_url}
-            alt={providerData.name || "Provider"}
-            width={120}
-            height={120}
-            className="rounded-full object-cover !w-[120px] !h-[120px] border-4 border-white shadow-lg"
-          />
-        ) : (
-          <Avatar size={120} className="border-4 border-white shadow-lg">
-            {providerData.name?.charAt(0)?.toUpperCase() || "P"}
-          </Avatar>
-        )}
-        <h2 className="mt-4 text-2xl font-semibold">{providerData.name}</h2>
-        {providerData.status && (
-          <Tag
-            color={
-              providerData.status === "active"
-                ? "green"
-                : providerData.status === "pending"
-                ? "orange"
-                : providerData.status === "suspended"
-                ? "red"
-                : "default"
-            }
-            className="mt-2"
+    <Form form={form} layout="vertical" onFinish={onSubmit}>
+      <div className="bg-white border border-solid border-gray-300 rounded-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Form.Item
+            name="provider_name"
+            label="Provider name"
+            rules={[{ required: true, message: "Provider name is required" }]}
           >
-            {providerData.status.toUpperCase()}
-          </Tag>
-        )}
-      </div>
-
-      {/* Provider Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <p className="text-gray-500 text-lg mb-2">Description</p>
-          <p className="text-gray-800 font-medium leading-relaxed">
-            {providerData.description || "No description available"}
-          </p>
+            <Input size="large" className="bg-[#F5F6FA]" placeholder="Name" />
+          </Form.Item>
+          <Form.Item
+            name="person_name"
+            label="Person Name"
+            rules={[{ required: true, message: "Person name is required" }]}
+          >
+            <Input size="large" className="bg-[#F5F6FA]" placeholder="User Name" />
+          </Form.Item>
+          <Form.Item name="provider_address" label="Provider Address">
+            <Input size="large" className="bg-[#F5F6FA]" placeholder="Provider Address" />
+          </Form.Item>
+          <Form.Item
+            name="person_phone"
+            label="Phone Number"
+            rules={[{ required: true, message: "Phone number is required" }]}
+          >
+            <Input size="large" className="bg-[#F5F6FA]" placeholder="Phone Number" />
+          </Form.Item>
+          <Form.Item name="provider_url" label="Provider URL" className="md:col-span-2">
+            <Input size="large" className="bg-[#F5F6FA]" placeholder="URL" />
+          </Form.Item>
         </div>
-
-        <div>
-          <p className="text-gray-500 text-lg mb-2">Current Rating</p>
-          <div className="flex items-center gap-2">
-            <Rate disabled value={providerData.rating || 0} allowHalf />
-            <span className="font-medium text-lg">
-              {providerData.rating ? providerData.rating.toFixed(1) : "0.0"}
-            </span>
-          </div>
-
-          <p className="text-gray-500 text-lg mt-4 mb-2">The Given Set Applicable</p>
-          <p className="font-medium text-lg text-primary">
-            {providerData.is_applicable ? "Yes" : "No"}
-          </p>
+        <div className="flex justify-between mt-6">
+          <Button
+            size="large"
+            className="bg-white border border-primary text-primary hover:bg-primary hover:text-white px-8 py-2"
+            onClick={prevStep}
+          >
+            Previous
+          </Button>
+          <Button type="primary" htmlType="submit" size="large" className="bg-primary hover:bg-primary px-8 py-2">
+            Next
+          </Button>
         </div>
       </div>
-
-      {/* Functions & Problems Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {providerData.functions && providerData.functions.length > 0 && (
-          <div>
-            <p className="text-gray-500 text-lg mb-2">Functions Provided</p>
-            <div className="flex flex-wrap gap-2">
-              {providerData.functions.slice(0, 3).map((func) => (
-                <Tag key={func.id} color="blue">
-                  {func.name}
-                </Tag>
-              ))}
-              {providerData.functions.length > 3 && (
-                <Tag color="default">+{providerData.functions.length - 3} more</Tag>
-              )}
-            </div>
-          </div>
-        )}
-
-        {providerData.problems && providerData.problems.length > 0 && (
-          <div>
-            <p className="text-gray-500 text-lg mb-2">Problems Solved</p>
-            <div className="flex flex-wrap gap-2">
-              {providerData.problems.slice(0, 3).map((problem) => (
-                <Tag key={problem.id} color="purple">
-                  {problem.name}
-                </Tag>
-              ))}
-              {providerData.problems.length > 3 && (
-                <Tag color="default">+{providerData.problems.length - 3} more</Tag>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Next Button */}
-      <div className="flex justify-end mt-6">
-        <Button
-          type="primary"
-          size="large"
-          className="bg-primary hover:bg-primary px-8 py-2"
-          onClick={nextStep}
-        >
-          Continue to Rating
-        </Button>
-      </div>
-    </div>
+    </Form>
   );
 };
 
 export default AboutProvider;
-
