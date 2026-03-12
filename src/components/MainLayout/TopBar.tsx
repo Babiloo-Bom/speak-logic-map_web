@@ -27,7 +27,9 @@ const TopBar = observer(() => {
             </Link>
           )}
           <span>🔔</span>
-          <span>👤</span>
+          <Link href="/userprofile" className="cursor-pointer">
+            👤
+          </Link>
         </div>
       </div>
     </div>

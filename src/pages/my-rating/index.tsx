@@ -1,6 +1,5 @@
-import { Button, Card, Table } from "antd";
+import { Button, Card, message, Typography } from "antd";
 import React, { useEffect, useState } from "react";
-import { Typography } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
 import { buildQueryParams, getAuthToken } from "@/utils/constants";
 import { baseDataRequestGetMyRating } from "@/lib/pages/my-rating/request";
@@ -14,6 +13,7 @@ const MyRatingPage = () => {
   const [data, setData] = useState<IResponseGetMyRating | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   // const handleCopy = async () => {
   //   await navigator.clipboard.writeText(projectId);
@@ -40,6 +40,9 @@ const MyRatingPage = () => {
         setData(result);
         setSuccess("Managers loaded successfully");
         setError("");
+        if (!selectedProjectId && result.items && result.items.length > 0) {
+          setSelectedProjectId(result.items[0].project_id);
+        }
       } else {
         const errorData = await response.json();
         setError(errorData.error || "Failed to fetch managers");
@@ -54,26 +57,58 @@ const MyRatingPage = () => {
     fetchMyRating(dataRequestGetMyRating);
   }, []);
 
-  console.log("My Ratings Data:", data);
-  const COLUMNS_MY_RATING = [
-    {
-      title: "Project Identification",
-      dataIndex: "project_id",
-      key: "project_id",
-    },
-    {
-      title: "Date",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (text: string) => <span>{text ? dayjs(text).format("YYYY-MM-DD") : ""}</span>,
-    },
-    {
-      title: "Used",
-      dataIndex: "used",
-      key: "used",
-      render: (text: boolean) => <span>{text ? "Yes" : "No"}</span>,
-    },
-  ];
+  const handleGenerate = async () => {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        setError("No authentication token found");
+        return;
+      }
+
+      const res = await fetch("/api/ratings/project-identification", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        message.error(err.error || "Failed to generate project identification");
+        return;
+      }
+
+      const newItem = await res.json();
+      setSelectedProjectId(newItem.project_id);
+      setData((prev) => ({
+        items: prev ? [newItem, ...prev.items] : [newItem],
+        total: (prev?.total || 0) + 1,
+      }));
+      message.success("Generated new project identification");
+    } catch (e) {
+      console.error("Generate project identification error:", e);
+      message.error("Network error. Please try again.");
+    }
+  };
+
+  const handleView = () => {
+    fetchMyRating(dataRequestGetMyRating);
+  };
+
+  const handleCopy = async () => {
+    if (!selectedProjectId) {
+      message.warning("No project identification to copy");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(selectedProjectId);
+      message.success("Copied to clipboard");
+    } catch {
+      message.error("Failed to copy");
+    }
+  };
+
   return (
     <div className="w-full flex items-center justify-center px-4 bg-white">
       <div className="w-full max-w-3xl text-center my-20">
@@ -82,41 +117,39 @@ const MyRatingPage = () => {
 
         {/* Top buttons */}
         <Card className="mb-10 rounded-xl">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="large" className="w-full sm:w-1/2 h-12 bg-primary text-white">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              size="large"
+              className="w-full sm:w-1/2 h-12 bg-primary text-white"
+              onClick={handleGenerate}
+            >
               Generate Project Identification
             </Button>
 
-            <Button size="large" className="w-full sm:w-1/2 h-12 border-primary text-primary">
+            <Button
+              size="large"
+              className="w-full sm:w-1/2 h-12 border-primary text-primary"
+              onClick={handleView}
+            >
               View Project Identification
             </Button>
           </div>
         </Card>
 
-        {/* Project ID */}
+        {/* Project Identification display */}
         <div className="mb-10">
-          <Table
-            dataSource={data?.items}
-            columns={COLUMNS_MY_RATING}
-            bordered
-            pagination={{
-              total: data?.total || 0,
-              pageSize: dataRequestGetMyRating.limit,
-              current: dataRequestGetMyRating.page,
-              onChange: (page) => {
-                const newDataRequest = {
-                  ...dataRequestGetMyRating,
-                  page: page,
-                };
-                setDataRequestGetMyRating(newDataRequest);
-                fetchMyRating(newDataRequest);
-              },
-            }}
-          />
+          <Card className="rounded-xl border border-[#D0DAEE]">
+            <div className="flex flex-col items-center gap-3">
+              <Text type="secondary">Project Identification</Text>
+              <div className="px-4 py-3 rounded-lg bg-[#F5F6FA] text-lg font-mono tracking-wide border border-[#D0DAEE] w-full max-w-xl mx-auto break-all">
+                {selectedProjectId || "No project identification yet"}
+              </div>
+            </div>
+          </Card>
         </div>
 
         {/* Action buttons */}
-        {/* <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button size="large" className="w-full sm:w-40 h-11 border-primary text-primary">
             Save
           </Button>
@@ -129,7 +162,7 @@ const MyRatingPage = () => {
           >
             Copy To Clipboard
           </Button>
-        </div> */}
+        </div>
       </div>
     </div>
   );

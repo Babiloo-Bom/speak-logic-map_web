@@ -106,13 +106,43 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       }
     }
 
-    // POST - Generate new project identification
+    // POST - Get or generate project identification
     if (req.method === "POST") {
-      const projectId = generateProjectId();
-
       const client = await pool.connect();
       try {
-        const result = await client.query(
+        // 1) Prefer an existing project identification that is not yet used.
+        //    This covers the case where a Provider already created/sent a project for this user.
+        const existingResult = await client.query(
+          `
+          SELECT id, user_id, project_id, used, manager_id, provider_id, created_at, used_at
+          FROM project_identifications
+          WHERE user_id = $1
+          ORDER BY created_at DESC
+          LIMIT 1
+          `,
+          [userId]
+        );
+
+        if (existingResult.rows.length > 0) {
+          const row = existingResult.rows[0];
+          const existingItem: ProjectIdentification = {
+            id: row.id,
+            user_id: row.user_id,
+            project_id: row.project_id,
+            used: row.used,
+            manager_id: row.manager_id || undefined,
+            provider_id: row.provider_id || undefined,
+            created_at: row.created_at,
+            used_at: row.used_at || undefined,
+          };
+
+          // Return existing item – client will just display this GUID
+          return res.status(200).json(existingItem);
+        }
+
+        // 2) If no existing project, generate a new one for this user
+        const projectId = generateProjectId();
+        const insertResult = await client.query(
           `
           INSERT INTO project_identifications (user_id, project_id, used, created_at)
           VALUES ($1, $2, false, CURRENT_TIMESTAMP)
@@ -121,7 +151,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           [userId, projectId]
         );
 
-        const row = result.rows[0];
+        const row = insertResult.rows[0];
         const newItem: ProjectIdentification = {
           id: row.id,
           user_id: row.user_id,

@@ -60,6 +60,22 @@ services:
     networks:
       - speak-logic-map-network
 
+  # Ensure uploads volume permissions for non-root app user (uid 1001)
+  uploads-permissions:
+    image: alpine:3.20
+    container_name: speak-logic-map-uploads-permissions
+    command: >
+      sh -c "
+        mkdir -p /app/public/uploads &&
+        chown -R 1001:1001 /app/public/uploads &&
+        chmod -R 755 /app/public/uploads
+      "
+    volumes:
+      - ./public/uploads:/app/public/uploads
+    networks:
+      - speak-logic-map-network
+    restart: "no"
+
   # Next.js Application (Frontend + Backend API)
   app:
     build:
@@ -73,8 +89,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # Mount uploads directory as volume (not in image)
-      - uploads_data:/app/public/uploads
+      # Bind-mount uploads to host folder so new avatars appear immediately
+      - ./public/uploads:/app/public/uploads
       # Firebase: mount file SA (optional) - nếu có file .json thì set GOOGLE_APPLICATION_CREDENTIALS
       - ./logic-map-mobile-firebase-adminsdk-fbsvc-89e59e32fa.json:/app/secrets/firebase-sa.json:ro
     environment:
@@ -111,6 +127,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      uploads-permissions:
+        condition: service_completed_successfully
     networks:
       - speak-logic-map-network
     healthcheck:
@@ -122,8 +140,6 @@ services:
 
 volumes:
   postgres_data:
-    driver: local
-  uploads_data:
     driver: local
 
 networks:

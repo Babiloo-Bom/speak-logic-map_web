@@ -83,7 +83,9 @@ export default function ShowMapModal({
   return (
     <Modal
       title={
-        <span className="text-lg font-semibold text-[#324899]">Show Map</span>
+        <div className="w-full text-center">
+          <span className="text-lg font-semibold text-[#324899]">Show Map</span>
+        </div>
       }
       open={open}
       onCancel={onClose}
@@ -115,10 +117,10 @@ export default function ShowMapModal({
             </MapContainer>
           )}
 
-          {/* Provider info box overlay */}
+          {/* Provider info box overlay - centered vertically & horizontally */}
           {provider && (
-            <div className="absolute bottom-4 left-4 right-4 z-[1000] pointer-events-none">
-              <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3 pointer-events-auto max-w-sm">
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 transform z-[1000] pointer-events-none flex justify-center">
+              <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3 pointer-events-auto max-w-md w-full mx-4">
                 <p className="text-xs text-gray-500 mb-0.5">Provider Name</p>
                 <p className="text-green-600 font-semibold mb-1">
                   {provider.name || "—"}

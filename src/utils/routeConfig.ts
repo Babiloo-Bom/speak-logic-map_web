@@ -30,6 +30,11 @@ export const UNVERIFIED_ALLOWED_ROUTES: string[] = [
 
 // Check if a route is public (doesn't require authentication)
 export const isPublicRoute = (pathname: string): boolean => {
+  // Special case: profile detail wizard should be protected (requires auth)
+  if (pathname === "/auth/add-user-detail") {
+    return false;
+  }
+
   // Check exact matches first
   if (PUBLIC_ROUTES.includes(pathname)) {
     return true;

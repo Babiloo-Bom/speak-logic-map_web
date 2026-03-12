@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useUserStore } from '@/providers/RootStoreProvider';
 import withAuth from '@/components/Auth/withAuth';
-import HeaderAuth from '@/components/Auth/Header';
-import FooterAuth from '@/components/Auth/Footer';
 import Image from "next/image";
 import IMG_MAPEXAMPLE from "@/assets/images/MapExample.png";
 import LocationMiniMap from '@/components/Profile/LocationMiniMap';
@@ -37,6 +37,7 @@ interface ApiResponse {
 
 const ProfilePage: React.FC = () => {
 
+  const router = useRouter();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -59,9 +60,8 @@ const ProfilePage: React.FC = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleValue, setTitleValue] = useState(formData.title || "");
 
-  const [existingAvatarUrl, setExistingAvatarUrl] = useState<string | null>(
-    null
-  );
+  const [existingAvatarUrl, setExistingAvatarUrl] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState(false);
 
   const dfCountryCode = localStorage.getItem('dfCountryCode');
 
@@ -105,6 +105,7 @@ const ProfilePage: React.FC = () => {
 
           if (data.profile.avatar_url) {
             setExistingAvatarUrl(data.profile.avatar_url);
+            setAvatarError(false);
           }
         }
       } else {
@@ -209,16 +210,16 @@ const ProfilePage: React.FC = () => {
         <meta name="description" content="Manage your Function Provider profile" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <HeaderAuth />
       <section className="bg-[#FCFCFC] py-16">
         <div className="container max-w-5xl mx-auto flex flex-col items-center">
           <h2 className="text-3xl font-semibold mb-6">User Profile</h2>
           <div className="flex flex-col items-center">
-            {resolvedAvatarUrl ? (
+            {resolvedAvatarUrl && !avatarError ? (
               <img
                 src={resolvedAvatarUrl}
                 alt="Current avatar"
                 className="w-32 h-32 rounded-full border-4 border-solid border-[#324899] mb-6"
+                onError={() => setAvatarError(true)}
               />
             ) : (
               <Image
@@ -227,7 +228,28 @@ const ProfilePage: React.FC = () => {
                 className="w-32 h-32 rounded-full border-4 border-solid border-[#324899] mb-6"
               />
             )}
-            <h3 className="text-2xl font-bold text-[#324899] mb-6">{formData.firstName + ' ' + formData.lastName}</h3>
+            <h3 className="text-2xl font-bold text-[#324899] mb-4">
+              {formData.firstName + ' ' + formData.lastName}
+            </h3>
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+              <Link href="/my-rating">
+                <button
+                  type="button"
+                  className="px-6 py-2 rounded-full bg-[#324899] text-white font-medium hover:bg-[#25336f] transition-colors"
+                >
+                  My Ratings
+                </button>
+              </Link>
+              <button
+                type="button"
+                className="px-6 py-2 rounded-full border border-[#324899] text-[#324899] font-medium hover:bg-[#324899] hover:text-white transition-colors"
+                onClick={() => {
+                  router.push('/auth/add-user-detail');
+                }}
+              >
+                Edit
+              </button>
+            </div>
           </div>
           <div className="w-full border border-solid border-[#D0DAEE] rounded-lg px-48 py-6 bg-white">
             <div className="grid grid-cols-2 gap-6">
@@ -296,7 +318,6 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       </section>
-      <FooterAuth />
     </>
   );
 };

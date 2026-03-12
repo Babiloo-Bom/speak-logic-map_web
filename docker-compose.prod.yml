@@ -69,6 +69,21 @@ services:
 
   # Next.js Application (Frontend + Backend API)
   # APP_IMAGE dùng khi pull từ GHCR: ghcr.io/owner/repo:latest
+  uploads-permissions:
+    image: alpine:3.20
+    container_name: speak-logic-map-uploads-permissions
+    command: >
+      sh -c "
+        mkdir -p /app/public/uploads &&
+        chown -R 1001:1001 /app/public/uploads &&
+        chmod -R 755 /app/public/uploads
+      "
+    volumes:
+      - ./public/uploads:/app/public/uploads
+    networks:
+      - speak-logic-map-network
+    restart: "no"
+
   app:
     image: ${APP_IMAGE:-${DOCKER_REGISTRY:-docker.io}/${DOCKER_IMAGE_PREFIX:-speak-logic-map}-web:${IMAGE_TAG:-latest}}
     container_name: speak-logic-map-app
@@ -129,11 +144,13 @@ services:
       - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON:-}
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS:-}
     volumes:
-      # Mount uploads directory to persist uploaded files
-      - uploads_data:/app/public/uploads
+      # Bind-mount uploads to repo folder so new avatars are visible without rebuild
+      - ./public/uploads:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
+      uploads-permissions:
+        condition: service_completed_successfully
     ports:
       - "${APP_PORT:-1040}:3000"
     networks:
@@ -152,8 +169,6 @@ services:
 
 volumes:
   postgres_data:
-    driver: local
-  uploads_data:
     driver: local
 
 networks:

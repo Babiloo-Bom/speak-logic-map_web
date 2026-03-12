@@ -94,13 +94,19 @@ const User: React.FC = (): JSX.Element => {
                 </ModalWrap>
             )}
             <div className={`${styles['user']}`}>
-                <Image 
-                    src={avatarUrl || IMG_USER} 
-                    alt='user' 
-                    width={30} 
-                    height={30}
-                    style={{ objectFit: 'cover', borderRadius: '50%' }}
-                />
+                <button
+                    type="button"
+                    className="border-0 bg-transparent p-0 m-0 cursor-pointer"
+                    onClick={() => router.push('/userprofile')}
+                >
+                    <Image
+                        src={avatarUrl || IMG_USER}
+                        alt="user"
+                        width={30}
+                        height={30}
+                        style={{ objectFit: 'cover', borderRadius: '50%' }}
+                    />
+                </button>
                 <div className={`${styles['info']}`}>
                     <div className={`${styles['avatar']}`} onClick={() => {
                         router.push('/userprofile')

@@ -28,10 +28,11 @@ export default function ProvidersPage() {
                 Add Providers
               </Button>
             </Link>
-            <Link href="/admin/providers/create">
+            <Link href="/providers/create">
               <Button
+                type="primary"
                 size="large"
-                className="!h-12 !px-8 !font-medium !bg-white/90 !text-gray-800 hover:!bg-gray-100 !border !border-gray-300"
+                className="!bg-blue-800 hover:!bg-blue-900 !border-0 !h-12 !px-8 !font-medium"
               >
                 Add Provider Wizard
               </Button>
