@@ -1,23 +1,21 @@
 import { Button, Card, message, Typography } from "antd";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { CopyOutlined } from "@ant-design/icons";
 import { buildQueryParams, getAuthToken } from "@/utils/constants";
 import { baseDataRequestGetMyRating } from "@/lib/pages/my-rating/request";
 import { IDataRequestGetMyRating, IResponseGetMyRating } from "@/lib/pages/my-rating/type";
-import dayjs from "dayjs";
 
 const { Text } = Typography;
 
 const MyRatingPage = () => {
+  const router = useRouter();
   const [dataRequestGetMyRating, setDataRequestGetMyRating] = useState(baseDataRequestGetMyRating);
   const [data, setData] = useState<IResponseGetMyRating | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-
-  // const handleCopy = async () => {
-  //   await navigator.clipboard.writeText(projectId);
-  // };
+  const [saving, setSaving] = useState(false);
 
   const fetchMyRating = async (req: IDataRequestGetMyRating) => {
     try {
@@ -93,7 +91,42 @@ const MyRatingPage = () => {
   };
 
   const handleView = () => {
-    fetchMyRating(dataRequestGetMyRating);
+    router.push("/function-ratings");
+  };
+
+  const handleSave = async () => {
+    if (!selectedProjectId) {
+      message.warning("No project identification to save");
+      return;
+    }
+    setSaving(true);
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        message.error("No authentication token found");
+        return;
+      }
+      const res = await fetch("/api/ratings/project-identification", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ project_id: selectedProjectId }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        message.error(err.error || "Failed to save project identification");
+        return;
+      }
+      message.success("Project identification saved");
+      router.push("/function-ratings");
+    } catch (e) {
+      console.error("Save project identification error:", e);
+      message.error("Network error. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCopy = async () => {
@@ -103,20 +136,29 @@ const MyRatingPage = () => {
     }
     try {
       await navigator.clipboard.writeText(selectedProjectId);
-      message.success("Copied to clipboard");
+      message.success("Copied. You can share this ID with another user.");
     } catch {
       message.error("Failed to copy");
     }
   };
 
   return (
-    <div className="w-full flex items-center justify-center px-4 bg-white">
-      <div className="w-full max-w-3xl text-center my-20">
-        {/* Title */}
-        <h1 className="text-[49px] font-medium mb-10 ">My Ratings</h1>
+    <div className="w-full min-h-screen bg-white">
+      {/* Banner: ảnh nền dưới chữ My Ratings */}
+      <div
+        className="w-full flex items-center justify-center py-16 px-4 relative bg-cover bg-center"
+        style={{
+          backgroundImage: "url(/img/0a18721094daa3de2c797ae22f13fdd414489005.jpg)",
+          minHeight: "240px",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40" />
+        <h1 className="text-4xl md:text-[49px] font-medium text-white relative z-10">My Ratings</h1>
+      </div>
 
-        {/* Top buttons */}
-        <Card className="mb-10 rounded-xl">
+      <div className="w-full flex items-center justify-center px-4">
+        <div className="w-full max-w-3xl text-center my-20">
+          <Card className="mb-10 rounded-xl">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="large"
@@ -125,7 +167,6 @@ const MyRatingPage = () => {
             >
               Generate Project Identification
             </Button>
-
             <Button
               size="large"
               className="w-full sm:w-1/2 h-12 border-primary text-primary"
@@ -136,7 +177,6 @@ const MyRatingPage = () => {
           </div>
         </Card>
 
-        {/* Project Identification display */}
         <div className="mb-10">
           <Card className="rounded-xl border border-[#D0DAEE]">
             <div className="flex flex-col items-center gap-3">
@@ -148,20 +188,24 @@ const MyRatingPage = () => {
           </Card>
         </div>
 
-        {/* Action buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button size="large" className="w-full sm:w-40 h-11 border-primary text-primary">
+          <Button
+            size="large"
+            className="w-full sm:w-40 h-11 border-primary text-primary"
+            onClick={handleSave}
+            loading={saving}
+          >
             Save
           </Button>
-
           <Button
             size="large"
             icon={<CopyOutlined />}
-            className=" bg-primary text-white w-full sm:w-56 h-11 flex items-center justify-center"
+            className="bg-primary text-white w-full sm:w-56 h-11 flex items-center justify-center"
             onClick={handleCopy}
           >
             Copy To Clipboard
           </Button>
+        </div>
         </div>
       </div>
     </div>

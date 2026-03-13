@@ -106,12 +106,40 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       }
     }
 
-    // POST - Get or generate project identification
+    // POST - Save (with optional project_id) or get/generate project identification
     if (req.method === "POST") {
+      const body = typeof req.body === "object" ? req.body : {};
+      const requestedProjectId =
+        typeof body.project_id === "string" ? body.project_id.trim().toUpperCase() : null;
+
       const client = await pool.connect();
       try {
-        // 1) Prefer an existing project identification that is not yet used.
-        //    This covers the case where a Provider already created/sent a project for this user.
+        // If client sends project_id (e.g. from Save or pasted from another user), upsert for this user
+        if (requestedProjectId) {
+          const upsertResult = await client.query(
+            `
+            INSERT INTO project_identifications (user_id, project_id, used, created_at)
+            VALUES ($1, $2, false, CURRENT_TIMESTAMP)
+            ON CONFLICT (project_id) DO UPDATE SET user_id = $1
+            RETURNING id, user_id, project_id, used, manager_id, provider_id, created_at, used_at
+            `,
+            [userId, requestedProjectId]
+          );
+          const row = upsertResult.rows[0];
+          const item: ProjectIdentification = {
+            id: row.id,
+            user_id: row.user_id,
+            project_id: row.project_id,
+            used: row.used,
+            manager_id: row.manager_id || undefined,
+            provider_id: row.provider_id || undefined,
+            created_at: row.created_at,
+            used_at: row.used_at || undefined,
+          };
+          return res.status(200).json(item);
+        }
+
+        // No project_id in body: get existing or generate new (legacy behavior)
         const existingResult = await client.query(
           `
           SELECT id, user_id, project_id, used, manager_id, provider_id, created_at, used_at
@@ -135,12 +163,9 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
             created_at: row.created_at,
             used_at: row.used_at || undefined,
           };
-
-          // Return existing item – client will just display this GUID
           return res.status(200).json(existingItem);
         }
 
-        // 2) If no existing project, generate a new one for this user
         const projectId = generateProjectId();
         const insertResult = await client.query(
           `
