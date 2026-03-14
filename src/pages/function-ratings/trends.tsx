@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, DatePicker, Radio, Select, Spin, Alert } from "antd";
+import { DownOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import {
@@ -19,7 +20,11 @@ import { getAuthToken } from "@/utils/constants";
 const QUESTION_OPTIONS = [
   { value: "manager_helped_identify_problem", label: "Did the manager help you identify the problem properly?" },
   { value: "function_solved_problem", label: "Did the function solve the problem?" },
-  { value: "manager_applied_feedback", label: "Did the Manager apply the feedback to help solve the problem?" },
+  { value: "problem_existed_before_function", label: "Did the problem exist before the function executed by the provider?" },
+  { value: "problem_existed_after_function", label: "Did the problem exist after the function executed by the provider?" },
+  { value: "function_provided_solved_problem", label: "Is the function provided by the provider solved the problem?" },
+  { value: "provided_feedback_after_function", label: "If no, did you provide feedback to the provider after function executed to help the function executed properly to solve the problem?" },
+  { value: "manager_applied_feedback", label: "Did the provider apply the feedback to help solve the problem?" },
 ];
 
 export interface TrendDataPoint {
@@ -56,6 +61,7 @@ const FunctionTrendsPage = () => {
       }
       const params = new URLSearchParams();
       params.set("question", question);
+      params.set("answer", selectYesNo.toLowerCase());
       if (fromDate?.isValid()) params.set("from", fromDate.format("YYYY-MM-DD"));
       if (toDate?.isValid()) params.set("to", toDate.format("YYYY-MM-DD"));
       const res = await fetch(`/api/ratings/trends?${params.toString()}`, {
@@ -81,7 +87,7 @@ const FunctionTrendsPage = () => {
 
   useEffect(() => {
     fetchTrends();
-  }, [question, fromDate?.valueOf(), toDate?.valueOf()]);
+  }, [question, selectYesNo, fromDate?.valueOf(), toDate?.valueOf()]);
 
   const handleBack = () => router.push("/function-ratings");
 
@@ -115,44 +121,52 @@ const FunctionTrendsPage = () => {
       </div>
 
       <div className="w-full max-w-6xl mx-auto px-4 py-8">
-        {/* Filters */}
-        <div className="flex flex-wrap items-end gap-4 mb-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">From</label>
-            <DatePicker
-              format="DD/MM/YYYY"
-              placeholder="DD/MM/YYYY"
-              value={fromDate}
-              onChange={(d) => setFromDate(d ?? null)}
-              className="w-full min-w-[140px]"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
-            <DatePicker
-              format="DD/MM/YYYY"
-              placeholder="DD/MM/YYYY"
-              value={toDate}
-              onChange={(d) => setToDate(d ?? null)}
-              className="w-full min-w-[140px]"
-            />
-          </div>
-          <div className="min-w-[280px]">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Select Question</label>
-            <Select
-              value={question}
-              onChange={setQuestion}
-              options={QUESTION_OPTIONS}
-              className="w-full"
-              size="middle"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Select</label>
-            <Radio.Group value={selectYesNo} onChange={(e) => setSelectYesNo(e.target.value)} optionType="button" buttonStyle="solid">
-              <Radio.Button value="Yes">Yes</Radio.Button>
-              <Radio.Button value="No">No</Radio.Button>
-            </Radio.Group>
+        {/* Filters - layout: [From | To], [Select Question | Select Yes/No] */}
+        <div className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 max-w-4xl">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">From</label>
+              <DatePicker
+                format="DD/MM/YY"
+                placeholder="DD/MM/YY"
+                value={fromDate}
+                onChange={(d) => setFromDate(d ?? null)}
+                className="w-full rounded-lg [&_.ant-picker]:!rounded-lg [&_.ant-picker]:!bg-[#f5f6fa] [&_.ant-picker]:!border-gray-300"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">To</label>
+              <DatePicker
+                format="DD/MM/YY"
+                placeholder="DD/MM/YY"
+                value={toDate}
+                onChange={(d) => setToDate(d ?? null)}
+                className="w-full rounded-lg [&_.ant-picker]:!rounded-lg [&_.ant-picker]:!bg-[#f5f6fa] [&_.ant-picker]:!border-gray-300"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Select Question</label>
+              <Select
+                value={question}
+                onChange={setQuestion}
+                options={QUESTION_OPTIONS}
+                className="w-full [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!bg-[#f5f6fa] [&_.ant-select-selector]:!border-gray-300 [&_.ant-select-selector]:!min-h-[40px]"
+                size="large"
+                suffixIcon={<DownOutlined className="text-gray-500" />}
+                placeholder="Select question"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Select</label>
+              <Radio.Group
+                value={selectYesNo}
+                onChange={(e) => setSelectYesNo(e.target.value)}
+                className="flex gap-6"
+              >
+                <Radio value="Yes">Yes</Radio>
+                <Radio value="No">No</Radio>
+              </Radio.Group>
+            </div>
           </div>
         </div>
 

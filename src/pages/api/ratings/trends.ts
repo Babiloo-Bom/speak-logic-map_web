@@ -6,6 +6,10 @@ import pool from "@/lib/database";
 const ALLOWED_QUESTIONS = [
   "manager_helped_identify_problem",
   "function_solved_problem",
+  "problem_existed_before_function",
+  "problem_existed_after_function",
+  "function_provided_solved_problem",
+  "provided_feedback_after_function",
   "manager_applied_feedback",
 ] as const;
 
