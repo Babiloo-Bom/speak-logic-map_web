@@ -24,7 +24,10 @@ const FunctionRatingsPage = () => {
       if (!token) return;
       const queryString = buildQueryParams(req);
       const url = `/api/ratings/project-identification${queryString ? `?${queryString}` : ""}`;
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      });
       if (res.ok) {
         const result: IResponseGetMyRating = await res.json();
         setData(result);
@@ -53,7 +56,7 @@ const FunctionRatingsPage = () => {
   React.useEffect(() => {
     fetchList(baseDataRequestGetMyRating);
     fetchAverageRating();
-  }, []);
+  }, [router.asPath]);
 
   const filteredItems = useMemo(() => {
     const items = data?.items ?? [];
@@ -128,9 +131,11 @@ const FunctionRatingsPage = () => {
               className="function-rating-stars"
             />
           </div>
-          <Button type="primary" size="large" className="bg-primary border-primary">
-            Function Trend
-          </Button>
+          <Link href="/function-ratings/trends">
+            <Button type="primary" size="large" className="bg-primary border-primary">
+              Function Trend
+            </Button>
+          </Link>
         </div>
 
         {/* Search */}

@@ -4,17 +4,47 @@ import { IDataRequestRating } from "@/lib/pages/manager-search/manager-rating/ty
 import { FormField } from "@/utils/constants";
 import { FUNCTION_FORM_FIELDS } from "@/lib/pages/manager-search/manager-rating/_components/AboutFunction/constants";
 
+type ManagerData = {
+  name?: string;
+  function?: string;
+  functions?: Array<{ id?: number; name: string }>;
+};
+
 type Props = {
   dataRequestRating: IDataRequestRating;
   setDataRequestRating: React.Dispatch<React.SetStateAction<IDataRequestRating>>;
   nextStep: () => void;
   prevStep: () => void;
+  managerData?: ManagerData | null;
 };
 
 const AboutFunction = (props: Props) => {
-  const { dataRequestRating, setDataRequestRating, nextStep, prevStep } = props;
+  const { dataRequestRating, setDataRequestRating, nextStep, prevStep, managerData } = props;
   const [form] = Form.useForm();
   const usedFunctionValue = Form.useWatch("used_function_from_manager", form);
+
+  const defaultFunctionName =
+    dataRequestRating.function_name ||
+    managerData?.function ||
+    (managerData?.functions && managerData.functions[0]?.name) ||
+    "";
+  const defaultFunctionManager = dataRequestRating.function_manager || managerData?.name || "";
+
+  useEffect(() => {
+    form.setFieldsValue({
+      function_name: defaultFunctionName,
+      function_manager: defaultFunctionManager,
+      used_function_from_manager: dataRequestRating.used_function_from_manager ?? false,
+      function_execution_date: dataRequestRating.function_execution_date || undefined,
+      problem_solver_manager_name: dataRequestRating.problem_solver_manager_name || "",
+      problem_to_be_solved: dataRequestRating.problem_to_be_solved || "",
+      manager_helped_identify_problem: dataRequestRating.manager_helped_identify_problem,
+      function_solved_problem: dataRequestRating.function_solved_problem,
+      problem_existed_before_function: dataRequestRating.problem_existed_before_function,
+      problem_existed_after_function: dataRequestRating.problem_existed_after_function,
+      function_provided_solved_problem: dataRequestRating.function_provided_solved_problem,
+    });
+  }, [dataRequestRating, managerData, defaultFunctionName, defaultFunctionManager, form]);
 
   const onSubmit = (data: IDataRequestRating) => {
     const newDataRequest = {

@@ -1,3 +1,12 @@
+/** User profile data for pre-filling Step 1 (About User) */
+export interface InitialUserData {
+  reviewer_name?: string;
+  reviewer_full_name?: string;
+  reviewer_email?: string;
+  reviewer_phone?: string;
+  reviewer_address?: string;
+}
+
 export interface IDataRequestRating {
   reviewer_name: string;
   reviewer_full_name: string;
@@ -22,4 +31,8 @@ export interface IDataRequestRating {
   function_provided_solved_problem: boolean;
   provided_feedback_after_function: boolean;
   manager_applied_feedback: boolean;
+  /** Overall rating 1-5 stars */
+  rating?: number;
+  /** Optional: paste from My Ratings to link this rating so it appears in View Rating */
+  project_id?: string;
 }

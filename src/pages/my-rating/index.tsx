@@ -28,9 +28,8 @@ const MyRatingPage = () => {
       const queryString = buildQueryParams(req);
       const url = `/api/ratings/project-identification${queryString ? `?${queryString}` : ""}`;
       const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
       });
 
       if (response.ok) {
@@ -38,8 +37,8 @@ const MyRatingPage = () => {
         setData(result);
         setSuccess("Managers loaded successfully");
         setError("");
-        if (!selectedProjectId && result.items && result.items.length > 0) {
-          setSelectedProjectId(result.items[0].project_id);
+        if (result.items && result.items.length > 0) {
+          setSelectedProjectId((prev) => prev || result.items[0].project_id);
         }
       } else {
         const errorData = await response.json();
@@ -53,7 +52,7 @@ const MyRatingPage = () => {
 
   useEffect(() => {
     fetchMyRating(dataRequestGetMyRating);
-  }, []);
+  }, [router.asPath]);
 
   const handleGenerate = async () => {
     try {

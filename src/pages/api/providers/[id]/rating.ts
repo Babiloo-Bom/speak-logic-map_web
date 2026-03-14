@@ -5,6 +5,7 @@ import {
   getProviderRatingSummary,
   upsertProviderRating,
 } from "@/lib/providers";
+import pool from "@/lib/database";
 
 const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   const { id } = req.query;
@@ -25,7 +26,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      const { rating, comment } = req.body ?? {};
+      const { rating, comment, project_id: rawProjectId } = req.body ?? {};
 
       const numericRating = Number(rating);
       if (!numericRating || numericRating < 1 || numericRating > 5) {
@@ -38,6 +39,14 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
         numericRating,
         typeof comment === "string" ? comment : undefined
       );
+
+      const projectId = typeof rawProjectId === "string" ? rawProjectId.trim().toUpperCase() || null : null;
+      if (projectId) {
+        await pool.query(
+          `UPDATE project_identifications SET provider_id = $1, used = true, used_at = CURRENT_TIMESTAMP WHERE project_id = $2 AND user_id = $3`,
+          [providerId, projectId, req.user.id]
+        );
+      }
 
       return res.status(200).json(summary);
     }

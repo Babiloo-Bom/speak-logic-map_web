@@ -56,7 +56,11 @@ export const isPublicRoute = (pathname: string): boolean => {
 
 // Check if a route allows unverified users
 export const allowsUnverifiedUsers = (pathname: string): boolean => {
-  return UNVERIFIED_ALLOWED_ROUTES.includes(pathname) || isPublicRoute(pathname);
+  return (
+    UNVERIFIED_ALLOWED_ROUTES.includes(pathname) ||
+    pathname.startsWith("/function-ratings/") ||
+    isPublicRoute(pathname)
+  );
 };
 
 // Get required roles for a route (if any)

@@ -17,7 +17,7 @@ const STEP_TITLES = ["About User", "About Provider", "About Function And Problem
 
 const ProviderRating = () => {
   const router = useRouter();
-  const { providerId } = router.query;
+  const { providerId, projectId: queryProjectId } = router.query;
   const { token } = theme.useToken();
   const [currentStep, setCurrentStep] = useState(0);
   const [dataRequestRating, setDataRequestRating] = useState<IProviderRatingRequest>(baseProviderRatingRequest);
@@ -122,6 +122,10 @@ const ProviderRating = () => {
         body: JSON.stringify({
           rating,
           comment: req.comment || undefined,
+          ...(function () {
+            const pid = req.project_id?.trim() || (typeof queryProjectId === "string" ? queryProjectId.trim() : "");
+            return pid ? { project_id: pid } : {};
+          })(),
         }),
       });
 

@@ -1,4 +1,4 @@
-import { Form, Input, Button, Radio, DatePicker } from "antd";
+import { Form, Input, Button, Radio, DatePicker, Rate } from "antd";
 import React, { useEffect } from "react";
 import { IDataRequestRating } from "@/lib/pages/manager-search/manager-rating/type";
 import { FormField } from "@/utils/constants";
@@ -14,6 +14,10 @@ type Props = {
 const AboutFeedback = (props: Props) => {
   const { dataRequestRating, setDataRequestRating, handleSubmit, prevStep } = props;
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    form.setFieldsValue({ rating: dataRequestRating.rating ?? 0 });
+  }, [dataRequestRating.rating, form]);
 
   const onSubmit = (data: IDataRequestRating) => {
     const newDataRequest = {
@@ -43,9 +47,24 @@ const AboutFeedback = (props: Props) => {
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={onSubmit} labelCol={{ style: { minHeight: "auto" } }} wrapperCol={{ style: { minHeight: "auto" } }}>
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={onSubmit}
+      initialValues={{ rating: dataRequestRating.rating ?? 0 }}
+      labelCol={{ style: { minHeight: "auto" } }}
+      wrapperCol={{ style: { minHeight: "auto" } }}
+    >
       <div className="bg-white border border-solid border-gray-300 rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Form.Item
+          name="rating"
+          label="Đánh giá (số sao)"
+          rules={[{ required: true, message: "Vui lòng chọn số sao đánh giá (1-5)" }]}
+          className="md:col-span-2"
+        >
+          <Rate count={5} style={{ fontSize: 28 }} onChange={(v) => form.setFieldsValue({ rating: v ?? 0 })} />
+        </Form.Item>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           {FEEDBACK_FORM_FIELDS.map((field) => (
             <Form.Item
               key={field.name}

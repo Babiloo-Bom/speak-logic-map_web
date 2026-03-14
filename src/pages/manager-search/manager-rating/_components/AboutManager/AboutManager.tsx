@@ -1,19 +1,44 @@
 import { Form, Input, Button, Radio, DatePicker } from "antd";
-import React from "react";
+import React, { useEffect } from "react";
 import { IDataRequestRating } from "@/lib/pages/manager-search/manager-rating/type";
 import { FormField } from "@/utils/constants";
 import { MANAGER_FORM_FIELDS } from "@/lib/pages/manager-search/manager-rating/_components/AboutManager/constants";
+
+type ManagerData = {
+  name?: string;
+  first_name?: string;
+  last_name?: string;
+  location?: string;
+  near_city?: string;
+  city?: string;
+};
 
 type Props = {
   dataRequestRating: IDataRequestRating;
   setDataRequestRating: React.Dispatch<React.SetStateAction<IDataRequestRating>>;
   nextStep: () => void;
   prevStep: () => void;
+  managerData?: ManagerData | null;
 };
 
 const AboutManager = (props: Props) => {
-  const { dataRequestRating, setDataRequestRating, nextStep, prevStep } = props;
+  const { dataRequestRating, setDataRequestRating, nextStep, prevStep, managerData } = props;
   const [form] = Form.useForm();
+
+  const managerUserName = managerData
+    ? [managerData.first_name, managerData.last_name].filter(Boolean).join(" ").trim() || managerData.name
+    : "";
+  const managerLocation = managerData?.location || managerData?.near_city || managerData?.city || "";
+
+  useEffect(() => {
+    form.setFieldsValue({
+      manager_name: dataRequestRating.manager_name || managerData?.name || "",
+      manager_user_name: dataRequestRating.manager_user_name || managerUserName || "",
+      manager_location: dataRequestRating.manager_location || managerLocation || "",
+      job_location: dataRequestRating.job_location || managerData?.near_city || managerData?.city || "",
+      manager_url: dataRequestRating.manager_url || "",
+    });
+  }, [dataRequestRating, managerData, managerUserName, managerLocation, form]);
 
   const onSubmit = (data: IDataRequestRating) => {
     const newDataRequest = {

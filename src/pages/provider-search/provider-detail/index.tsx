@@ -13,6 +13,27 @@ export default function ProviderDetail() {
 
   const [providerData, setProviderData] = useState<IProviderDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [latestProjectId, setLatestProjectId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchLatestProjectId = async () => {
+      try {
+        const token = getAuthToken();
+        if (!token) return;
+        const res = await fetch("/api/ratings/project-identification?limit=1", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const id = data?.items?.[0]?.project_id;
+          if (id) setLatestProjectId(id);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    fetchLatestProjectId();
+  }, []);
 
   const fetchProviderDetail = async () => {
     try {
@@ -54,7 +75,9 @@ export default function ProviderDetail() {
   }, [providerId]);
 
   const handleRateProvider = () => {
-    router.push(`/provider-search/provider-rating?providerId=${providerId}`);
+    const query = new URLSearchParams({ providerId: String(providerId) });
+    if (latestProjectId) query.set("projectId", latestProjectId);
+    router.push(`/provider-search/provider-rating?${query.toString()}`);
   };
 
   if (loading) {

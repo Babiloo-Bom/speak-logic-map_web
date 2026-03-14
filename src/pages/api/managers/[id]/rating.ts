@@ -269,7 +269,7 @@ async function upsertManagerRating(
         data.function_name ?? null,
         data.function_manager ?? null,
         data.used_function_from_manager ?? null,
-        data.function_execution_date ?? null,
+        (data.function_execution_date && String(data.function_execution_date).trim()) ? data.function_execution_date : null,
         data.problem_solver_manager_name ?? null,
         data.problem_to_be_solved ?? null,
         data.manager_helped_identify_problem ?? null,
@@ -439,18 +439,27 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      const data: ManagerRatingRequest = req.body ?? {};
+      const body = req.body ?? {};
+      const data: ManagerRatingRequest = body;
+      const projectId = typeof body.project_id === "string" ? body.project_id.trim().toUpperCase() || null : null;
 
-      // Validate rating if provided
+      // Validate rating if provided (DB column is integer, so round to 1-5)
       if (data.rating !== undefined && data.rating !== null) {
         const numericRating = Number(data.rating);
-        if (numericRating < 1 || numericRating > 5) {
+        if (Number.isNaN(numericRating) || numericRating < 1 || numericRating > 5) {
           return res.status(400).json({ error: "Rating must be between 1 and 5" });
         }
-        data.rating = numericRating;
+        data.rating = Math.round(numericRating);
       }
 
       const summary = await upsertManagerRating(managerId, req.user.id, data);
+
+      if (projectId) {
+        await pool.query(
+          `UPDATE project_identifications SET manager_id = $1, used = true, used_at = CURRENT_TIMESTAMP WHERE project_id = $2 AND user_id = $3`,
+          [managerId, projectId, req.user.id]
+        );
+      }
 
       return res.status(200).json(summary);
     }

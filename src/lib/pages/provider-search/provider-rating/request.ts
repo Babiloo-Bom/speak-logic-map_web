@@ -25,4 +25,5 @@ export const baseProviderRatingRequest: IProviderRatingRequest = {
   provider_applied_feedback: false,
   rating: 0,
   comment: "",
+  project_id: "",
 };

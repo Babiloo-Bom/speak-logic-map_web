@@ -1,18 +1,29 @@
 import { Form, Input, Button, Radio, DatePicker } from "antd";
-import React from "react";
+import React, { useEffect } from "react";
 import { USER_FORM_FIELDS } from "@/lib/pages/manager-search/manager-rating/_components/AboutUser/constants";
-import { IDataRequestRating } from "@/lib/pages/manager-search/manager-rating/type";
+import { IDataRequestRating, InitialUserData } from "@/lib/pages/manager-search/manager-rating/type";
 import { FormField } from "@/utils/constants";
 
 type Props = {
   dataRequestRating: IDataRequestRating;
   setDataRequestRating: React.Dispatch<React.SetStateAction<IDataRequestRating>>;
   nextStep: () => void;
+  initialUserData?: InitialUserData | null;
 };
 
 const AboutUser = (props: Props) => {
-  const { dataRequestRating, setDataRequestRating, nextStep } = props;
+  const { dataRequestRating, setDataRequestRating, nextStep, initialUserData } = props;
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    form.setFieldsValue({
+      reviewer_name: dataRequestRating.reviewer_name || initialUserData?.reviewer_name || "",
+      reviewer_full_name: dataRequestRating.reviewer_full_name || initialUserData?.reviewer_full_name || "",
+      reviewer_email: dataRequestRating.reviewer_email || initialUserData?.reviewer_email || "",
+      reviewer_phone: dataRequestRating.reviewer_phone || initialUserData?.reviewer_phone || "",
+      reviewer_address: dataRequestRating.reviewer_address || initialUserData?.reviewer_address || "",
+    });
+  }, [dataRequestRating, initialUserData, form]);
 
   const onSubmit = (data: IDataRequestRating) => {
     const newDataRequest = {

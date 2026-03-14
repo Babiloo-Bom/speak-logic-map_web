@@ -14,6 +14,28 @@ export default function ManagerDetail() {
 
   const [managerData, setManagerData] = useState<IManagerDetail | null>(null);
   const [avatarSrc, setAvatarSrc] = useState<string | typeof DEFAULT_AVATAR>(DEFAULT_AVATAR);
+  const [latestProjectId, setLatestProjectId] = useState<string | null>(null);
+
+  const fetchLatestProjectId = async () => {
+    try {
+      const token = getAuthToken();
+      if (!token) return;
+      const res = await fetch("/api/ratings/project-identification?limit=1", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const id = data?.items?.[0]?.project_id;
+        if (id) setLatestProjectId(id);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    fetchLatestProjectId();
+  }, []);
 
   const fetchManagerDetail = async () => {
     try {
@@ -100,9 +122,12 @@ export default function ManagerDetail() {
               <p className="text-gray-500 text-2xl">Function Provided</p>
               <p className="text-primary font-medium text-xl">{functionProvided || "--"}</p>
 
-              <p className="mt-4 text-gray-500 text-xl">Project Identification</p>
-              <Link href={`/manager-search/manager-rating?managerId=${managerId}`} className="text-primary break-all text-xl">
-                277CA003-0610-478F-9385-4D2732771EBE
+              <p className="mt-4 text-gray-500 text-xl">Rate this Manager</p>
+              <Link
+                href={`/manager-search/manager-rating?managerId=${managerId}${latestProjectId ? `&projectId=${encodeURIComponent(latestProjectId)}` : ""}`}
+                className="text-primary break-all text-xl hover:underline"
+              >
+                Go to Manager Rating
               </Link>
             </div>
 

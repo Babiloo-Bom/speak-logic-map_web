@@ -47,4 +47,6 @@ export interface IProviderRatingRequest {
   // Submitted to API
   rating: number; // 1-5
   comment?: string;
+  /** Optional: paste from My Ratings to link this rating so it appears in View Rating */
+  project_id?: string;
 }

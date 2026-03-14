@@ -22,4 +22,6 @@ export const baseDataRequestRating = {
   function_provided_solved_problem: false,
   provided_feedback_after_function: false,
   manager_applied_feedback: false,
+  rating: 0,
+  project_id: "",
 };
