@@ -42,48 +42,62 @@ const haversineDistance = (lat1: number, lng1: number, lat2: number, lng2: numbe
 // GET MANAGER BY ID
 // ============================================
 
+const getManagerByIdSelectSql = `
+  SELECT
+    m.id,
+    m.user_id,
+    m.name,
+    m.description,
+    m.expertise,
+    m.lat,
+    m.lng,
+    m.rating,
+    m.rating_count,
+    m.status,
+    m.is_given_set,
+    m.created_at,
+    m.image_url,
+    u.email,
+    u.role,
+    p.first_name,
+    p.last_name,
+    p.title,
+    p.function,
+    p.location AS profile_location,
+    p.phone,
+    p.website,
+    p.zip_code,
+    p.geo_id,
+    p.avatar_id,
+    p.pen_name,
+    g.city,
+    g.country,
+    COALESCE(fa_avatar.url, p.pen_name) as avatar_url
+  FROM managers m
+  INNER JOIN users u ON u.id = m.user_id
+  LEFT JOIN profiles p ON p.user_id = u.id
+  LEFT JOIN geopoints g ON g.id = m.geo_id
+  LEFT JOIN file_assets fa_avatar ON fa_avatar.id = p.avatar_id
+  WHERE m.id = $1
+`;
+
 export async function getManagerById(id: number): Promise<Manager | null> {
   const client = await pool.connect();
 
   try {
-    const result = await client.query(
-      `
-        SELECT
-          m.id,
-          m.user_id,
-          m.name,
-          m.description,
-          m.expertise,
-          m.lat,
-          m.lng,
-          m.rating,
-          m.rating_count,
-          m.status,
-          m.is_given_set,
-          m.created_at,
-          m.image_url,
-          u.email,
-          u.role,
-          p.first_name,
-          p.last_name,
-          p.title,
-          p.function,
-          p.geo_id,
-          p.avatar_id,
-          p.pen_name,
-          g.city,
-          g.country,
-          COALESCE(fa_avatar.url, p.pen_name) as avatar_url
-        FROM managers m
-        INNER JOIN users u ON u.id = m.user_id
-        LEFT JOIN profiles p ON p.user_id = u.id
-        LEFT JOIN geopoints g ON g.id = m.geo_id
-        LEFT JOIN file_assets fa_avatar ON fa_avatar.id = p.avatar_id
-        WHERE m.id = $1
-      `,
-      [id]
-    );
-
+    let result: { rows: any[] };
+    try {
+      result = await client.query(getManagerByIdSelectSql, [id]);
+    } catch (err: any) {
+      if (err?.code === "42703" && (err?.message?.includes("phone") || err?.message?.includes("zip_code"))) {
+        await client.query("ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone VARCHAR(50)");
+        await client.query("ALTER TABLE profiles ADD COLUMN IF NOT EXISTS website VARCHAR(500)");
+        await client.query("ALTER TABLE profiles ADD COLUMN IF NOT EXISTS zip_code VARCHAR(20)");
+        result = await client.query(getManagerByIdSelectSql, [id]);
+      } else {
+        throw err;
+      }
+    }
     if (result.rows.length === 0) {
       return null;
     }
@@ -135,7 +149,10 @@ export async function getManagerById(id: number): Promise<Manager | null> {
       last_name: row.last_name ?? undefined,
       title: row.title ?? undefined,
       function: row.function ?? undefined,
-      location: row.location ?? undefined,
+      location: row.profile_location ?? undefined,
+      phone: row.phone ?? undefined,
+      website: row.website ?? undefined,
+      zip_code: row.zip_code ?? undefined,
       avatar_id: row.avatar_id ?? undefined,
       avatar_url: row.avatar_url ?? undefined,
       pen_name: row.pen_name ?? undefined,
@@ -145,6 +162,19 @@ export async function getManagerById(id: number): Promise<Manager | null> {
     };
 
     return manager;
+  } finally {
+    client.release();
+  }
+}
+
+/** Get manager by user id (for "my manager profile" when logged in as manager). */
+export async function getManagerByUserId(userId: number): Promise<Manager | null> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(`SELECT id FROM managers WHERE user_id = $1`, [userId]);
+    if (result.rows.length === 0) return null;
+    const managerId = result.rows[0].id;
+    return getManagerById(managerId);
   } finally {
     client.release();
   }

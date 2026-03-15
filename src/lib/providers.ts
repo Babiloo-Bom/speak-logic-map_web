@@ -121,6 +121,24 @@ export async function getProviderById(
   }
 }
 
+/** Get provider by user id (for "my provider profile" when logged in as provider). */
+export async function getProviderByUserId(
+  userId: number
+): Promise<ProviderWithRelations | null> {
+  const client = await pool.connect();
+  try {
+    const idResult = await client.query(
+      "SELECT id FROM providers WHERE user_id = $1 LIMIT 1",
+      [userId]
+    );
+    if (idResult.rows.length === 0) return null;
+    const providerId = idResult.rows[0].id;
+    return getProviderById(providerId);
+  } finally {
+    client.release();
+  }
+}
+
 export async function searchProviders(
   params: ProviderSearchParams
 ): Promise<ProviderSearchResponse> {

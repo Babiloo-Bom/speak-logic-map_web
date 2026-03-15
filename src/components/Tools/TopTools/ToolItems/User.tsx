@@ -97,7 +97,7 @@ const User: React.FC = (): JSX.Element => {
                 <button
                     type="button"
                     className="border-0 bg-transparent p-0 m-0 cursor-pointer"
-                    onClick={() => router.push('/userprofile')}
+                    onClick={() => router.push(userStore.hasRole('manager') ? '/manager-profile' : userStore.hasRole('provider') ? '/provider-profile' : '/userprofile')}
                 >
                     <Image
                         src={avatarUrl || IMG_USER}
@@ -109,7 +109,7 @@ const User: React.FC = (): JSX.Element => {
                 </button>
                 <div className={`${styles['info']}`}>
                     <div className={`${styles['avatar']}`} onClick={() => {
-                        router.push('/userprofile')
+                        router.push(userStore.hasRole('manager') ? '/manager-profile' : userStore.hasRole('provider') ? '/provider-profile' : '/userprofile')
                     }}>
                         <Image 
                             src={avatarUrl || IMG_USER} 

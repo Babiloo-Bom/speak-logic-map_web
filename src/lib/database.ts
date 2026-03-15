@@ -122,8 +122,10 @@ export const initDatabase = async () => {
 
     // Ensure new columns exist when migrating existing databases
     await client.query(`
-      ALTER TABLE profiles
-      ADD COLUMN IF NOT EXISTS location VARCHAR(255);
+      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS location VARCHAR(255);
+      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
+      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS website VARCHAR(500);
+      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS zip_code VARCHAR(20);
     `);
 
     console.log('Database initialized successfully');

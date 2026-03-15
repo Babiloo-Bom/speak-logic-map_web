@@ -7,6 +7,9 @@ interface ProfileUpdateRequest {
   title?: string;
   function?: string;
   location?: string;
+  phone?: string;
+  website?: string;
+  zipCode?: string;
   geoId?: number;
   avatarId?: number;
   penName?: string;
@@ -46,6 +49,9 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
         title,
         function: userFunction,
         location,
+        phone,
+        website,
+        zipCode,
         geoId,
         avatarId,
         penName,
@@ -59,6 +65,9 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
         title: title ?? existing?.title,
         function: userFunction ?? existing?.function,
         location: location ?? existing?.location,
+        phone: phone ?? existing?.phone,
+        website: website ?? existing?.website,
+        zip_code: zipCode ?? existing?.zip_code,
         geo_id: geoId ?? existing?.geo_id,
         avatar_id: avatarId ?? existing?.avatar_id,
         pen_name: penName ?? existing?.pen_name,

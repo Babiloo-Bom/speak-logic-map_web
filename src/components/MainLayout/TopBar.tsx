@@ -27,7 +27,7 @@ const TopBar = observer(() => {
             </Link>
           )}
           <span>🔔</span>
-          <Link href="/userprofile" className="cursor-pointer">
+          <Link href={userStore.hasRole("manager") ? "/manager-profile" : userStore.hasRole("provider") ? "/provider-profile" : "/userprofile"} className="cursor-pointer">
             👤
           </Link>
         </div>

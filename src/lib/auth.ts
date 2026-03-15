@@ -22,6 +22,9 @@ export interface UserProfile {
   title?: string;
   function?: string;
   location?: string;
+  phone?: string;
+  website?: string;
+  zip_code?: string;
   geo_id?: number;
   avatar_id?: number;
   pen_name?: string;
@@ -177,8 +180,8 @@ export const createOrUpdateProfile = async (profile: UserProfile): Promise<UserP
   try {
     const result = await client.query(
       `
-      INSERT INTO profiles (user_id, first_name, last_name, title, function, location, geo_id, avatar_id, pen_name)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO profiles (user_id, first_name, last_name, title, function, location, phone, website, zip_code, geo_id, avatar_id, pen_name)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       ON CONFLICT (user_id)
       DO UPDATE SET
         first_name = $2,
@@ -186,9 +189,12 @@ export const createOrUpdateProfile = async (profile: UserProfile): Promise<UserP
         title = $4,
         function = $5,
         location = $6,
-        geo_id = $7,
-        avatar_id = $8,
-        pen_name = $9
+        phone = $7,
+        website = $8,
+        zip_code = $9,
+        geo_id = $10,
+        avatar_id = $11,
+        pen_name = $12
       RETURNING *
     `,
       [
@@ -198,6 +204,9 @@ export const createOrUpdateProfile = async (profile: UserProfile): Promise<UserP
         profile.title,
         profile.function,
         profile.location,
+        profile.phone ?? null,
+        profile.website ?? null,
+        profile.zip_code ?? null,
         profile.geo_id,
         profile.avatar_id,
         profile.pen_name,

@@ -33,6 +33,9 @@ export interface Manager {
   title?: string;
   function?: string;
   location?: string;
+  phone?: string;
+  website?: string;
+  zip_code?: string;
   avatar_id?: number;
   avatar_url?: string;
   pen_name?: string;

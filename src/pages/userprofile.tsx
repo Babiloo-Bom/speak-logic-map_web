@@ -28,6 +28,9 @@ interface Profile {
   avatar_url?: string;
   pen_name?: string;
   location?: string;
+  phone?: string;
+  website?: string;
+  zip_code?: string;
 }
 
 interface ApiResponse {
@@ -45,6 +48,9 @@ const ProfilePage: React.FC = () => {
     function: '',
     penName: '',
     location: '',
+    phone: '',
+    website: '',
+    zipCode: '',
   });
 
   const [user, setUser] = useState<User | null>(null);
@@ -101,6 +107,9 @@ const ProfilePage: React.FC = () => {
             function: data.profile.function || '',
             penName: data.profile.pen_name || '',
             location: data.profile.location || 'USA',
+            phone: (data.profile as Profile).phone || '',
+            website: (data.profile as Profile).website || '',
+            zipCode: (data.profile as Profile).zip_code || '',
           });
 
           if (data.profile.avatar_url) {
@@ -131,14 +140,20 @@ const ProfilePage: React.FC = () => {
         firstName: formData.firstName,
         lastName: formData.lastName,
         title: formData.title,
-        function: formData.function, // đổi tên
+        function: formData.function,
+        location: formData.location,
+        penName: formData.penName,
+        phone: formData.phone,
+        website: formData.website,
+        zipCode: formData.zipCode,
       };
 
-      if (field === 'title') {
-        form.title = newValue;
-      } else if (field === 'function') {
-        form.function = newValue;
-      }
+      if (field === 'title') form.title = newValue;
+      else if (field === 'function') form.function = newValue;
+      else if (field === 'location') form.location = newValue;
+      else if (field === 'phone') form.phone = newValue;
+      else if (field === 'website') form.website = newValue;
+      else if (field === 'zipCode') form.zipCode = newValue;
 
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
@@ -280,7 +295,47 @@ const ProfilePage: React.FC = () => {
               </div>
               <div>
                 <p className="font-bold">Default Location:</p>
-                <p>{formData.location}</p>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
+                  onBlur={(e) => handleUpdateProfile('location', e.target.value)}
+                  placeholder="Địa chỉ / thành phố / quốc gia"
+                  className="border-2 border-black px-2 py-1 rounded w-full"
+                />
+              </div>
+              <div>
+                <p className="font-bold">Zip code:</p>
+                <input
+                  type="text"
+                  value={formData.zipCode}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, zipCode: e.target.value }))}
+                  onBlur={(e) => handleUpdateProfile('zipCode', e.target.value)}
+                  placeholder="Zip code"
+                  className="border-2 border-black px-2 py-1 rounded w-full"
+                />
+              </div>
+              <div>
+                <p className="font-bold">Phone:</p>
+                <input
+                  type="text"
+                  value={formData.phone}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                  onBlur={(e) => handleUpdateProfile('phone', e.target.value)}
+                  placeholder="Số điện thoại"
+                  className="border-2 border-black px-2 py-1 rounded w-full"
+                />
+              </div>
+              <div>
+                <p className="font-bold">Website:</p>
+                <input
+                  type="text"
+                  value={formData.website}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, website: e.target.value }))}
+                  onBlur={(e) => handleUpdateProfile('website', e.target.value)}
+                  placeholder="https://..."
+                  className="border-2 border-black px-2 py-1 rounded w-full"
+                />
               </div>
               <div>
                 <p className="font-bold">Function:</p>

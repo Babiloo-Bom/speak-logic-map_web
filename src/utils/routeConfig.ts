@@ -68,7 +68,7 @@ export const getRequiredRoles = (pathname: string): string[] => {
   // Define role-based routes here
   const roleBasedRoutes: Record<string, string[]> = {
     "/admin": ["admin"],
-    "/dashboard": ["admin", "user", "manager"],
+    "/dashboard": ["admin", "user", "manager", "provider"],
     // Add more role-based routes as needed
   };
 

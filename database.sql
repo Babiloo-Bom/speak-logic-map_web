@@ -100,6 +100,9 @@ CREATE TABLE IF NOT EXISTS profiles (
   title VARCHAR(120),
   function VARCHAR(120),
   location VARCHAR(255),  -- User's location text
+  phone VARCHAR(50),
+  website VARCHAR(500),
+  zip_code VARCHAR(20),
   geo_id BIGINT,
   avatar_id BIGINT,
   pen_name VARCHAR(120),
