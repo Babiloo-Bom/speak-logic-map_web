@@ -1,24 +1,31 @@
-import { Button, Card, message, Typography } from "antd";
-import React, { useEffect, useState } from "react";
+import { Button, Card, message, Typography, Table } from "antd";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import { CopyOutlined } from "@ant-design/icons";
 import { buildQueryParams, getAuthToken } from "@/utils/constants";
 import { baseDataRequestGetMyRating } from "@/lib/pages/my-rating/request";
-import { IDataRequestGetMyRating, IResponseGetMyRating } from "@/lib/pages/my-rating/type";
+import { IDataRequestGetMyRating, IMyRatingItem, IResponseGetMyRating } from "@/lib/pages/my-rating/type";
+import dayjs from "dayjs";
 
 const { Text } = Typography;
 
 const MyRatingPage = () => {
   const router = useRouter();
-  const [dataRequestGetMyRating, setDataRequestGetMyRating] = useState(baseDataRequestGetMyRating);
+  const [dataRequestGetMyRating, setDataRequestGetMyRating] = useState<IDataRequestGetMyRating>({
+    ...baseDataRequestGetMyRating,
+    used: "",
+  });
   const [data, setData] = useState<IResponseGetMyRating | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchMyRating = async (req: IDataRequestGetMyRating) => {
     try {
+      setLoading(true);
       const token = getAuthToken();
       if (!token) {
         setError("No authentication token found");
@@ -47,6 +54,8 @@ const MyRatingPage = () => {
     } catch (error) {
       setError("Network error. Please try again.");
       console.error("Fetch error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -141,6 +150,59 @@ const MyRatingPage = () => {
     }
   };
 
+  const tableItems = useMemo(() => data?.items ?? [], [data?.items]);
+
+  const columns = [
+    {
+      title: "Project Identification",
+      dataIndex: "project_id",
+      key: "project_id",
+      render: (id: string, row: IMyRatingItem) => {
+        const href = row.provider_id
+          ? `/provider-search/provider-rating?providerId=${row.provider_id}&projectId=${encodeURIComponent(id)}`
+          : `/function-ratings/${encodeURIComponent(id)}`;
+        return (
+          <Link href={href} className="font-mono text-primary hover:underline">
+            {id}
+          </Link>
+        );
+      },
+    },
+    {
+      title: "Date",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (v: string) => dayjs(v).format("DD/MM/YYYY"),
+    },
+    {
+      title: "Used",
+      dataIndex: "used",
+      key: "used",
+      render: (used: boolean) => (used ? "Yes" : "No"),
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_: unknown, record: IMyRatingItem) => {
+        const href = record.provider_id
+          ? `/provider-search/provider-rating?providerId=${record.provider_id}&projectId=${encodeURIComponent(
+              record.project_id
+            )}`
+          : `/function-ratings/${encodeURIComponent(record.project_id)}`;
+        return (
+          <Link href={href}>
+            <Button
+              size="small"
+              className="!bg-white !text-primary border border-primary hover:!bg-primary hover:!text-white hover:!border-primary"
+            >
+              Rate
+            </Button>
+          </Link>
+        );
+      },
+    },
+  ];
+
   return (
     <div className="w-full min-h-screen bg-white">
       {/* Banner: ảnh nền dưới chữ My Ratings */}
@@ -158,53 +220,64 @@ const MyRatingPage = () => {
       <div className="w-full flex items-center justify-center px-4">
         <div className="w-full max-w-3xl text-center my-20">
           <Card className="mb-10 rounded-xl">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="large"
-              className="w-full sm:w-1/2 h-12 bg-primary text-white"
-              onClick={handleGenerate}
-            >
-              Generate Project Identification
-            </Button>
-            <Button
-              size="large"
-              className="w-full sm:w-1/2 h-12 border-primary text-primary"
-              onClick={handleView}
-            >
-              View Project Identification
-            </Button>
-          </div>
-        </Card>
-
-        <div className="mb-10">
-          <Card className="rounded-xl border border-[#D0DAEE]">
-            <div className="flex flex-col items-center gap-3">
-              <Text type="secondary">Project Identification</Text>
-              <div className="px-4 py-3 rounded-lg bg-[#F5F6FA] text-lg font-mono tracking-wide border border-[#D0DAEE] w-full max-w-xl mx-auto break-all">
-                {selectedProjectId || "No project identification yet"}
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                size="large"
+                className="w-full sm:w-1/2 h-12 bg-primary text-white"
+                onClick={handleGenerate}
+              >
+                Generate Project Identification
+              </Button>
+              <Button
+                size="large"
+                className="w-full sm:w-1/2 h-12 border-primary text-primary"
+                onClick={handleView}
+              >
+                View Project Identification
+              </Button>
             </div>
           </Card>
-        </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button
-            size="large"
-            className="w-full sm:w-40 h-11 border-primary text-primary"
-            onClick={handleSave}
-            loading={saving}
-          >
-            Save
-          </Button>
-          <Button
-            size="large"
-            icon={<CopyOutlined />}
-            className="bg-primary text-white w-full sm:w-56 h-11 flex items-center justify-center"
-            onClick={handleCopy}
-          >
-            Copy To Clipboard
-          </Button>
-        </div>
+          <div className="mb-10">
+            <Card className="rounded-xl border border-[#D0DAEE]">
+              <div className="flex flex-col items-center gap-3">
+                <Text type="secondary">Project Identification</Text>
+                <div className="px-4 py-3 rounded-lg bg-[#F5F6FA] text-lg font-mono tracking-wide border border-[#D0DAEE] w-full max-w-xl mx-auto break-all">
+                  {selectedProjectId || "No project identification yet"}
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+            <Button
+              size="large"
+              className="w-full sm:w-40 h-11 border-primary text-primary"
+              onClick={handleSave}
+              loading={saving}
+            >
+              Save
+            </Button>
+            <Button
+              size="large"
+              icon={<CopyOutlined />}
+              className="bg-primary text-white w-full sm:w-56 h-11 flex items-center justify-center"
+              onClick={handleCopy}
+            >
+              Copy To Clipboard
+            </Button>
+          </div>
+
+          {/* Project list table like Figma My Ratings */}
+          <Card className="rounded-xl border border-[#D0DAEE] text-left">
+            <Table<IMyRatingItem>
+              rowKey="id"
+              dataSource={tableItems}
+              columns={columns}
+              loading={loading}
+              pagination={false}
+            />
+          </Card>
         </div>
       </div>
     </div>

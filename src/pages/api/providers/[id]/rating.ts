@@ -43,7 +43,10 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       const projectId = typeof rawProjectId === "string" ? rawProjectId.trim().toUpperCase() || null : null;
       if (projectId) {
         await pool.query(
-          `UPDATE project_identifications SET provider_id = $1, used = true, used_at = CURRENT_TIMESTAMP WHERE project_id = $2 AND user_id = $3`,
+          `
+          INSERT INTO project_identifications (user_id, project_id, used, provider_id, created_at, used_at)
+          VALUES ($3, $2, true, $1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          `,
           [providerId, projectId, req.user.id]
         );
       }

@@ -640,13 +640,26 @@ CREATE TABLE IF NOT EXISTS provider_problems (
 CREATE TABLE IF NOT EXISTS project_identifications (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  project_id VARCHAR(36) UNIQUE NOT NULL,  -- UUID format: "277CA003-06I0-478F-9385-4D2732771EBE"
+  project_id VARCHAR(36) NOT NULL,         -- UUID format: "277CA003-06I0-478F-9385-4D2732771EBE"
   used BOOLEAN DEFAULT false,              -- Has this ID been used for a rating?
   manager_id BIGINT REFERENCES managers(id) ON DELETE SET NULL,   -- If used for manager rating
   provider_id BIGINT REFERENCES providers(id) ON DELETE SET NULL, -- If used for provider rating
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   used_at TIMESTAMP  -- When the ID was used
 );
+
+-- Ensure there is no leftover unique index on project_id so one Project ID can be used for many ratings
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_indexes
+    WHERE schemaname = 'public'
+      AND indexname = 'project_identifications_project_id_key'
+  ) THEN
+    EXECUTE 'DROP INDEX IF EXISTS project_identifications_project_id_key';
+  END IF;
+END $$;
 
 -- ============================================
 -- CREATE INDEXES

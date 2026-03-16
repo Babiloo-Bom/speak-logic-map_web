@@ -454,10 +454,14 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
 
       const summary = await upsertManagerRating(managerId, req.user.id, data);
 
+      // For each rating with a projectId, create a dedicated project_identifications row (1-n)
       if (projectId) {
         await pool.query(
-          `UPDATE project_identifications SET manager_id = $1, used = true, used_at = CURRENT_TIMESTAMP WHERE project_id = $2 AND user_id = $3`,
-          [managerId, projectId, req.user.id]
+          `
+          INSERT INTO project_identifications (user_id, project_id, used, manager_id, created_at, used_at)
+          VALUES ($1, $2, true, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          `,
+          [req.user.id, projectId, managerId]
         );
       }
 

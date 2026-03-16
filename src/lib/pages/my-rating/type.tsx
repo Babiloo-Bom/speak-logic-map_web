@@ -8,6 +8,7 @@ export interface IMyRatingItem {
   id: number;
   user_id: number;
   manager_id: number;
+  provider_id?: number | null;
   project_id: string;
   created_at: string;
   used_at: string;

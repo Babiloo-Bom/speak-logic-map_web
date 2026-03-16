@@ -115,13 +115,12 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
 
       const client = await pool.connect();
       try {
-        // If client sends project_id (e.g. from Save or pasted from another user), upsert for this user
+        // If client sends project_id (e.g. from Save or pasted from another user), always create a new row
         if (requestedProjectId) {
           const upsertResult = await client.query(
             `
             INSERT INTO project_identifications (user_id, project_id, used, created_at)
             VALUES ($1, $2, false, CURRENT_TIMESTAMP)
-            ON CONFLICT (project_id) DO UPDATE SET user_id = $1
             RETURNING id, user_id, project_id, used, manager_id, provider_id, created_at, used_at
             `,
             [userId, requestedProjectId]
@@ -137,7 +136,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
             created_at: row.created_at,
             used_at: row.used_at || undefined,
           };
-          return res.status(200).json(item);
+          return res.status(201).json(item);
         }
 
         // No project_id in body: get existing or generate new (legacy behavior)
