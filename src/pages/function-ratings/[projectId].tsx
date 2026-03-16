@@ -42,7 +42,7 @@ const yesNo = (v: boolean | undefined) => (v === true ? "Yes" : v === false ? "N
 
 const FunctionRatingDetailPage = () => {
   const router = useRouter();
-  const { projectId } = router.query;
+  const { projectId, piId } = router.query as { projectId?: string | string[]; piId?: string | string[] };
   const [items, setItems] = useState<ViewRatingItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +50,15 @@ const FunctionRatingDetailPage = () => {
     if (!projectId || typeof projectId !== "string") return;
     const token = getAuthToken();
     if (!token) return;
-    fetch(`/api/ratings/view-rating/${encodeURIComponent(projectId)}`, {
+    const url = (() => {
+      const base = `/api/ratings/view-rating/${encodeURIComponent(projectId)}`;
+      if (typeof piId === "string" && piId.trim().length > 0) {
+        return `${base}?piId=${encodeURIComponent(piId)}`;
+      }
+      return base;
+    })();
+
+    fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => (res.ok ? res.json() : null))
@@ -63,7 +71,7 @@ const FunctionRatingDetailPage = () => {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [projectId]);
+  }, [projectId, piId]);
 
   if (loading) {
     return (

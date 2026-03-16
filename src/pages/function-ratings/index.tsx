@@ -74,11 +74,14 @@ const FunctionRatingsPage = () => {
       title: "Project Identification",
       dataIndex: "project_id",
       key: "project_id",
-      render: (id: string) => (
-        <Link href={`/function-ratings/${encodeURIComponent(id)}`} className="font-mono text-primary hover:underline">
-          {id}
-        </Link>
-      ),
+      render: (id: string, row: IMyRatingItem) => {
+        const href = `/function-ratings/${encodeURIComponent(id)}?piId=${row.id}`;
+        return (
+          <Link href={href} className="font-mono text-primary hover:underline">
+            {id}
+          </Link>
+        );
+      },
     },
     {
       title: "Date",
@@ -89,16 +92,19 @@ const FunctionRatingsPage = () => {
     {
       title: "Action",
       key: "action",
-      render: (_: unknown, record: IMyRatingItem) => (
-        <Link href={`/function-ratings/${encodeURIComponent(record.project_id)}`}>
-          <Button
-            size="small"
-            className="!bg-white !text-primary border border-primary hover:!bg-primary hover:!text-white hover:!border-primary"
-          >
-            View Rating
-          </Button>
-        </Link>
-      ),
+      render: (_: unknown, record: IMyRatingItem) => {
+        const href = `/function-ratings/${encodeURIComponent(record.project_id)}?piId=${record.id}`;
+        return (
+          <Link href={href}>
+            <Button
+              size="small"
+              className="!bg-white !text-primary border border-primary hover:!bg-primary hover:!text-white hover:!border-primary"
+            >
+              View Rating
+            </Button>
+          </Link>
+        );
+      },
     },
   ];
 

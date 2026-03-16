@@ -160,7 +160,7 @@ const MyRatingPage = () => {
       render: (id: string, row: IMyRatingItem) => {
         const href = row.provider_id
           ? `/provider-search/provider-rating?providerId=${row.provider_id}&projectId=${encodeURIComponent(id)}`
-          : `/function-ratings/${encodeURIComponent(id)}`;
+          : `/function-ratings/${encodeURIComponent(id)}?piId=${row.id}`;
         return (
           <Link href={href} className="font-mono text-primary hover:underline">
             {id}
@@ -188,7 +188,7 @@ const MyRatingPage = () => {
           ? `/provider-search/provider-rating?providerId=${record.provider_id}&projectId=${encodeURIComponent(
               record.project_id
             )}`
-          : `/function-ratings/${encodeURIComponent(record.project_id)}`;
+          : `/function-ratings/${encodeURIComponent(record.project_id)}?piId=${record.id}`;
         return (
           <Link href={href}>
             <Button

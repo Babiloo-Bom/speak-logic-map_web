@@ -15,7 +15,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { projectId } = req.query;
+  const { projectId, piId } = req.query as { projectId?: string | string[]; piId?: string | string[] };
   const userId = req.user.id;
 
   if (!projectId || typeof projectId !== "string") {
@@ -25,13 +25,24 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   try {
     const client = await pool.connect();
     try {
-      const piResult = await client.query(
-        `SELECT id, user_id, project_id, used, manager_id, provider_id, created_at
-         FROM project_identifications
-         WHERE project_id = $1 AND user_id = $2
-         ORDER BY created_at DESC`,
-        [projectId, userId]
-      );
+      const baseSql = `SELECT id, user_id, project_id, used, manager_id, provider_id, created_at
+                       FROM project_identifications
+                       WHERE project_id = $1 AND user_id = $2`;
+
+      const params: any[] = [projectId, userId];
+
+      const useSingle =
+        typeof piId === "string" && piId.trim().length > 0 && Number.isInteger(Number(piId));
+
+      const sql = useSingle
+        ? `${baseSql} AND id = $3 ORDER BY created_at DESC`
+        : `${baseSql} ORDER BY created_at DESC`;
+
+      if (useSingle) {
+        params.push(Number(piId));
+      }
+
+      const piResult = await client.query(sql, params);
       if (piResult.rows.length === 0) {
         return res.status(404).json({ error: "Project identification not found" });
       }
