@@ -17,6 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Verify refresh token
     const payload = verifyRefreshToken(refreshToken);
     
+    
     if (!payload) {
       return res.status(401).json({ error: 'Invalid refresh token' });
     }
@@ -34,6 +35,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Generate new tokens
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
 
+    // Compute expiresAt for client-side display
+    const now = Date.now();
+    const accessTokenExpiresAt = new Date(now + ACCESS_TOKEN_EXPIRES_IN_SECONDS * 1000).toISOString();
+    const refreshTokenExpiresAt = new Date(now + REFRESH_TOKEN_EXPIRES_IN_SECONDS * 1000).toISOString();
+
     // Store new refresh token
     await storeRefreshToken(user.id, newRefreshToken);
 
@@ -49,6 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       refreshToken: newRefreshToken,
       accessTokenExpiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
       refreshTokenExpiresIn: REFRESH_TOKEN_EXPIRES_IN_SECONDS,
+      accessTokenExpiresAt,
+      refreshTokenExpiresAt,
       user: {
         id: user.id,
         email: user.email,

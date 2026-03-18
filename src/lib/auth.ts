@@ -302,7 +302,7 @@ export const storeRefreshToken = async (userId: number, refreshToken: string): P
   const client = await pool.connect();
 
   try {
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN_SECONDS * 1000);
 
     await client.query("INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES ($1, $2, $3)", [userId, refreshToken, expiresAt]);
   } finally {

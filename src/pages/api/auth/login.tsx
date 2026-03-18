@@ -60,6 +60,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Generate tokens
     const { accessToken, refreshToken } = generateTokens(user);
 
+    // Compute expiresAt for client-side display (security: client can read but cannot extend server validity)
+    const now = Date.now();
+    const accessTokenExpiresAt = new Date(now + ACCESS_TOKEN_EXPIRES_IN_SECONDS * 1000).toISOString();
+    const refreshTokenExpiresAt = new Date(now + REFRESH_TOKEN_EXPIRES_IN_SECONDS * 1000).toISOString();
+
     // Store refresh token
     await storeRefreshToken(user.id, refreshToken);
 
@@ -76,6 +81,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       refreshToken,
       accessTokenExpiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
       refreshTokenExpiresIn: REFRESH_TOKEN_EXPIRES_IN_SECONDS,
+      accessTokenExpiresAt,
+      refreshTokenExpiresAt,
       user,
     });
   } catch (error) {
