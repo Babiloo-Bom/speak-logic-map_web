@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { verifyRefreshToken, findUserById, generateTokens, storeRefreshToken, invalidateRefreshToken } from '@/lib/auth';
+import { verifyRefreshToken, findUserById, generateTokens, storeRefreshToken, invalidateRefreshToken, ACCESS_TOKEN_EXPIRES_IN_SECONDS, REFRESH_TOKEN_EXPIRES_IN_SECONDS } from '@/lib/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -39,13 +39,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Set new refresh token as httpOnly cookie
     res.setHeader('Set-Cookie', [
-      `refreshToken=${newRefreshToken}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Strict${
+      `refreshToken=${newRefreshToken}; HttpOnly; Path=/; Max-Age=${REFRESH_TOKEN_EXPIRES_IN_SECONDS}; SameSite=Strict${
         process.env.NODE_ENV === 'production' ? '; Secure' : ''
       }`
     ]);
 
     res.status(200).json({
       accessToken,
+      refreshToken: newRefreshToken,
+      accessTokenExpiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
+      refreshTokenExpiresIn: REFRESH_TOKEN_EXPIRES_IN_SECONDS,
       user: {
         id: user.id,
         email: user.email,

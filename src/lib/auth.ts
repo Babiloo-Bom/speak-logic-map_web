@@ -59,6 +59,9 @@ export const verifyPassword = async (password: string, hashedPassword: string): 
 };
 
 // JWT utilities
+export const ACCESS_TOKEN_EXPIRES_IN_SECONDS = 15 * 24 * 60 * 60; // 15 days
+export const REFRESH_TOKEN_EXPIRES_IN_SECONDS = 7 * 24 * 60 * 60; // 7 days (matches DB + cookie)
+
 export const generateTokens = (user: User) => {
   const payload: JWTPayload = {
     userId: user.id,
@@ -66,8 +69,8 @@ export const generateTokens = (user: User) => {
     role: user.role,
   };
 
-  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: "15d" });
-  const refreshToken = jwt.sign({ userId: user.id }, JWT_REFRESH_SECRET, { expiresIn: "30d" });
+  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS });
+  const refreshToken = jwt.sign({ userId: user.id }, JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN_SECONDS });
 
   return { accessToken, refreshToken };
 };

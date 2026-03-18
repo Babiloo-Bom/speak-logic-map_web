@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { findUserByEmail, verifyPassword, generateTokens, storeRefreshToken } from '@/lib/auth';
+import { findUserByEmail, verifyPassword, generateTokens, storeRefreshToken, ACCESS_TOKEN_EXPIRES_IN_SECONDS, REFRESH_TOKEN_EXPIRES_IN_SECONDS } from '@/lib/auth';
 
 interface LoginRequest {
   email: string;
@@ -65,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Set refresh token as httpOnly cookie
     res.setHeader('Set-Cookie', [
-      `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Strict${
+      `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=${REFRESH_TOKEN_EXPIRES_IN_SECONDS}; SameSite=Strict${
         process.env.NODE_ENV === 'production' ? '; Secure' : ''
       }`
     ]);
@@ -73,6 +73,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json({
       message: 'Login successful',
       accessToken,
+      refreshToken,
+      accessTokenExpiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
+      refreshTokenExpiresIn: REFRESH_TOKEN_EXPIRES_IN_SECONDS,
       user,
     });
   } catch (error) {
