@@ -48,7 +48,41 @@ export async function getAllFcmTokens(): Promise<string[]> {
   }
 }
 
-/** Gửi push tới nhiều token qua FCM; trả về số thành công và thất bại. */
+/** FCM token của một user (nhiều thiết bị). */
+export async function getFcmTokensByUserId(userId: number): Promise<string[]> {
+  const client = await pool.connect();
+  try {
+    const r = await client.query<{ fcm_token: string }>(
+      `SELECT DISTINCT fcm_token FROM device_fcm_tokens
+       WHERE user_id = $1 AND fcm_token IS NOT NULL AND fcm_token != ''`,
+      [userId]
+    );
+    return r.rows.map((row) => row.fcm_token);
+  } finally {
+    client.release();
+  }
+}
+
+/** FCM token của nhiều user (gộp tất cả thiết bị, token trùng lặp loại). */
+export async function getFcmTokensByUserIds(userIds: number[]): Promise<string[]> {
+  if (userIds.length === 0) return [];
+  const client = await pool.connect();
+  try {
+    const r = await client.query<{ fcm_token: string }>(
+      `SELECT DISTINCT fcm_token FROM device_fcm_tokens
+       WHERE user_id = ANY($1::bigint[]) AND fcm_token IS NOT NULL AND fcm_token != ''`,
+      [userIds]
+    );
+    return r.rows.map((row) => row.fcm_token);
+  } finally {
+    client.release();
+  }
+}
+
+/** FCM giới hạn 500 token / lần gửi multicast. */
+const FCM_MULTICAST_MAX = 500;
+
+/** Gửi push tới nhiều token qua FCM; trả về số thành công và thất bại. Tự chia chunk. */
 export async function sendMulticast(
   tokens: string[],
   notification: { title: string; body?: string },
@@ -66,34 +100,44 @@ export async function sendMulticast(
   if (tokens.length === 0) {
     return { successCount: 0, failureCount: 0, failedTokens: [] };
   }
-  const message: admin.messaging.MulticastMessage = {
-    tokens,
-    notification: {
-      title: notification.title,
-      body: notification.body ?? '',
-    },
-    data: data ? Object.fromEntries(Object.entries(data).map(([k, v]) => [k, String(v)])) : undefined,
-    android: { priority: 'high' },
-    apns: { payload: { aps: { sound: 'default' } } },
-  };
-  const result = await admin.messaging().sendEachForMulticast(message);
+
+  let successCount = 0;
+  let failureCount = 0;
   const failedTokens: string[] = [];
   const errors: { token: string; code?: string; message?: string }[] = [];
-  result.responses.forEach((resp, i) => {
-    if (!resp.success) {
-      const token = tokens[i];
-      failedTokens.push(token);
-      const err = (resp as { error?: { code?: string; message?: string } }).error;
-      errors.push({
-        token: token.slice(0, 20) + '...',
-        code: err?.code,
-        message: err?.message,
-      });
-    }
-  });
+
+  for (let offset = 0; offset < tokens.length; offset += FCM_MULTICAST_MAX) {
+    const chunk = tokens.slice(offset, offset + FCM_MULTICAST_MAX);
+    const message: admin.messaging.MulticastMessage = {
+      tokens: chunk,
+      notification: {
+        title: notification.title,
+        body: notification.body ?? '',
+      },
+      data: data ? Object.fromEntries(Object.entries(data).map(([k, v]) => [k, String(v)])) : undefined,
+      android: { priority: 'high' },
+      apns: { payload: { aps: { sound: 'default' } } },
+    };
+    const result = await admin.messaging().sendEachForMulticast(message);
+    successCount += result.successCount;
+    failureCount += result.failureCount;
+    result.responses.forEach((resp, i) => {
+      if (!resp.success) {
+        const token = chunk[i];
+        failedTokens.push(token);
+        const err = (resp as { error?: { code?: string; message?: string } }).error;
+        errors.push({
+          token: token.slice(0, 20) + '...',
+          code: err?.code,
+          message: err?.message,
+        });
+      }
+    });
+  }
+
   return {
-    successCount: result.successCount,
-    failureCount: result.failureCount,
+    successCount,
+    failureCount,
     failedTokens,
     errors: errors.length > 0 ? errors : undefined,
   };

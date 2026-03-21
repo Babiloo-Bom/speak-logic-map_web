@@ -62,7 +62,21 @@ Content-Type: application/json
 - **deviceId**, **platform**: tùy chọn.
 - Trả về: `{ "success": true, "message": "Token registered" }`.
 
-### 2. Gửi thông báo tới tất cả thiết bị (chỉ admin)
+### 1b. Danh sách user cho admin (dropdown — tên & email)
+
+```http
+GET /api/notifications/user-options?q=&limit=80
+Authorization: Bearer <adminAccessToken>
+```
+
+- Chỉ **admin**. Dùng cho UI chọn người nhận thông báo (không cần nhập ID).
+- **`q`** (tùy chọn): tìm theo email, `first_name`, `last_name`, hoặc họ tên đầy đủ (ILIKE). Để trống = trả danh sách đầu (sắp xếp theo email).
+- **`limit`**: tối đa 200, mặc định 80.
+- Trả về: `{ "items": [{ "id": number, "email": string, "label": string }] }` — `label` dạng `"Họ tên — email"`, hoặc chỉ `email` nếu profile chưa có tên.
+
+### 2. Gửi thông báo (chỉ admin)
+
+**Broadcast — tất cả thiết bị đã đăng ký**
 
 ```http
 POST /api/notifications/send
@@ -76,8 +90,24 @@ Content-Type: application/json
 }
 ```
 
-- Backend query tất cả FCM token trong `device_fcm_tokens`, gọi Firebase FCM gửi tới từng token, ghi một bản ghi vào `notifications`.
-- Trả về: `{ "success": true, "successCount", "failureCount", "totalTokens", "errors"? }`. Nếu có token lỗi, `errors` chứa `code` (vd. `messaging/invalid-registration-token`) và `message` từ Firebase.
+- Không gửi `userId` / `userIds`: lấy mọi FCM token trong `device_fcm_tokens`, gửi multicast; ghi **một** bản ghi `notifications` với `user_id = NULL` (broadcast).
+
+**Gửi cho một hoặc nhiều user**
+
+```json
+{
+  "title": "Riêng cho bạn",
+  "body": "Nội dung",
+  "userIds": [42, 7, 15]
+}
+```
+
+- `userIds`: mảng id trong bảng `users` (tối đa **200** id, trùng sẽ bỏ). Gửi tới mọi FCM token của các user đó; ghi **một bản ghi lịch sử cho mỗi user** (cùng title/body).
+- Tương thích cũ: có thể gửi **`userId`** (số) thay cho mảng một phần tử.
+- Nếu có id không tồn tại: `404`, `{ "error", "missingIds": [...] }`.
+- Nếu user chưa có thiết bị FCM: `200`, vẫn ghi lịch sử cho từng user (không gửi được push).
+
+- Trả về: `{ "success", "message", "successCount", "failureCount", "totalTokens", "targetUserId" (nếu 1 user), "targetUserIds", "broadcast", "errors"? }`.
 
 **Tại sao `successCount: 0`, `failureCount: 1`?**  
 Thường do token trong DB **không phải FCM token thật**: token test (vd. `"test-device-token-123"`) hoặc token hết hạn. Firebase chỉ chấp nhận token do Firebase SDK trên app (Android/iOS/Web) cấp. Khi gửi thất bại, response có thêm `errors` với `code` (vd. `messaging/invalid-registration-token`) để kiểm tra.
@@ -85,13 +115,17 @@ Thường do token trong DB **không phải FCM token thật**: token test (vd. 
 ### 3. Lịch sử thông báo
 
 ```http
-GET /api/notifications/history?page=1&limit=20
+GET /api/notifications/history?page=1&limit=20&includeBroadcast=true&onlyUnread=false
 Authorization: Bearer <accessToken>
 ```
 
-- User thường: chỉ thông báo của user đó (và thông báo broadcast `user_id IS NULL`).
-- Admin: toàn bộ thông báo.
-- Trả về: `{ "items": [...], "total", "page", "limit" }`.
+**Lọc theo user (mặc định, tiết kiệm băng thông):**
+
+- **User thường:** chỉ thông báo của chính user trong JWT (và broadcast `user_id IS NULL` nếu `includeBroadcast=true`). Tham số `userId` / `scope` bị bỏ qua.
+- **Admin:** mặc định giống user — chỉ inbox của **tài khoản admin đang gọi API**. Để xem inbox user khác: `?userId=<id>`.
+- **Admin — toàn hệ thống (tùy chọn):** `?scope=all` trả mọi bản ghi trong bảng `notifications` (chỉ dùng khi audit; tốn băng thông). Khi có `scope=all`, không cần/không dùng `userId` để lọc inbox.
+
+Trả về: `{ "items", "total", "unreadCount", "page", "limit", "hasMore", "scope": "user"|"all", "filteredUserId": number|null }`.
 
 ## Chạy migration (DB đã tồn tại)
 
