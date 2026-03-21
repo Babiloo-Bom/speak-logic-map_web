@@ -336,6 +336,17 @@ export const rectPopupHTML = (listCountry: any): string => {
   `;
 }
 
+/** Popup nhỏ khi right-click icon rect (remove) — gọi window.deleteRectIcon() từ Popups.js */
+export const rectIconPopupHTML = (): string => {
+  return `
+    <div class="${styles['popup-wrap']} ${styles['popup-interact-function']}">
+      <div onclick="deleteRectIcon()" class="${styles['row']}">
+        Delete
+      </div>
+    </div>
+  `;
+}
+
 // Right-click menu on Group Marker
 export const groupPopupHTML = (): string => {
   return `

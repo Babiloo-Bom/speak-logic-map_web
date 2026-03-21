@@ -1,5 +1,5 @@
 import { Input, Select, Button } from "antd";
-import { SearchOutlined, FilterOutlined, MenuOutlined } from "@ant-design/icons";
+import { SearchOutlined, MenuOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import { IDataRequestGetList } from "@/lib/pages/provider-search/types";
 
@@ -34,11 +34,6 @@ export default function HeaderSearch({
     <div>
       <div className="relative w-full h-40 sm:h-48 md:h-64 rounded-xl overflow-hidden mb-10">
         <Image src={imageUrl} alt={title} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
-
-        {/* overlay */}
-        {/* <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-          <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-semibold">{title}</h1>
-        </div> */}
       </div>
       <div className="flex flex-col md:flex-row gap-3">
         <Input

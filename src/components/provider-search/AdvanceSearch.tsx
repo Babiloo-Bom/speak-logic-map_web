@@ -32,12 +32,10 @@ function AdvanceSearch(props: Props) {
         open={open}
         footer={
           <div className="flex items-center justify-between border-t border-blue-500/40">
-            {/* CLOSE */}
             <Button type="text" onClick={onClose} className="w-1/2 h-12 text-gray-700 font-medium rounded-none hover:bg-transparent">
               CLOSE
             </Button>
 
-            {/* Divider */}
             <div className="h-6 w-px bg-blue-500/40" />
 
             <Button

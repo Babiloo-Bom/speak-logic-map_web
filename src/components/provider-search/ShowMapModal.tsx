@@ -3,9 +3,10 @@
 import { Modal } from "antd";
 import { CheckOutlined, UserOutlined } from "@ant-design/icons";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import type { Icon } from "leaflet";
 import type { ProviderItem } from "@/lib/pages/provider-search/types";
+import MapResizeHelper from "./MapResizeHelper";
 
 import "leaflet/dist/leaflet.css";
 
@@ -36,15 +37,17 @@ export default function ShowMapModal({
   onClose,
   provider,
 }: ShowMapModalProps) {
-  const [mounted, setMounted] = useState(false);
+  const [mapMountKey, setMapMountKey] = useState(0);
   const [markerIcon, setMarkerIcon] = useState<Icon | null>(null);
 
-  useEffect(() => {
-    if (open) setMounted(true);
+  useLayoutEffect(() => {
+    if (open) {
+      setMapMountKey((k) => k + 1);
+    }
   }, [open]);
 
   useEffect(() => {
-    if (!open || !mounted) return;
+    if (!open) return;
     let cancelled = false;
     import("leaflet").then((L) => {
       if (cancelled) return;
@@ -62,7 +65,7 @@ export default function ShowMapModal({
     return () => {
       cancelled = true;
     };
-  }, [open, mounted]);
+  }, [open]);
 
   const hasCoords =
     provider &&
@@ -97,16 +100,17 @@ export default function ShowMapModal({
       styles={{ body: { padding: 0 } }}
     >
       <div className="rounded-b-xl overflow-hidden">
-        {/* Map */}
         <div className="relative h-[360px] w-full bg-gray-100">
-          {mounted && open && (
+          {open && (
             <MapContainer
+              key={mapMountKey}
               center={center}
               zoom={zoom}
               scrollWheelZoom={true}
               style={{ width: "100%", height: "100%", zIndex: 0 }}
               attributionControl={false}
             >
+              <MapResizeHelper active={open} />
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               {hasCoords && markerIcon && (
                 <Marker
@@ -117,7 +121,6 @@ export default function ShowMapModal({
             </MapContainer>
           )}
 
-          {/* Provider info box overlay - centered vertically & horizontally */}
           {provider && (
             <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 transform z-[1000] pointer-events-none flex justify-center">
               <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3 pointer-events-auto max-w-md w-full mx-4">

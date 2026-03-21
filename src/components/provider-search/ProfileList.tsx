@@ -1,4 +1,3 @@
-import { Pagination } from "antd";
 import ProfileItem from "./ProfileItem";
 import { ProviderItem } from "@/lib/pages/provider-search/types";
 

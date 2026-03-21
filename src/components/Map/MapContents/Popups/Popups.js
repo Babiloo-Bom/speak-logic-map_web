@@ -1189,27 +1189,26 @@ export const groupPopup = (map, e) => {
 }
 
 // ---------------------------------------------------------------------------------------------------------
-// Popup shown when right-click on mainset marker
-// export const mainsetPopup = (map, e, toggleModalInsertNumberPerson, setPositionOfHorizontalLine) => {
-//     clearAllPopups(map);
-//
-//     const popup = L.popup();
-//
-//     popup
-//         .setLatLng([e.latlng.lat, e.latlng.lng])
-//         .setContent(mainsetPopupHTML())
-//         .addTo(map);
-//
-//     window.deleteMainSet = () => {
-//         map.removeLayer(e.target);
-//         map.removeLayer(popup);
-//     }
-//
-//     window.insertHorizontalLine = () => {
-//         toggleModalInsertNumberPerson();
-//         setPositionOfHorizontalLine(e.latlng.lat, e.latlng.lng);
-//     }
-// }
+// Popup shown when right-click on mainset marker (HandleSelectItem gọi mainsetPopup(map, e))
+export const mainsetPopup = (map, e) => {
+    clearAllPopups(map);
+
+    const popup = L.popup();
+
+    popup
+        .setLatLng([e.latlng.lat, e.latlng.lng])
+        .setContent(mainsetPopupHTML())
+        .addTo(map);
+
+    window.deleteMainSet = () => {
+        map.removeLayer(e.target);
+        map.removeLayer(popup);
+    };
+
+    window.insertHorizontalLine = () => {
+        /* Có thể nối modal “Insert Principle Line” sau nếu cần */
+    };
+};
 
 export const routePopup = (map, distancePoint, distancePoint2, e) => {
 

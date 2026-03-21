@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button, Skeleton } from "antd";
 import { CheckOutlined } from "@ant-design/icons";
-import { useRouter } from "next/router";
 import { ProviderItem } from "@/lib/pages/provider-search/types";
 import ShowMapModal from "./ShowMapModal";
 
@@ -12,7 +11,6 @@ interface Props {
 }
 
 export default function ProfileItem({ data }: Props) {
-  const router = useRouter();
   const [showMapOpen, setShowMapOpen] = useState(false);
 
   const handleShowMap = () => {
@@ -44,7 +42,6 @@ export default function ProfileItem({ data }: Props) {
 
   return (
     <div className="bg-white rounded-xl border border-[#CCCCCC] border-solid shadow-sm p-5 flex flex-col">
-      {/* URL (blue link) */}
       {displayUrl && (
         <a
           href={displayUrl.startsWith("http") ? displayUrl : `https://${displayUrl}`}
@@ -56,7 +53,6 @@ export default function ProfileItem({ data }: Props) {
         </a>
       )}
 
-      {/* Description + See More */}
       {description && (
         <p className="text-gray-700 text-sm mb-3 line-clamp-2">
           {truncatedDesc}
@@ -72,19 +68,16 @@ export default function ProfileItem({ data }: Props) {
         </p>
       )}
 
-      {/* Function Provided (value green) */}
       <p className="text-sm mb-1.5">
         <span className="text-gray-600">Function Provided</span>{" "}
         <span className="text-green-600 font-medium">{functionLabel || "—"}</span>
       </p>
 
-      {/* Problem Solved (value red) */}
       <p className="text-sm mb-1.5">
         <span className="text-gray-600">Problem Solved</span>{" "}
         <span className="text-red-600 font-medium">{problemLabel || "—"}</span>
       </p>
 
-      {/* The Given Set Applicable (checkmark) */}
       <p className="text-sm mb-4 flex items-center gap-2">
         <span className="text-gray-600">The Given Set Applicable</span>
         {givenSetApplicable ? (
@@ -94,7 +87,6 @@ export default function ProfileItem({ data }: Props) {
         )}
       </p>
 
-      {/* Show Map button (only one action) */}
       <div className="mt-auto pt-2">
         <Button
           block
