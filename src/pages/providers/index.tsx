@@ -28,7 +28,7 @@ export default function ProvidersPage() {
                 Add Providers
               </Button>
             </Link>
-            <Link href="/providers/create">
+            <Link href="/providers/wizard">
               <Button
                 type="primary"
                 size="large"
