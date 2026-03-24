@@ -28,9 +28,6 @@ interface Profile {
   avatar_url?: string;
   pen_name?: string;
   location?: string;
-  phone?: string;
-  website?: string;
-  zip_code?: string;
 }
 
 interface ApiResponse {
@@ -48,9 +45,6 @@ const ProfilePage: React.FC = () => {
     function: '',
     penName: '',
     location: '',
-    phone: '',
-    website: '',
-    zipCode: '',
   });
 
   const [user, setUser] = useState<User | null>(null);
@@ -68,8 +62,6 @@ const ProfilePage: React.FC = () => {
 
   const [existingAvatarUrl, setExistingAvatarUrl] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState(false);
-
-  const dfCountryCode = localStorage.getItem('dfCountryCode');
 
   useEffect(() => {
     fetchProfile();
@@ -107,9 +99,6 @@ const ProfilePage: React.FC = () => {
             function: data.profile.function || '',
             penName: data.profile.pen_name || '',
             location: data.profile.location || 'USA',
-            phone: (data.profile as Profile).phone || '',
-            website: (data.profile as Profile).website || '',
-            zipCode: (data.profile as Profile).zip_code || '',
           });
 
           if (data.profile.avatar_url) {
@@ -143,17 +132,11 @@ const ProfilePage: React.FC = () => {
         function: formData.function,
         location: formData.location,
         penName: formData.penName,
-        phone: formData.phone,
-        website: formData.website,
-        zipCode: formData.zipCode,
       };
 
       if (field === 'title') form.title = newValue;
       else if (field === 'function') form.function = newValue;
       else if (field === 'location') form.location = newValue;
-      else if (field === 'phone') form.phone = newValue;
-      else if (field === 'website') form.website = newValue;
-      else if (field === 'zipCode') form.zipCode = newValue;
 
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
@@ -266,108 +249,79 @@ const ProfilePage: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className="w-full border border-solid border-[#D0DAEE] rounded-lg px-48 py-6 bg-white">
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <p className="font-bold">Title:</p>
-                {isEditingTitle ? (
+          <div className="w-full border border-solid border-[#D0DAEE] rounded-lg px-4 sm:px-8 md:px-16 lg:px-24 py-6 bg-white">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              <div className="flex flex-col gap-6">
+                <div>
+                  <p className="font-bold">Title:</p>
+                  {isEditingTitle ? (
+                    <input
+                      type="text"
+                      value={titleValue}
+                      onChange={(e) => setTitleValue(e.target.value)}
+                      onBlur={handleSaveTitle}
+                      onKeyDown={handleKeyDownTitle}
+                      autoFocus
+                      className="border-2 border-black px-2 py-1 rounded w-full"
+                    />
+                  ) : (
+                    <p>
+                      {formData.title}
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingTitle(true)}
+                        className="ml-2 hover:text-blue-700"
+                      >
+                        ✎
+                      </button>
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <p className="font-bold">Function:</p>
+                  {isEditingFunction ? (
+                    <input
+                      type="text"
+                      value={functionValue}
+                      onChange={(e) => setFunctionValue(e.target.value)}
+                      onBlur={handleSaveFunction}
+                      onKeyDown={handleKeyDownFunction}
+                      autoFocus
+                      className="border-2 border-black px-2 py-1 rounded w-full"
+                    />
+                  ) : (
+                    <p>
+                      {formData.function}
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingFunction(true)}
+                        className="ml-2 hover:text-blue-700"
+                      >
+                        ✎
+                      </button>
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col gap-6">
+                <div>
+                  <p className="font-bold">Default Location:</p>
                   <input
                     type="text"
-                    value={titleValue}
-                    onChange={(e) => setTitleValue(e.target.value)}
-                    onBlur={handleSaveTitle}
-                    onKeyDown={handleKeyDownTitle}
-                    autoFocus
+                    value={formData.location}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
+                    onBlur={(e) => handleUpdateProfile('location', e.target.value)}
+                    placeholder="Địa chỉ / thành phố / quốc gia"
                     className="border-2 border-black px-2 py-1 rounded w-full"
                   />
-                ) : (
-                  <p>
-                    {formData.title}
-                    <button
-                      type="button"
-                      onClick={() => setIsEditingTitle(true)}
-                      className="ml-2 hover:text-blue-700"
-                    >
-                      ✎
-                    </button>
-                  </p>
-                )}
-              </div>
-              <div>
-                <p className="font-bold">Default Location:</p>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
-                  onBlur={(e) => handleUpdateProfile('location', e.target.value)}
-                  placeholder="Địa chỉ / thành phố / quốc gia"
-                  className="border-2 border-black px-2 py-1 rounded w-full"
-                />
-              </div>
-              <div>
-                <p className="font-bold">Zip code:</p>
-                <input
-                  type="text"
-                  value={formData.zipCode}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, zipCode: e.target.value }))}
-                  onBlur={(e) => handleUpdateProfile('zipCode', e.target.value)}
-                  placeholder="Zip code"
-                  className="border-2 border-black px-2 py-1 rounded w-full"
-                />
-              </div>
-              <div>
-                <p className="font-bold">Phone:</p>
-                <input
-                  type="text"
-                  value={formData.phone}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-                  onBlur={(e) => handleUpdateProfile('phone', e.target.value)}
-                  placeholder="Số điện thoại"
-                  className="border-2 border-black px-2 py-1 rounded w-full"
-                />
-              </div>
-              <div>
-                <p className="font-bold">Website:</p>
-                <input
-                  type="text"
-                  value={formData.website}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, website: e.target.value }))}
-                  onBlur={(e) => handleUpdateProfile('website', e.target.value)}
-                  placeholder="https://..."
-                  className="border-2 border-black px-2 py-1 rounded w-full"
-                />
-              </div>
-              <div>
-                <p className="font-bold">Function:</p>
-                {isEditingFunction ? (
-                  <input
-                    type="text"
-                    value={functionValue}
-                    onChange={(e) => setFunctionValue(e.target.value)}
-                    onBlur={handleSaveFunction}
-                    onKeyDown={handleKeyDownFunction}
-                    autoFocus
-                    className="border-2 border-black px-2 py-1 rounded w-full"
-                  />
-                ) : (
-                  <p>
-                    {formData.function}
-                    <button
-                      type="button"
-                      onClick={() => setIsEditingFunction(true)}
-                      className="ml-2 hover:text-blue-700"
-                    >
-                      ✎
-                    </button>
-                  </p>
-                )}
-              </div>
-              <div className="">
-                {formData.location ? (
-                  <LocationMiniMap locationName={formData.location} height={220} />
-                ) : (
-                  <Image src={IMG_MAPEXAMPLE} alt="World map" className="rounded-lg" />
-                )}
+                </div>
+                <div className="w-full min-w-0">
+                  {formData.location ? (
+                    <LocationMiniMap locationName={formData.location} height={220} />
+                  ) : (
+                    <Image src={IMG_MAPEXAMPLE} alt="World map" className="rounded-lg w-full h-auto" />
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -381,9 +335,4 @@ const ProfilePage: React.FC = () => {
 export default withAuth(ProfilePage, {
   requireEmailVerification: true
 });
-
-
-function elseif(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
 

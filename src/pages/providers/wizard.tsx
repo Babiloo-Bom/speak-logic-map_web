@@ -13,6 +13,51 @@ function Label({ children }: { children: React.ReactNode }) {
   return <label className="block text-sm font-medium text-gray-900 mb-1.5">{children}</label>;
 }
 
+/** Label + Yes/No: cùng chiều cao vùng điều khiển với `<input className={inputClass} />` (~48px) */
+function RadioYesNo({
+  label,
+  name,
+  value,
+  onYes,
+  onNo,
+}: {
+  label: string;
+  name: string;
+  value: boolean;
+  onYes: () => void;
+  onNo: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label>{label}</Label>
+      <div className="min-h-[48px] flex items-center">
+        <div className="flex flex-wrap gap-x-10 gap-y-2 items-center">
+          <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="radio"
+              name={name}
+              checked={value}
+              onChange={onYes}
+              className="accent-[#2d4096] w-4 h-4 shrink-0"
+            />
+            <span className="text-sm text-gray-900">Yes</span>
+          </label>
+          <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="radio"
+              name={name}
+              checked={!value}
+              onChange={onNo}
+              className="accent-[#2d4096] w-4 h-4 shrink-0"
+            />
+            <span className="text-sm text-gray-900">No</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function escapeXml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -397,133 +442,90 @@ export default function ProviderWizardPage() {
             )}
 
             {step === 2 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-5">
-                <div className="flex flex-col gap-5">
-                  <div>
-                    <Label>Function Name</Label>
-                    <input
-                      className={inputClass}
-                      placeholder="Function provided by the Provider"
-                      value={s2.functionName}
-                      onChange={(e) => updateS2({ functionName: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Function Location</Label>
-                    <input
-                      className={inputClass}
-                      placeholder="Enter Location"
-                      value={s2.functionLocation}
-                      onChange={(e) => updateS2({ functionLocation: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Function Keyword</Label>
-                    <input
-                      className={inputClass}
-                      placeholder="Add Tags"
-                      value={s2.keywords}
-                      onChange={(e) => updateS2({ keywords: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Function Description</Label>
-                    <textarea
-                      className={`${inputClass} min-h-[120px] resize-y`}
-                      placeholder="Function Description"
-                      value={s2.functionDescription}
-                      onChange={(e) => updateS2({ functionDescription: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Function requires Physical Address/Location</Label>
-                    <div className="flex gap-6 mt-1">
-                      <label className="inline-flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          checked={s2.requiresPhysicalAddress}
-                          onChange={() => updateS2({ requiresPhysicalAddress: true })}
-                          className="accent-[#2d4096]"
-                        />
-                        <span>Yes</span>
-                      </label>
-                      <label className="inline-flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          checked={!s2.requiresPhysicalAddress}
-                          onChange={() => updateS2({ requiresPhysicalAddress: false })}
-                          className="accent-[#2d4096]"
-                        />
-                        <span>No</span>
-                      </label>
-                    </div>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 md:items-start gap-x-10 gap-y-5">
+                {/* Hàng 1 */}
+                <div>
+                  <Label>Function Name</Label>
+                  <input
+                    className={inputClass}
+                    placeholder="Function provided by the Provider"
+                    value={s2.functionName}
+                    onChange={(e) => updateS2({ functionName: e.target.value })}
+                  />
                 </div>
-                <div className="flex flex-col gap-5">
-                  <div>
-                    <Label>Problem Solved</Label>
-                    <input
-                      className={inputClass}
-                      placeholder="Problem Solved by the Function"
-                      value={s2.problemSolved}
-                      onChange={(e) => updateS2({ problemSolved: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Function URL</Label>
-                    <input
-                      className={inputClass}
-                      placeholder="Function URL"
-                      value={s2.functionUrl}
-                      onChange={(e) => updateS2({ functionUrl: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>The Given Set Applicable</Label>
-                    <div className="flex gap-6 mt-1">
-                      <label className="inline-flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          checked={s2.givenSetApplicable}
-                          onChange={() => updateS2({ givenSetApplicable: true })}
-                          className="accent-[#2d4096]"
-                        />
-                        <span>Yes</span>
-                      </label>
-                      <label className="inline-flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          checked={!s2.givenSetApplicable}
-                          onChange={() => updateS2({ givenSetApplicable: false })}
-                          className="accent-[#2d4096]"
-                        />
-                        <span>No</span>
-                      </label>
-                    </div>
-                  </div>
-                  <div>
-                    <Label>Function Provided Address</Label>
-                    <div className="flex gap-6 mt-1">
-                      <label className="inline-flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          checked={s2.functionProvidedAddress}
-                          onChange={() => updateS2({ functionProvidedAddress: true })}
-                          className="accent-[#2d4096]"
-                        />
-                        <span>Yes</span>
-                      </label>
-                      <label className="inline-flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          checked={!s2.functionProvidedAddress}
-                          onChange={() => updateS2({ functionProvidedAddress: false })}
-                          className="accent-[#2d4096]"
-                        />
-                        <span>No</span>
-                      </label>
-                    </div>
-                  </div>
+                <div>
+                  <Label>Problem Solved</Label>
+                  <input
+                    className={inputClass}
+                    placeholder="Problem Solved by the Function"
+                    value={s2.problemSolved}
+                    onChange={(e) => updateS2({ problemSolved: e.target.value })}
+                  />
+                </div>
+                {/* Hàng 2 */}
+                <div>
+                  <Label>Function Location</Label>
+                  <input
+                    className={inputClass}
+                    placeholder="Enter Location"
+                    value={s2.functionLocation}
+                    onChange={(e) => updateS2({ functionLocation: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Function URL</Label>
+                  <input
+                    className={inputClass}
+                    placeholder="Function URL"
+                    value={s2.functionUrl}
+                    onChange={(e) => updateS2({ functionUrl: e.target.value })}
+                  />
+                </div>
+                {/* Hàng 3: Keyword | The Given Set (cùng baseline) */}
+                <div>
+                  <Label>Function Keyword</Label>
+                  <input
+                    className={inputClass}
+                    placeholder="Add Tags"
+                    value={s2.keywords}
+                    onChange={(e) => updateS2({ keywords: e.target.value })}
+                  />
+                </div>
+                <RadioYesNo
+                  label="The Given Set Applicable"
+                  name="wizard-given-set"
+                  value={s2.givenSetApplicable}
+                  onYes={() => updateS2({ givenSetApplicable: true })}
+                  onNo={() => updateS2({ givenSetApplicable: false })}
+                />
+                {/* Hàng 4: Description | Function Provided Address (căn đỉnh cùng hàng) */}
+                <div className="md:row-span-1">
+                  <Label>Function Description</Label>
+                  <textarea
+                    className={`${inputClass} min-h-[120px] resize-y`}
+                    placeholder="Function Description"
+                    value={s2.functionDescription}
+                    onChange={(e) => updateS2({ functionDescription: e.target.value })}
+                  />
+                </div>
+                <div className="md:self-start">
+                  <RadioYesNo
+                    label="Function Provided Address"
+                    name="wizard-provided-addr"
+                    value={s2.functionProvidedAddress}
+                    onYes={() => updateS2({ functionProvidedAddress: true })}
+                    onNo={() => updateS2({ functionProvidedAddress: false })}
+                  />
+                </div>
+                {/* Hàng 5: chỉ cột trái */}
+                <div className="md:col-span-2 max-w-full md:max-w-[calc(50%-1.25rem)]">
+                  <RadioYesNo
+                    label="Function requires Physical Address/Location"
+                    name="wizard-physical"
+                    value={s2.requiresPhysicalAddress}
+                    onYes={() => updateS2({ requiresPhysicalAddress: true })}
+                    onNo={() => updateS2({ requiresPhysicalAddress: false })}
+                  />
                 </div>
               </div>
             )}
