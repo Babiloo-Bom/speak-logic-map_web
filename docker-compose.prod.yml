@@ -22,12 +22,17 @@ services:
       -c listen_addresses='*'
       -c max_connections=100
     healthcheck:
-      # Dùng biến trong container (POSTGRES_* do environment cung cấp)
-      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\" || exit 1"]
-      interval: 10s
+      # database.sql rất lớn — lần đầu init có thể vài phút; postgres chỉ "healthy" khi init xong.
+      # start_period phải đủ dài để không đánh dấu unhealthy trong lúc init.
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h 127.0.0.1 -p 5432 -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\" || exit 1",
+        ]
+      interval: 15s
       timeout: 10s
-      retries: 10
-      start_period: 60s
+      retries: 25
+      start_period: 900s
     ports:
       - "${POSTGRES_PORT:-1042}:5432"
 
