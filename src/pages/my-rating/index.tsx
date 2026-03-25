@@ -44,9 +44,7 @@ const MyRatingPage = () => {
         setData(result);
         setSuccess("Managers loaded successfully");
         setError("");
-        if (result.items && result.items.length > 0) {
-          setSelectedProjectId((prev) => prev || result.items[0].project_id);
-        }
+        // Project Identification ô chính giữ trống khi vào trang; chỉ hiện sau khi bấm Generate.
       } else {
         const errorData = await response.json();
         setError(errorData.error || "Failed to fetch managers");
@@ -242,8 +240,12 @@ const MyRatingPage = () => {
             <Card className="rounded-xl border border-[#D0DAEE]">
               <div className="flex flex-col items-center gap-3">
                 <Text type="secondary">Project Identification</Text>
-                <div className="px-4 py-3 rounded-lg bg-[#F5F6FA] text-lg font-mono tracking-wide border border-[#D0DAEE] w-full max-w-xl mx-auto break-all">
-                  {selectedProjectId || "No project identification yet"}
+                <div
+                  className={`px-4 py-3 rounded-lg bg-[#F5F6FA] text-lg font-mono tracking-wide border border-[#D0DAEE] w-full max-w-xl mx-auto break-all min-h-[52px] flex items-center justify-center ${
+                    selectedProjectId ? "text-gray-900" : ""
+                  }`}
+                >
+                  {selectedProjectId ?? ""}
                 </div>
               </div>
             </Card>
