@@ -15,6 +15,7 @@ export interface ProjectIdentification {
   used: boolean;             // Has this ID been used for a rating?
   manager_id?: number;       // If used, which manager was rated
   provider_id?: number;      // If used, which provider was rated
+  sender_provider_id?: number; // If sent to user by a provider
   created_at: string;        // Date created
   used_at?: string;          // Date when used
 }
@@ -74,7 +75,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
         // Get items
         const result = await client.query(
           `
-          SELECT id, user_id, project_id, used, manager_id, provider_id, created_at, used_at
+          SELECT id, user_id, project_id, used, manager_id, provider_id, sender_provider_id, created_at, used_at
           FROM project_identifications
           ${whereClause}
           ORDER BY created_at DESC
@@ -90,6 +91,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           used: row.used,
           manager_id: row.manager_id || undefined,
           provider_id: row.provider_id || undefined,
+          sender_provider_id: row.sender_provider_id || undefined,
           created_at: row.created_at,
           used_at: row.used_at || undefined,
         }));
@@ -139,31 +141,63 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           return res.status(201).json(item);
         }
 
-        // No project_id in body: get existing or generate new (legacy behavior)
-        const existingResult = await client.query(
+        // No project_id in body: Generate behavior
+        // Priority:
+        // 1) If a provider has sent a project_id to this user (unused), return the newest one.
+        // 2) Otherwise, return user's newest unused project_id (if any).
+        // 3) Otherwise, generate a new one.
+        const sentResult = await client.query(
           `
-          SELECT id, user_id, project_id, used, manager_id, provider_id, created_at, used_at
+          SELECT id, user_id, project_id, used, manager_id, provider_id, sender_provider_id, created_at, used_at
           FROM project_identifications
-          WHERE user_id = $1
+          WHERE user_id = $1 AND used = false AND sender_provider_id IS NOT NULL
           ORDER BY created_at DESC
           LIMIT 1
           `,
           [userId]
         );
 
-        if (existingResult.rows.length > 0) {
-          const row = existingResult.rows[0];
-          const existingItem: ProjectIdentification = {
+        if (sentResult.rows.length > 0) {
+          const row = sentResult.rows[0];
+          const item: ProjectIdentification = {
             id: row.id,
             user_id: row.user_id,
             project_id: row.project_id,
             used: row.used,
             manager_id: row.manager_id || undefined,
             provider_id: row.provider_id || undefined,
+            sender_provider_id: row.sender_provider_id || undefined,
             created_at: row.created_at,
             used_at: row.used_at || undefined,
           };
-          return res.status(200).json(existingItem);
+          return res.status(200).json(item);
+        }
+
+        const existingUnusedResult = await client.query(
+          `
+          SELECT id, user_id, project_id, used, manager_id, provider_id, sender_provider_id, created_at, used_at
+          FROM project_identifications
+          WHERE user_id = $1 AND used = false
+          ORDER BY created_at DESC
+          LIMIT 1
+          `,
+          [userId]
+        );
+
+        if (existingUnusedResult.rows.length > 0) {
+          const row = existingUnusedResult.rows[0];
+          const item: ProjectIdentification = {
+            id: row.id,
+            user_id: row.user_id,
+            project_id: row.project_id,
+            used: row.used,
+            manager_id: row.manager_id || undefined,
+            provider_id: row.provider_id || undefined,
+            sender_provider_id: row.sender_provider_id || undefined,
+            created_at: row.created_at,
+            used_at: row.used_at || undefined,
+          };
+          return res.status(200).json(item);
         }
 
         const projectId = generateProjectId();
@@ -171,7 +205,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           `
           INSERT INTO project_identifications (user_id, project_id, used, created_at)
           VALUES ($1, $2, false, CURRENT_TIMESTAMP)
-          RETURNING id, user_id, project_id, used, created_at
+          RETURNING id, user_id, project_id, used, sender_provider_id, created_at
           `,
           [userId, projectId]
         );
@@ -182,6 +216,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           user_id: row.user_id,
           project_id: row.project_id,
           used: row.used,
+          sender_provider_id: row.sender_provider_id || undefined,
           created_at: row.created_at,
         };
 

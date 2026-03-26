@@ -28,7 +28,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       if (req.method === "GET") {
         const result = await client.query(
           `
-          SELECT id, user_id, project_id, used, manager_id, provider_id, created_at, used_at
+          SELECT id, user_id, project_id, used, manager_id, provider_id, sender_provider_id, created_at, used_at
           FROM project_identifications
           WHERE project_id = $1 AND user_id = $2
           `,
@@ -47,6 +47,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
           used: row.used,
           manager_id: row.manager_id || undefined,
           provider_id: row.provider_id || undefined,
+          sender_provider_id: row.sender_provider_id || undefined,
           created_at: row.created_at,
           used_at: row.used_at || undefined,
         };

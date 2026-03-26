@@ -644,9 +644,22 @@ CREATE TABLE IF NOT EXISTS project_identifications (
   used BOOLEAN DEFAULT false,              -- Has this ID been used for a rating?
   manager_id BIGINT REFERENCES managers(id) ON DELETE SET NULL,   -- If used for manager rating
   provider_id BIGINT REFERENCES providers(id) ON DELETE SET NULL, -- If used for provider rating
+  sender_provider_id BIGINT REFERENCES providers(id) ON DELETE SET NULL, -- If sent to user by a provider
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   used_at TIMESTAMP  -- When the ID was used
 );
+
+-- Ensure sender_provider_id exists (for existing tables)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'project_identifications' AND column_name = 'sender_provider_id'
+  ) THEN
+    ALTER TABLE project_identifications
+      ADD COLUMN sender_provider_id BIGINT REFERENCES providers(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 -- Ensure there is no leftover unique index on project_id so one Project ID can be used for many ratings
 DO $$
@@ -772,6 +785,7 @@ CREATE INDEX IF NOT EXISTS idx_project_identifications_project_id ON project_ide
 CREATE INDEX IF NOT EXISTS idx_project_identifications_used ON project_identifications(used);
 CREATE INDEX IF NOT EXISTS idx_project_identifications_manager_id ON project_identifications(manager_id);
 CREATE INDEX IF NOT EXISTS idx_project_identifications_provider_id ON project_identifications(provider_id);
+CREATE INDEX IF NOT EXISTS idx_project_identifications_sender_provider_id ON project_identifications(sender_provider_id);
 CREATE INDEX IF NOT EXISTS idx_project_identifications_created_at ON project_identifications(created_at);
 
 -- ============================================

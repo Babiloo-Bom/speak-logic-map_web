@@ -1,71 +1,54 @@
 import { Button, Card, message, Typography, Table } from "antd";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { CopyOutlined } from "@ant-design/icons";
-import { buildQueryParams, getAuthToken } from "@/utils/constants";
-import { baseDataRequestGetMyRating } from "@/lib/pages/my-rating/request";
-import { IDataRequestGetMyRating, IMyRatingItem, IResponseGetMyRating } from "@/lib/pages/my-rating/type";
 import dayjs from "dayjs";
+import { getAuthToken } from "@/utils/constants";
+import type { IMyRatingItem, IResponseGetMyRating } from "@/lib/pages/my-rating/type";
 
 const { Text } = Typography;
 
 const MyRatingPage = () => {
   const router = useRouter();
-  const [dataRequestGetMyRating, setDataRequestGetMyRating] = useState<IDataRequestGetMyRating>({
-    ...baseDataRequestGetMyRating,
-    used: "",
-  });
-  const [data, setData] = useState<IResponseGetMyRating | null>(null);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [showSavedTable, setShowSavedTable] = useState(false);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [tableData, setTableData] = useState<IResponseGetMyRating | null>(null);
 
-  const fetchMyRating = async (req: IDataRequestGetMyRating) => {
+  const fetchProjectIdentificationList = async () => {
     try {
-      setLoading(true);
+      setTableLoading(true);
       const token = getAuthToken();
       if (!token) {
-        setError("No authentication token found");
+        message.error("No authentication token found");
         return;
       }
-
-      const queryString = buildQueryParams(req);
-      const url = `/api/ratings/project-identification${queryString ? `?${queryString}` : ""}`;
-      const response = await fetch(url, {
+      const res = await fetch("/api/ratings/project-identification?page=1&limit=20", {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
-
-      if (response.ok) {
-        const result: IResponseGetMyRating = await response.json();
-        setData(result);
-        setSuccess("Managers loaded successfully");
-        setError("");
-        // Project Identification ô chính giữ trống khi vào trang; chỉ hiện sau khi bấm Generate.
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || "Failed to fetch managers");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        message.error(err.error || "Failed to load project identifications");
+        return;
       }
-    } catch (error) {
-      setError("Network error. Please try again.");
-      console.error("Fetch error:", error);
+      const data: IResponseGetMyRating = await res.json();
+      setTableData(data);
+    } catch (e) {
+      console.error("Fetch project identifications error:", e);
+      message.error("Network error. Please try again.");
     } finally {
-      setLoading(false);
+      setTableLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchMyRating(dataRequestGetMyRating);
-  }, [router.asPath]);
 
   const handleGenerate = async () => {
     try {
       const token = getAuthToken();
       if (!token) {
-        setError("No authentication token found");
+        message.error("No authentication token found");
         return;
       }
 
@@ -85,10 +68,6 @@ const MyRatingPage = () => {
 
       const newItem = await res.json();
       setSelectedProjectId(newItem.project_id);
-      setData((prev) => ({
-        items: prev ? [newItem, ...prev.items] : [newItem],
-        total: (prev?.total || 0) + 1,
-      }));
       message.success("Generated new project identification");
     } catch (e) {
       console.error("Generate project identification error:", e);
@@ -126,7 +105,9 @@ const MyRatingPage = () => {
         return;
       }
       message.success("Project identification saved");
-      router.push("/function-ratings");
+      // Show table after save
+      setShowSavedTable(true);
+      await fetchProjectIdentificationList();
     } catch (e) {
       console.error("Save project identification error:", e);
       message.error("Network error. Please try again.");
@@ -148,8 +129,7 @@ const MyRatingPage = () => {
     }
   };
 
-  const tableItems = useMemo(() => data?.items ?? [], [data?.items]);
-
+  const tableItems = tableData?.items ?? [];
   const columns = [
     {
       title: "Project Identification",
@@ -170,17 +150,20 @@ const MyRatingPage = () => {
       title: "Date",
       dataIndex: "created_at",
       key: "created_at",
+      width: 140,
       render: (v: string) => dayjs(v).format("DD/MM/YYYY"),
     },
     {
       title: "Used",
       dataIndex: "used",
       key: "used",
+      width: 90,
       render: (used: boolean) => (used ? "Yes" : "No"),
     },
     {
       title: "Action",
       key: "action",
+      width: 120,
       render: (_: unknown, record: IMyRatingItem) => {
         const href = record.provider_id
           ? `/provider-search/provider-rating?providerId=${record.provider_id}&projectId=${encodeURIComponent(
@@ -236,27 +219,25 @@ const MyRatingPage = () => {
             </div>
           </Card>
 
+          {/* Project Identification (ban đầu trống; chỉ hiện sau khi bấm Generate hoặc chọn từ bảng) */}
           <div className="mb-10">
             <Card className="rounded-xl border border-[#D0DAEE]">
               <div className="flex flex-col items-center gap-3">
                 <Text type="secondary">Project Identification</Text>
-                <div
-                  className={`px-4 py-3 rounded-lg bg-[#F5F6FA] text-lg font-mono tracking-wide border border-[#D0DAEE] w-full max-w-xl mx-auto break-all min-h-[52px] flex items-center justify-center ${
-                    selectedProjectId ? "text-gray-900" : ""
-                  }`}
-                >
+                <div className="px-4 py-3 rounded-lg bg-[#F5F6FA] text-lg font-mono tracking-wide border border-[#D0DAEE] w-full max-w-xl mx-auto break-all min-h-[52px] flex items-center justify-center">
                   {selectedProjectId ?? ""}
                 </div>
               </div>
             </Card>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-2">
             <Button
               size="large"
               className="w-full sm:w-40 h-11 border-primary text-primary"
               onClick={handleSave}
               loading={saving}
+              disabled={!selectedProjectId}
             >
               Save
             </Button>
@@ -265,21 +246,25 @@ const MyRatingPage = () => {
               icon={<CopyOutlined />}
               className="bg-primary text-white w-full sm:w-56 h-11 flex items-center justify-center"
               onClick={handleCopy}
+              disabled={!selectedProjectId}
             >
               Copy To Clipboard
             </Button>
           </div>
 
-          {/* Project list table like Figma My Ratings */}
-          <Card className="rounded-xl border border-[#D0DAEE] text-left">
-            <Table<IMyRatingItem>
-              rowKey="id"
-              dataSource={tableItems}
-              columns={columns}
-              loading={loading}
-              pagination={false}
-            />
-          </Card>
+          {showSavedTable && (
+            <div className="mt-10">
+              <Card className="rounded-xl border border-[#D0DAEE] text-left">
+                <Table<IMyRatingItem>
+                  rowKey={(r) => `${r.project_id}-${r.id}`}
+                  dataSource={tableItems}
+                  columns={columns as any}
+                  loading={tableLoading}
+                  pagination={false}
+                />
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </div>
