@@ -160,28 +160,6 @@ const MyRatingPage = () => {
       width: 90,
       render: (used: boolean) => (used ? "Yes" : "No"),
     },
-    {
-      title: "Action",
-      key: "action",
-      width: 120,
-      render: (_: unknown, record: IMyRatingItem) => {
-        const href = record.provider_id
-          ? `/provider-search/provider-rating?providerId=${record.provider_id}&projectId=${encodeURIComponent(
-              record.project_id
-            )}`
-          : `/function-ratings/${encodeURIComponent(record.project_id)}?piId=${record.id}`;
-        return (
-          <Link href={href}>
-            <Button
-              size="small"
-              className="!bg-white !text-primary border border-primary hover:!bg-primary hover:!text-white hover:!border-primary"
-            >
-              Rate
-            </Button>
-          </Link>
-        );
-      },
-    },
   ];
 
   return (
