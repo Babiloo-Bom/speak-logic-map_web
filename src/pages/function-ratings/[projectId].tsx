@@ -1,9 +1,18 @@
 import { Button, Card, Rate, Typography } from "antd";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getAuthToken } from "@/utils/constants";
 
 const { Text } = Typography;
+
+/** Next.js dynamic routes sometimes pass query values as string[]. */
+function firstQueryParam(v: string | string[] | undefined): string | undefined {
+  if (v == null) return undefined;
+  const s = Array.isArray(v) ? v[0] : v;
+  const t = typeof s === "string" ? s.trim() : "";
+  return t.length > 0 ? t : undefined;
+}
 
 interface ViewRatingItem {
   type: "manager" | "provider" | null;
@@ -42,26 +51,52 @@ const yesNo = (v: boolean | undefined) => (v === true ? "Yes" : v === false ? "N
 
 const FunctionRatingDetailPage = () => {
   const router = useRouter();
-  const { projectId, piId } = router.query as { projectId?: string | string[]; piId?: string | string[] };
   const [items, setItems] = useState<ViewRatingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!projectId || typeof projectId !== "string") return;
+    if (!router.isReady) return;
+
+    const projectId = firstQueryParam(router.query.projectId);
+    const piId = firstQueryParam(router.query.piId);
+
+    if (!projectId) {
+      setItems([]);
+      setFetchError(null);
+      setLoading(false);
+      return;
+    }
+
     const token = getAuthToken();
-    if (!token) return;
-    const url = (() => {
-      const base = `/api/ratings/view-rating/${encodeURIComponent(projectId)}`;
-      if (typeof piId === "string" && piId.trim().length > 0) {
-        return `${base}?piId=${encodeURIComponent(piId)}`;
-      }
-      return base;
-    })();
+    if (!token) {
+      setItems([]);
+      setFetchError("Not signed in.");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setFetchError(null);
+
+    const base = `/api/ratings/view-rating/${encodeURIComponent(projectId)}`;
+    const url =
+      piId && Number.isInteger(Number(piId)) ? `${base}?piId=${encodeURIComponent(piId)}` : base;
 
     fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => (res.ok ? res.json() : null))
+      .then(async (res) => {
+        if (!res.ok) {
+          const msg =
+            res.status === 404
+              ? "Không tìm thấy mã dự án cho tài khoản này (kiểm tra đã đăng nhập đúng user và đã Save ở My Ratings)."
+              : `Lỗi tải (${res.status}).`;
+          setFetchError(msg);
+          return null;
+        }
+        return res.json();
+      })
       .then((json: ViewRatingResponse | null) => {
         if (json && Array.isArray(json.items)) {
           setItems(json.items);
@@ -69,11 +104,15 @@ const FunctionRatingDetailPage = () => {
           setItems([]);
         }
       })
-      .catch(console.error)
+      .catch((e) => {
+        console.error(e);
+        setFetchError("Không thể tải dữ liệu. Thử lại sau.");
+        setItems([]);
+      })
       .finally(() => setLoading(false));
-  }, [projectId, piId]);
+  }, [router.isReady, router.query.projectId, router.query.piId]);
 
-  if (loading) {
+  if (!router.isReady || loading) {
     return (
       <div className="w-full max-w-4xl mx-auto px-4 py-12 text-center">
         <Text type="secondary">Loading...</Text>
@@ -81,10 +120,30 @@ const FunctionRatingDetailPage = () => {
     );
   }
 
+  const routeProjectId = firstQueryParam(router.query.projectId);
+
+  if (fetchError) {
+    return (
+      <div className="w-full max-w-4xl mx-auto px-4 py-12 text-center space-y-3">
+        <Text type="danger">{fetchError}</Text>
+        <div>
+          <Button type="link" onClick={() => router.push("/function-ratings")}>
+            Back to Function Ratings
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!items || items.length === 0) {
     return (
-      <div className="w-full max-w-4xl mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-4xl mx-auto px-4 py-12 text-center space-y-3">
         <Text type="secondary">Project identification or rating not found.</Text>
+        {routeProjectId && (
+          <p className="text-sm text-gray-500">
+            Project ID trong URL: <span className="font-mono">{routeProjectId}</span>
+          </p>
+        )}
         <Button type="link" onClick={() => router.push("/function-ratings")} className="ml-2">
           Back to Function Ratings
         </Button>
@@ -132,15 +191,27 @@ const FunctionRatingDetailPage = () => {
                   </div>
                   <div>
                     <p className="text-sm mb-1" style={{ color: "#324899" }}>Rating</p>
-                    <p className="font-medium">{(data.rating ?? 0).toFixed(1)}</p>
+                    <p className="font-medium">
+                      {data.rating != null ? Number(data.rating).toFixed(1) : "— (chưa đánh giá)"}
+                    </p>
                   </div>
                 </div>
               ) : (
                 <>
-                  <p className="text-gray-600 mb-2">This Project ID has not been used for a rating yet.</p>
-                  <p className="text-sm text-gray-500">
-                    To see rating details here, use this Project Identification when you submit a Manager rating or Provider rating. You can copy it from My Ratings and paste it when rating.
+                  <p className="text-sm mb-1" style={{ color: "#324899" }}>Project ID</p>
+                  <p className="font-mono font-medium mb-3 break-all">{data.project_id}</p>
+                  <p className="text-gray-600 mb-2">This Project ID has not been linked to a manager or provider rating yet.</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    If a provider sent you this code, ensure the row in My Ratings shows the correct link after Save. Otherwise, start a provider or manager rating and paste this ID where the form asks for it.
                   </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Link href="/my-rating">
+                      <Button type="primary" className="bg-primary border-primary">My Ratings</Button>
+                    </Link>
+                    <Link href="/provider-search">
+                      <Button>Provider search</Button>
+                    </Link>
+                  </div>
                 </>
               )}
             </Card>
@@ -150,10 +221,14 @@ const FunctionRatingDetailPage = () => {
                 <div className="text-center mb-6 py-4 px-4 bg-gray-50 rounded-lg">
                   <h2 className="text-2xl font-semibold mb-2" style={{ color: "#324899" }}>Function Rating</h2>
                   <p className="text-sm mb-3" style={{ color: "#324899" }}>Đánh giá (số sao)</p>
-                  <div className="flex items-center justify-center gap-3 flex-wrap">
-                    <Rate disabled value={data.rating ?? 0} allowHalf style={{ fontSize: 32 }} className="[&_.ant-rate-star]:mr-1" />
-                    <span className="text-xl font-semibold">{(data.rating ?? 0).toFixed(1)}</span>
-                  </div>
+                  {data.type === "provider" && data.rating == null ? (
+                    <p className="text-gray-600">Chưa có điểm sao — hoàn thành đánh giá provider để thấy chi tiết tại đây.</p>
+                  ) : (
+                    <div className="flex items-center justify-center gap-3 flex-wrap">
+                      <Rate disabled value={data.rating ?? 0} allowHalf style={{ fontSize: 32 }} className="[&_.ant-rate-star]:mr-1" />
+                      <span className="text-xl font-semibold">{(data.rating ?? 0).toFixed(1)}</span>
+                    </div>
+                  )}
                 </div>
                 {isManager ? (
                   <div className="space-y-4">

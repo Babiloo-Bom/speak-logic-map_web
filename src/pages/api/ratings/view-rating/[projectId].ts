@@ -15,31 +15,36 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { projectId, piId } = req.query as { projectId?: string | string[]; piId?: string | string[] };
+  const rawPid = req.query.projectId;
+  const rawPiId = req.query.piId;
+  const projectId = Array.isArray(rawPid) ? rawPid[0] : rawPid;
+  const piId = Array.isArray(rawPiId) ? rawPiId[0] : rawPiId;
   const userId = req.user.id;
 
-  if (!projectId || typeof projectId !== "string") {
+  if (!projectId || typeof projectId !== "string" || !projectId.trim()) {
     return res.status(400).json({ error: "Invalid project ID" });
   }
+
+  const normalizedProjectId = projectId.trim();
 
   try {
     const client = await pool.connect();
     try {
-      const baseSql = `SELECT id, user_id, project_id, used, manager_id, provider_id, created_at
+      const baseSql = `SELECT id, user_id, project_id, used, manager_id, provider_id, sender_provider_id, created_at
                        FROM project_identifications
-                       WHERE project_id = $1 AND user_id = $2`;
+                       WHERE LOWER(TRIM(project_id)) = LOWER(TRIM($1::text)) AND user_id = $2`;
 
-      const params: any[] = [projectId, userId];
+      const params: any[] = [normalizedProjectId, userId];
 
-      const useSingle =
-        typeof piId === "string" && piId.trim().length > 0 && Number.isInteger(Number(piId));
+      const piIdStr = typeof piId === "string" ? piId.trim() : "";
+      const useSingle = piIdStr.length > 0 && Number.isInteger(Number(piIdStr));
 
       const sql = useSingle
         ? `${baseSql} AND id = $3 ORDER BY created_at DESC`
         : `${baseSql} ORDER BY created_at DESC`;
 
       if (useSingle) {
-        params.push(Number(piId));
+        params.push(Number(piIdStr));
       }
 
       const piResult = await client.query(sql, params);
@@ -51,7 +56,9 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
 
       for (const pi of piResult.rows) {
         const managerId = pi.manager_id ? Number(pi.manager_id) : null;
-        const providerId = pi.provider_id ? Number(pi.provider_id) : null;
+        const providerIdRaw = pi.provider_id ? Number(pi.provider_id) : null;
+        const senderProviderId = pi.sender_provider_id ? Number(pi.sender_provider_id) : null;
+        const providerId = providerIdRaw ?? senderProviderId;
 
         if (managerId) {
           const mrResult = await client.query(
@@ -115,11 +122,19 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
             [providerId, userId]
           );
           if (prResult.rows.length === 0) {
+            let providerName: string | undefined;
+            try {
+              const nameRes = await client.query(`SELECT name FROM providers WHERE id = $1 LIMIT 1`, [providerId]);
+              providerName = nameRes.rows[0]?.name ?? undefined;
+            } catch {
+              providerName = undefined;
+            }
             items.push({
               type: "provider",
               project_id: pi.project_id,
               used: pi.used,
               provider_id: providerId,
+              provider_name: providerName,
               rating: null,
             });
           } else {
