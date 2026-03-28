@@ -285,12 +285,6 @@ const FunctionRatingDetailPage = () => {
           </div>
         );
       })}
-
-      <div className="text-center">
-        <Button type="primary" className="bg-primary border-primary" onClick={() => router.push("/function-ratings")}>
-          Back to Function Ratings
-        </Button>
-      </div>
     </div>
   );
 };

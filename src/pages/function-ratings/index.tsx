@@ -58,11 +58,18 @@ const FunctionRatingsPage = () => {
     fetchAverageRating();
   }, [router.asPath]);
 
+  /** Chỉ giữ dòng đã gắn manager hoặc provider (kể cả mã do provider gửi): View Rating mới có nội dung thực sự. */
   const filteredItems = useMemo(() => {
     const items = data?.items ?? [];
-    if (!search.trim()) return items;
+    const viewable = items.filter(
+      (row) =>
+        row.manager_id != null ||
+        row.provider_id != null ||
+        row.sender_provider_id != null
+    );
+    if (!search.trim()) return viewable;
     const q = search.trim().toLowerCase();
-    return items.filter(
+    return viewable.filter(
       (row) =>
         row.project_id.toLowerCase().includes(q) ||
         dayjs(row.created_at).format("DD/MM/YYYY").toLowerCase().includes(q)
