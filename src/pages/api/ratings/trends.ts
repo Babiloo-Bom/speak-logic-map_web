@@ -16,9 +16,12 @@ const ALLOWED_QUESTIONS = [
 type QuestionKey = (typeof ALLOWED_QUESTIONS)[number];
 
 /**
- * GET - Function trends by date for a given Yes/No question from manager_ratings.
+ * GET - Function trends by date for a given Yes/No question from manager_ratings only.
+ * (provider_ratings has no boolean questionnaire — provider flow does not feed this API.)
+ *
  * Query: from (YYYY-MM-DD), to (YYYY-MM-DD), question (one of ALLOWED_QUESTIONS).
- * Returns { data: [ { date, Yes, No, "No issue" } ] } with percentages 0-100.
+ * Returns { data: [ { date, Yes, No, "Yes/No", "No issue" } ] } with percentages 0-100.
+ * Rows with NULL for the chosen question count toward "No issue" only; Yes/No stay 0.
  */
 const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   if (!req.user) {
@@ -43,21 +46,23 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   const client = await pool.connect();
   try {
     // Default: last 30 days if no range provided
+    // Use COALESCE so rows that only set created_at still appear in trends.
+    const dateExpr = "COALESCE(mr.updated_at, mr.created_at)";
     const whereClause = fromDate && toDate
-      ? "WHERE mr.updated_at >= $1::date AND mr.updated_at < ($2::date + interval '1 day')"
-      : "WHERE mr.updated_at >= (CURRENT_DATE - interval '30 days') AND mr.updated_at < (CURRENT_DATE + interval '1 day')";
+      ? `WHERE ${dateExpr} >= $1::date AND ${dateExpr} < ($2::date + interval '1 day')`
+      : `WHERE ${dateExpr} >= (CURRENT_DATE - interval '30 days') AND ${dateExpr} < (CURRENT_DATE + interval '1 day')`;
     const params = fromDate && toDate ? [fromDate, toDate] : [];
 
     const sql = `
       SELECT
-        DATE(mr.updated_at) AS d,
+        DATE(${dateExpr}) AS d,
         COUNT(*) FILTER (WHERE mr.${col} = true)::int AS yes_count,
         COUNT(*) FILTER (WHERE mr.${col} = false)::int AS no_count,
         COUNT(*) FILTER (WHERE mr.${col} IS NULL)::int AS no_issue_count,
         COUNT(*)::int AS total
       FROM manager_ratings mr
       ${whereClause}
-      GROUP BY DATE(mr.updated_at)
+      GROUP BY DATE(${dateExpr})
       ORDER BY d ASC
     `;
 

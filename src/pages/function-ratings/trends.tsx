@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button, DatePicker, Radio, Select, Spin, Alert } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
@@ -89,6 +89,12 @@ const FunctionTrendsPage = () => {
     fetchTrends();
   }, [question, selectYesNo, fromDate?.valueOf(), toDate?.valueOf()]);
 
+  /** Có điểm theo ngày nhưng không ai trả lời Yes/No cho cột câu hỏi (toàn NULL). */
+  const noYesNoInSeries = useMemo(
+    () => chartData.length > 0 && chartData.every((d) => d.Yes === 0 && d.No === 0),
+    [chartData]
+  );
+
   const handleBack = () => router.push("/function-ratings");
 
   const handleGenerateXLR = () => {
@@ -175,7 +181,28 @@ const FunctionTrendsPage = () => {
         )}
 
         {!loading && !error && chartData.length === 0 && (
-          <Alert type="info" message="No trend data for the selected period. Try another date range or question." className="mb-6" showIcon />
+          <Alert
+            type="info"
+            className="mb-6"
+            showIcon
+            message="Function Trend: chưa có dữ liệu trong khoảng thời gian đã chọn"
+            description={
+              <span>
+                Biểu đồ chỉ lấy từ <strong>đánh giá Manager</strong> (bảng câu hỏi Yes/No). Đánh giá Provider (chỉ sao + nhận xét){" "}
+                <strong>không</strong> xuất hiện ở đây. Thử mở rộng From/To, hoặc hoàn thành form đánh giá Manager có trả lời các câu hỏi.
+              </span>
+            }
+          />
+        )}
+
+        {!loading && !error && noYesNoInSeries && (
+          <Alert
+            type="warning"
+            className="mb-6"
+            showIcon
+            message="Có bản ghi manager theo ngày nhưng chưa có trả lời Yes/No cho câu hỏi này"
+            description="Các đánh giá chỉ nhập sao/comment (hoặc chưa điền phần câu hỏi) sẽ hiển thị 0% Yes và 0% No. Cần submit form đánh giá Manager đầy đủ phần câu hỏi."
+          />
         )}
 
         {/* Charts grid 3x3 */}
