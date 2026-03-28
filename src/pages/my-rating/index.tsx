@@ -139,11 +139,11 @@ const MyRatingPage = () => {
         const providerIdForRating = row.provider_id ?? row.sender_provider_id;
         let href: string;
         if (providerIdForRating) {
-          href = `/provider-search/provider-rating?providerId=${providerIdForRating}&projectId=${encodeURIComponent(id)}`;
+          href = `/provider-search/provider-rating?providerId=${providerIdForRating}&projectId=${encodeURIComponent(id)}&piId=${encodeURIComponent(String(row.id))}`;
         } else if (row.manager_id) {
-          href = `/manager-search/manager-rating?managerId=${row.manager_id}&projectId=${encodeURIComponent(id)}`;
+          href = `/manager-search/manager-rating?managerId=${row.manager_id}&projectId=${encodeURIComponent(id)}&piId=${encodeURIComponent(String(row.id))}`;
         } else {
-          href = `/function-ratings/${encodeURIComponent(id)}?piId=${row.id}`;
+          href = `/rate/start?projectId=${encodeURIComponent(id)}&piId=${encodeURIComponent(String(row.id))}`;
         }
         return (
           <Link href={href} className="font-mono text-primary hover:underline">

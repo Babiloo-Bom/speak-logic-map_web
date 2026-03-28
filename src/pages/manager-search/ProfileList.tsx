@@ -5,15 +5,17 @@ import { ManagerItem } from "@/lib/pages/manager-search/types";
 interface Props {
   data?: ManagerItem[];
   placeholderCount?: number;
+  rateProjectId?: string;
+  ratePiId?: string;
 }
 
-export default function ProfileList({ data, placeholderCount = 6 }: Props) {
+export default function ProfileList({ data, placeholderCount = 6, rateProjectId, ratePiId }: Props) {
   const list = data ?? Array.from({ length: placeholderCount });
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {list.map((item, index) => (
-        <ProfileItem key={item ? item.id : index} data={item} />
+        <ProfileItem key={item ? item.id : index} data={item} rateProjectId={rateProjectId} ratePiId={ratePiId} />
       ))}
     </div>
   );

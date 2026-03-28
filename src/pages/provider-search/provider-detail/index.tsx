@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { getAuthToken } from "@/utils/constants";
+import { firstQueryParam } from "@/utils/router-query";
 import { Card, Avatar, Rate, Divider, message, Button, Tag } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -9,7 +10,9 @@ import Image from "next/image";
 
 export default function ProviderDetail() {
   const router = useRouter();
-  const { providerId } = router.query;
+  const providerId = router.isReady ? firstQueryParam(router.query.providerId) : undefined;
+  const routeProjectId = router.isReady ? firstQueryParam(router.query.projectId) : undefined;
+  const routePiId = router.isReady ? firstQueryParam(router.query.piId) : undefined;
 
   const [providerData, setProviderData] = useState<IProviderDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,16 +72,40 @@ export default function ProviderDetail() {
   };
 
   useEffect(() => {
-    if (providerId) {
+    if (providerId && !Number.isNaN(Number(providerId))) {
       fetchProviderDetail();
     }
   }, [providerId]);
 
   const handleRateProvider = () => {
+    if (!providerId) return;
     const query = new URLSearchParams({ providerId: String(providerId) });
-    if (latestProjectId) query.set("projectId", latestProjectId);
+    const pid = routeProjectId || latestProjectId;
+    if (pid) query.set("projectId", pid);
+    if (routePiId) query.set("piId", routePiId);
     router.push(`/provider-search/provider-rating?${query.toString()}`);
   };
+
+  if (!router.isReady) {
+    return (
+      <div className="w-full bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center text-gray-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!providerId || Number.isNaN(Number(providerId))) {
+    return (
+      <div className="w-full bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg text-gray-600">Invalid provider</div>
+          <Button type="primary" className="mt-4" onClick={() => router.push("/provider-search")}>
+            Back to Search
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

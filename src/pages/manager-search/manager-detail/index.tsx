@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { getAuthToken } from "@/utils/constants";
-import { Card, Rate, message } from "antd";
+import { firstQueryParam } from "@/utils/router-query";
+import { Button, Card, Rate, message } from "antd";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -10,7 +11,9 @@ import DEFAULT_AVATAR from "@/assets/images/user.jpg";
 
 export default function ManagerDetail() {
   const router = useRouter();
-  const { managerId } = router.query;
+  const managerId = router.isReady ? firstQueryParam(router.query.managerId) : undefined;
+  const routeProjectId = router.isReady ? firstQueryParam(router.query.projectId) : undefined;
+  const routePiId = router.isReady ? firstQueryParam(router.query.piId) : undefined;
 
   const [managerData, setManagerData] = useState<IManagerDetail | null>(null);
   const [avatarSrc, setAvatarSrc] = useState<string | typeof DEFAULT_AVATAR>(DEFAULT_AVATAR);
@@ -69,7 +72,7 @@ export default function ManagerDetail() {
   };
 
   useEffect(() => {
-    if (managerId) {
+    if (managerId && !Number.isNaN(Number(managerId))) {
       fetchManagerDetail();
     }
   }, [managerId]);
@@ -84,6 +87,36 @@ export default function ManagerDetail() {
     ((managerData as any)?.functions?.length
       ? (managerData as any).functions.map((f: { name: string }) => f.name).join(", ")
       : null);
+
+  const ratingHref =
+    managerId != null
+      ? (() => {
+          const q = new URLSearchParams({ managerId: String(managerId) });
+          const pid = routeProjectId || latestProjectId;
+          if (pid) q.set("projectId", pid);
+          if (routePiId) q.set("piId", routePiId);
+          return `/manager-search/manager-rating?${q.toString()}`;
+        })()
+      : "#";
+
+  if (!router.isReady) {
+    return (
+      <div className="w-full bg-white min-h-screen flex items-center justify-center text-gray-600">Loading...</div>
+    );
+  }
+
+  if (!managerId || Number.isNaN(Number(managerId))) {
+    return (
+      <div className="w-full bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Invalid manager</p>
+          <Button type="primary" className="mt-4" onClick={() => router.push("/manager-search")}>
+            Back to Search
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-white min-h-screen">
@@ -123,10 +156,7 @@ export default function ManagerDetail() {
               <p className="text-primary font-medium text-xl">{functionProvided || "--"}</p>
 
               <p className="mt-4 text-gray-500 text-xl">Rate this Manager</p>
-              <Link
-                href={`/manager-search/manager-rating?managerId=${managerId}${latestProjectId ? `&projectId=${encodeURIComponent(latestProjectId)}` : ""}`}
-                className="text-primary break-all text-xl hover:underline"
-              >
+              <Link href={ratingHref} className="text-primary break-all text-xl hover:underline">
                 Go to Manager Rating
               </Link>
             </div>

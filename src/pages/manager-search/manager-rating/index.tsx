@@ -8,6 +8,7 @@ import AboutFunction from "./_components/AboutFunction/AboutFunction";
 import AboutFeedback from "./_components/AboutFeedback/AboutFeedback";
 import { IDataRequestRating, InitialUserData } from "@/lib/pages/manager-search/manager-rating/type";
 import { getAuthToken } from "@/utils/constants";
+import { firstQueryParam } from "@/utils/router-query";
 import dayjs from "dayjs";
 
 type ManagerData = {
@@ -24,7 +25,9 @@ type ManagerData = {
 
 const ManagerRating = () => {
   const router = useRouter();
-  const { managerId, projectId: queryProjectId } = router.query;
+  const { managerId: managerIdRaw, projectId: queryProjectIdRaw } = router.query;
+  const managerId = router.isReady ? firstQueryParam(managerIdRaw) : undefined;
+  const queryProjectId = router.isReady ? firstQueryParam(queryProjectIdRaw) : undefined;
   const { token } = theme.useToken();
   const [currentStep, setCurrentStep] = useState(0);
   const [dataRequestRating, setDataRequestRating] = useState(baseDataRequestRating);
@@ -60,8 +63,15 @@ const ManagerRating = () => {
   }, []);
 
   useEffect(() => {
+    if (!router.isReady || !queryProjectId) return;
+    setDataRequestRating((prev) =>
+      prev.project_id?.trim() ? prev : { ...prev, project_id: queryProjectId }
+    );
+  }, [router.isReady, queryProjectId]);
+
+  useEffect(() => {
+    if (!router.isReady || !managerId) return;
     const fetchManager = async () => {
-      if (!managerId || typeof managerId !== "string") return;
       const authToken = getAuthToken();
       if (!authToken) return;
       try {
@@ -74,8 +84,8 @@ const ManagerRating = () => {
         // ignore
       }
     };
-    fetchManager();
-  }, [managerId]);
+    void fetchManager();
+  }, [router.isReady, managerId]);
 
   const fetchRatingManager = async (req: IDataRequestRating) => {
     try {
@@ -88,7 +98,12 @@ const ManagerRating = () => {
         ...req,
         function_execution_date: req.function_execution_date ? dayjs(req.function_execution_date).format("YYYY-MM-DD") : "",
       };
-      const projectIdToSend = req.project_id?.trim() || (typeof queryProjectId === "string" ? queryProjectId.trim() : "");
+      const projectIdToSend = req.project_id?.trim() || queryProjectId?.trim() || "";
+
+      if (!managerId) {
+        setError("Missing manager");
+        return;
+      }
 
       const url = `/api/managers/${managerId}/rating`;
       const response = await fetch(url, {

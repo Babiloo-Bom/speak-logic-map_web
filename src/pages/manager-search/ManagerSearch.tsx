@@ -6,11 +6,14 @@ import { IDataRequestGetList, IDataResponseGetList } from "@/lib/pages/manager-s
 import HeaderSearch from "./HeaderSearch";
 import { buildQueryParams, getAuthToken } from "@/utils/constants";
 import { baseDataRequestGetList } from "@/lib/requests/manager-search";
-import { Pagination, PaginationProps } from "antd";
+import { Alert, Pagination, PaginationProps } from "antd";
 import AdvanceSearch from "./AdvanceSearch";
+import { firstQueryParam } from "@/utils/router-query";
 
 function ManagerSearch() {
   const router = useRouter();
+  const rateProjectId = router.isReady ? firstQueryParam(router.query.projectId) : undefined;
+  const ratePiId = router.isReady ? firstQueryParam(router.query.piId) : undefined;
   const [data, setData] = useState<IDataResponseGetList>();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -132,8 +135,22 @@ function ManagerSearch() {
           }}
         />
         <div className="mx-8">
+          {rateProjectId && (
+            <Alert
+              type="info"
+              showIcon
+              className="mb-6"
+              message="Bạn đang đánh giá kèm mã dự án"
+              description={
+                <span>
+                  Chọn <strong>More Details</strong> trên thẻ manager, rồi dùng liên kết đánh giá trên trang chi tiết. Mã:{" "}
+                  <span className="font-mono">{rateProjectId}</span>
+                </span>
+              }
+            />
+          )}
           <div className="mt-8">
-            <ProfileList data={data?.managers} />
+            <ProfileList data={data?.managers} rateProjectId={rateProjectId} ratePiId={ratePiId} />
           </div>
           <div className="mt-4">
             <Pagination

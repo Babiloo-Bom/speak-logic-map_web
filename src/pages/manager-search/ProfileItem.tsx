@@ -8,9 +8,11 @@ import DEFAULT_AVATAR from "@/assets/images/user.jpg";
 
 interface Props {
   data?: ManagerItem;
+  rateProjectId?: string;
+  ratePiId?: string;
 }
 
-export default function ProfileItem({ data }: Props) {
+export default function ProfileItem({ data, rateProjectId, ratePiId }: Props) {
   const router = useRouter();
   const [avatarSrc, setAvatarSrc] = useState<string | StaticImageData>(DEFAULT_AVATAR);
 
@@ -79,7 +81,13 @@ export default function ProfileItem({ data }: Props) {
           block
           size="large"
           className="bg-primary text-white hover:text-primary col-span-1"
-          onClick={() => router.push(`/manager-search/manager-detail?managerId=${data?.id}`)}
+          onClick={() => {
+            if (data?.id == null) return;
+            const q = new URLSearchParams({ managerId: String(data.id) });
+            if (rateProjectId) q.set("projectId", rateProjectId);
+            if (ratePiId) q.set("piId", ratePiId);
+            router.push(`/manager-search/manager-detail?${q.toString()}`);
+          }}
         >
           More Details
         </Button>

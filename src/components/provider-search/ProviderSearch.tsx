@@ -5,10 +5,17 @@ import { IDataRequestGetList, IDataResponseGetList } from "@/lib/pages/provider-
 import HeaderSearch from "./HeaderSearch";
 import { getAuthToken } from "@/utils/constants";
 import { baseDataRequestGetList } from "@/lib/requests/provider-search";
-import { Pagination, PaginationProps } from "antd";
+import { Alert, Pagination, PaginationProps } from "antd";
 import AdvanceSearch from "./AdvanceSearch";
+import { useRouter } from "next/router";
+import { firstQueryParam } from "@/utils/router-query";
+import { resolveRatingProviderId } from "@/lib/ratings/resolveRatingProviderId";
 
 function ProviderSearch() {
+  const router = useRouter();
+  const rateProjectId = router.isReady ? firstQueryParam(router.query.projectId) : undefined;
+  const ratePiId = router.isReady ? firstQueryParam(router.query.piId) : undefined;
+
   const [data, setData] = useState<IDataResponseGetList>();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -65,6 +72,32 @@ function ProviderSearch() {
     fetchProfile(dataRequest);
   }, []);
 
+  /** Có projectId trên URL: mở thẳng provider-rating khi có provider (PI / env server / NEXT_PUBLIC).
+   *  Dùng projectId/piId trong deps — không dùng router.asPath (dễ đổi liên tục và làm cleanup hủy redirect). */
+  useEffect(() => {
+    if (!router.isReady || !rateProjectId) return;
+
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        const token = getAuthToken();
+        if (!token || cancelled) return;
+
+        const providerNum = await resolveRatingProviderId(token, ratePiId);
+        if (cancelled || providerNum == null) return;
+
+        const qs = new URLSearchParams({ projectId: rateProjectId });
+        if (ratePiId) qs.set("piId", ratePiId);
+        window.location.replace(`/provider-search/provider-rating?providerId=${providerNum}&${qs.toString()}`);
+      })();
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [router.isReady, rateProjectId, ratePiId]);
+
   const onShowPageChange: PaginationProps["onChange"] = (page) => {
     const newDataRequest = {
       ...dataRequest,
@@ -113,6 +146,19 @@ function ProviderSearch() {
           }}
         />
         <div className="mx-8">
+          {rateProjectId && (
+            <Alert
+              type="info"
+              showIcon
+              className="mb-6"
+              message="Bạn đang đánh giá kèm mã dự án"
+              description={
+                <span>
+                  Mã dự án: <span className="font-mono">{rateProjectId}</span>. Nếu provider đã gửi mã, trong My Ratings bấm trực tiếp vào mã để mở form đánh giá.
+                </span>
+              }
+            />
+          )}
           <div className="mt-8">
             <ProfileList data={data?.providers} />
           </div>

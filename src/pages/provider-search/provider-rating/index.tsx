@@ -10,6 +10,7 @@ import AboutFeedbackNo from "./_components/AboutFeedbackNo/AboutFeedbackNo";
 import { baseProviderRatingRequest } from "@/lib/pages/provider-search/provider-rating/request";
 import { IProviderRatingRequest } from "@/lib/pages/provider-search/provider-rating/type";
 import { getAuthToken } from "@/utils/constants";
+import { firstQueryParam } from "@/utils/router-query";
 import { ProviderWithRelations } from "@/types/provider";
 import type { InitialUserData } from "@/lib/pages/provider-search/provider-rating/type";
 
@@ -17,7 +18,10 @@ const STEP_TITLES = ["About User", "About Provider", "About Function And Problem
 
 const ProviderRating = () => {
   const router = useRouter();
-  const { providerId, projectId: queryProjectId } = router.query;
+  const { providerId: providerIdRaw, projectId: queryProjectIdRaw, piId: piIdRaw } = router.query;
+  const providerId = router.isReady ? firstQueryParam(providerIdRaw) : undefined;
+  const queryProjectId = router.isReady ? firstQueryParam(queryProjectIdRaw) : undefined;
+  const queryPiId = router.isReady ? firstQueryParam(piIdRaw) : undefined;
   const { token } = theme.useToken();
   const [currentStep, setCurrentStep] = useState(0);
   const [dataRequestRating, setDataRequestRating] = useState<IProviderRatingRequest>(baseProviderRatingRequest);
@@ -25,6 +29,7 @@ const ProviderRating = () => {
   const [initialUserData, setInitialUserData] = useState<InitialUserData | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetchingProvider, setFetchingProvider] = useState(true);
+  const [providerLoadError, setProviderLoadError] = useState<string | null>(null);
 
   // Fetch user profile for pre-fill (Step 1)
   useEffect(() => {
@@ -56,15 +61,31 @@ const ProviderRating = () => {
     fetchUserProfile();
   }, []);
 
+  // Gắn project_id từ URL (My Ratings / provider gửi mã) vào form
   useEffect(() => {
-    const fetchProviderData = async () => {
-      if (!providerId) return;
+    if (!router.isReady || !queryProjectId) return;
+    setDataRequestRating((prev) =>
+      prev.project_id?.trim() ? prev : { ...prev, project_id: queryProjectId }
+    );
+  }, [router.isReady, queryProjectId]);
 
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    if (!providerId || Number.isNaN(Number(providerId))) {
+      setProviderData(null);
+      setProviderLoadError(null);
+      setFetchingProvider(false);
+      return;
+    }
+
+    const fetchProviderData = async () => {
+      setFetchingProvider(true);
+      setProviderLoadError(null);
       try {
-        setFetchingProvider(true);
         const authToken = getAuthToken();
         if (!authToken) {
-          message.error("No authentication token found");
+          setProviderLoadError("Please log in to continue.");
           return;
         }
 
@@ -80,22 +101,24 @@ const ProviderRating = () => {
         if (response.ok) {
           const result: ProviderWithRelations = await response.json();
           setProviderData(result);
+          setProviderLoadError(null);
         } else {
-          const errorData = await response.json();
-          message.error(errorData.error || "Failed to fetch provider");
-          router.push("/provider-search");
+          const errorData = await response.json().catch(() => ({}));
+          const msg = (errorData as { error?: string }).error || "Failed to load provider";
+          setProviderLoadError(msg);
+          setProviderData(null);
         }
       } catch (error) {
-        message.error("Network error. Please try again.");
         console.error("Fetch error:", error);
-        router.push("/provider-search");
+        setProviderLoadError("Network error. Please try again.");
+        setProviderData(null);
       } finally {
         setFetchingProvider(false);
       }
     };
 
-    fetchProviderData();
-  }, [providerId]);
+    void fetchProviderData();
+  }, [router.isReady, providerId]);
 
   const fetchRatingProvider = async (req: IProviderRatingRequest) => {
     const rating = req.rating || 0;
@@ -112,6 +135,11 @@ const ProviderRating = () => {
         return;
       }
 
+      if (!providerId) {
+        message.error("Missing provider");
+        return;
+      }
+
       const url = `/api/providers/${providerId}/rating`;
       const response = await fetch(url, {
         method: "POST",
@@ -123,7 +151,7 @@ const ProviderRating = () => {
           rating,
           comment: req.comment || undefined,
           ...(function () {
-            const pid = req.project_id?.trim() || (typeof queryProjectId === "string" ? queryProjectId.trim() : "");
+            const pid = req.project_id?.trim() || queryProjectId?.trim() || "";
             return pid ? { project_id: pid } : {};
           })(),
         }),
@@ -131,7 +159,10 @@ const ProviderRating = () => {
 
       if (response.ok) {
         message.success("Rating submitted successfully!");
-        router.push(`/provider-search/provider-detail?providerId=${providerId}`);
+        const detail = new URLSearchParams({ providerId: String(providerId) });
+        if (queryProjectId) detail.set("projectId", queryProjectId);
+        if (queryPiId) detail.set("piId", queryPiId);
+        router.push(`/provider-search/provider-detail?${detail.toString()}`);
       } else {
         const errorData = await response.json();
         message.error(errorData.error || "Failed to submit rating");
@@ -153,7 +184,7 @@ const ProviderRating = () => {
   };
 
   const handleCancel = () => {
-    router.push(`/provider-search/provider-detail?providerId=${providerId}`);
+    router.push("/my-rating");
   };
 
   const isStep4Yes = dataRequestRating.used_function_from_provider === true;
@@ -231,7 +262,7 @@ const ProviderRating = () => {
     marginTop: 16,
   };
 
-  if (fetchingProvider) {
+  if (!router.isReady || fetchingProvider) {
     return (
       <div className="w-full bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -246,8 +277,35 @@ const ProviderRating = () => {
       <div className="w-full bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-lg text-gray-600 mb-4">Invalid provider</div>
-          <Button type="primary" onClick={() => router.push("/provider-search")}>
-            Back to Search
+          <Button type="primary" onClick={() => router.push("/my-rating")}>
+            Back to My Ratings
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (providerLoadError) {
+    return (
+      <div className="w-full bg-white min-h-screen flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="text-lg text-gray-800 mb-2">Cannot open provider rating</div>
+          <p className="text-gray-600 mb-6">{providerLoadError}</p>
+          <Button type="primary" onClick={() => router.push("/my-rating")}>
+            Back to My Ratings
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!providerData) {
+    return (
+      <div className="w-full bg-white min-h-screen flex items-center justify-center px-4">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Unable to load provider data.</p>
+          <Button type="primary" onClick={() => router.push("/my-rating")}>
+            Back to My Ratings
           </Button>
         </div>
       </div>
