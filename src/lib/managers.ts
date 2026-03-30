@@ -448,6 +448,11 @@ export async function searchManagers(params: ManagerSearchParams): Promise<Manag
         ", (CASE WHEN m.description IS NOT NULL AND TRIM(COALESCE(m.description, '')) != '' THEN 1 ELSE 0 END) as _sort_desc";
       orderBy = "_sort_desc DESC, m.rating DESC, m.created_at DESC";
       break;
+    case "expertise":
+      sortSelectSql =
+        ", (CASE WHEN m.expertise IS NOT NULL AND TRIM(COALESCE(m.expertise, '')) != '' THEN 1 ELSE 0 END) as _sort_exp";
+      orderBy = "_sort_exp DESC, m.rating DESC, m.created_at DESC";
+      break;
     case "providers":
     case "all":
     default:

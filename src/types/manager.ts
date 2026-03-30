@@ -102,7 +102,17 @@ export interface ManagerSearchParams {
   // ========== Pagination & Sorting ==========
   page?: number; // Page number (default: 1)
   limit?: number; // Items per page (default: 20, max: 100)
-  sort_by?: "name" | "rating" | "created_at" | "distance" | "functions" | "problems" | "providers" | "description" | "all"; // Sort field
+  sort_by?:
+    | "name"
+    | "rating"
+    | "created_at"
+    | "distance"
+    | "expertise"
+    | "functions"
+    | "problems"
+    | "providers"
+    | "description"
+    | "all"; // Sort field
   sort_order?: "asc" | "desc"; // Sort direction (default: 'desc')
 
   // ========== Other Filters ==========

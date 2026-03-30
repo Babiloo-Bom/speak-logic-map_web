@@ -15,13 +15,26 @@ export const itemsTabs = [
   },
 ];
 
-/** Nút lọc dưới hero — khớp provider-search `sort_by` */
+/** Nút lọc dưới hero — khớp provider-search `sortBy` / sort_by */
 export const DASHBOARD_HEADER_TABS = [
   { field: "provider", label: "Providers", href: "/provider-search" },
   { field: "functions", label: "Functions", href: "/provider-search" },
   { field: "description", label: "Descriptions", href: "/provider-search" },
   { field: "problems", label: "Problems", href: "/provider-search" },
   { field: "all", label: "All", href: "/provider-search" },
+];
+
+/**
+ * Nút lọc dưới khi tab Managers — khớp manager-search `sort_by`
+ * (Managers → name, Expertise → expertise, …)
+ */
+export const DASHBOARD_MANAGER_FILTER_TABS = [
+  { field: "name", label: "Managers", href: "/manager-search" },
+  { field: "expertise", label: "Expertise", href: "/manager-search" },
+  { field: "functions", label: "Functions", href: "/manager-search" },
+  { field: "problems", label: "Problems", href: "/manager-search" },
+  { field: "description", label: "Descriptions", href: "/manager-search" },
+  { field: "all", label: "All", href: "/manager-search" },
 ];
 
 export const ADVANCE_SEARCH_FILTERS: FilterSection[] = [

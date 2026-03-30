@@ -4,11 +4,13 @@ import Image from "next/image";
 import { IDataRequestGetList } from "@/lib/pages/manager-search/types";
 
 const SORT_OPTIONS = [
+  { value: "name", label: "Managers" },
+  { value: "expertise", label: "Expertise" },
   { value: "functions", label: "Functions" },
   { value: "problems", label: "Problems" },
   { value: "providers", label: "Providers" },
   { value: "description", label: "Descriptions" },
-  { value: "all", label: "Alls" },
+  { value: "all", label: "All" },
 ] as const;
 
 interface HeaderSearchProps {

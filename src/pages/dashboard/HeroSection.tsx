@@ -2,7 +2,7 @@ import { Button, Image, Input, Radio } from "antd";
 import FeatureItem from "./FeatureItem";
 import { MenuOutlined, SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
-import { DASHBOARD_HEADER_TABS, itemsTabs } from "@/lib/pages/dashboard/constants";
+import { DASHBOARD_HEADER_TABS, DASHBOARD_MANAGER_FILTER_TABS, itemsTabs } from "@/lib/pages/dashboard/constants";
 import { useCallback, useState } from "react";
 import AdvanceSearch from "./AdvanceSearch";
 import { baseDataRequest } from "@/lib/pages/dashboard/request";
@@ -35,19 +35,57 @@ const HeroSection = () => {
     return qs ? `?${qs}` : "";
   }, [dataRequest]);
 
-  /** Đi tới provider-search kèm sortBy theo nút lọc dưới */
-  const goProviderSearch = useCallback(() => {
-    const params = new URLSearchParams();
-    Object.entries(dataRequest).forEach(([key, value]) => {
-      if (value) params.append(key, String(value));
-    });
-    params.set("sortBy", activeFilterField);
-    const qs = params.toString();
-    router.push(`/provider-search${qs ? `?${qs}` : ""}`);
-  }, [dataRequest, activeFilterField, router]);
+  /** Đi tới provider-search kèm sortBy (sortOverride khi vừa bấm nút, state chưa kịp commit). */
+  const goProviderSearch = useCallback(
+    (sortOverride?: string) => {
+      const sort = sortOverride ?? activeFilterField;
+      const params = new URLSearchParams();
+      Object.entries(dataRequest).forEach(([key, value]) => {
+        if (value) params.append(key, String(value));
+      });
+      params.set("sortBy", sort);
+      const qs = params.toString();
+      router.push(`/provider-search${qs ? `?${qs}` : ""}`);
+    },
+    [dataRequest, activeFilterField, router]
+  );
+
+  /** Đi tới manager-search kèm sort_by */
+  const goManagerSearch = useCallback(
+    (sortOverride?: string) => {
+      const sort = sortOverride ?? activeFilterField;
+      const params = new URLSearchParams();
+      if (dataRequest.q) params.set("q", dataRequest.q);
+      if (dataRequest.browse) params.set("browse", String(dataRequest.browse));
+      if (dataRequest.operation) params.set("operation", dataRequest.operation);
+      if (dataRequest.rating) params.set("rating", dataRequest.rating);
+      if (dataRequest.given_set) params.set("given_set", dataRequest.given_set);
+      if (dataRequest.near_city) params.set("near_city", dataRequest.near_city);
+      params.set("sort_by", sort);
+      const qs = params.toString();
+      router.push(`/manager-search${qs ? `?${qs}` : ""}`);
+    },
+    [dataRequest, activeFilterField, router]
+  );
+
+  /** Nút Managers / Providers ở hàng dưới → chuyển thẳng sang trang search tương ứng */
+  const handleFilterRowClick = (field: string) => {
+    setActiveFilterField(field);
+    if (activeMainTab === "manager" && field === "name") {
+      goManagerSearch("name");
+      return;
+    }
+    if (activeMainTab === "provider" && field === "provider") {
+      goProviderSearch("provider");
+      return;
+    }
+  };
 
   const handleRedirectToMap = (type: string) => {
     setActiveMainTab(type);
+    if (type === "provider") setActiveFilterField("provider");
+    if (type === "manager") setActiveFilterField("name");
+
     const query = buildQueryString();
 
     switch (type) {
@@ -57,7 +95,9 @@ const HeroSection = () => {
         }
         break;
       case "manager":
-        router.push(`/manager-search${query}`);
+        if (router.pathname !== "/dashboard") {
+          router.push(`/dashboard${query}`);
+        }
         break;
       case "new":
         router.push(`/map/news${query}`);
@@ -68,16 +108,15 @@ const HeroSection = () => {
   };
 
   const runSearchForActiveTab = () => {
-    const query = buildQueryString();
     switch (activeMainTab) {
       case "provider":
         goProviderSearch();
         break;
       case "manager":
-        router.push(`/manager-search${query}`);
+        goManagerSearch();
         break;
       case "new":
-        router.push(`/map/news${query}`);
+        router.push(`/map/news${buildQueryString()}`);
         break;
       default:
         break;
@@ -138,24 +177,34 @@ const HeroSection = () => {
           <Button icon={<MenuOutlined />} onClick={() => setOpenAdvanceSearch(true)} className="border-primary text-primary hover:text-primary !h-12 !w-12" />
         </div>
 
-        {/* Feature cards */}
+        {/* Feature cards — đổi theo tab Providers / Managers */}
         <div className="mt-10 bg-white/30 border border-white border-solid backdrop-blur rounded-xl p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FeatureItem title="Function Providers" icon="👥" />
-            <FeatureItem title="The Given Set" icon="📘" />
-            <FeatureItem title="Functions" icon="⚙️" />
+            {activeMainTab === "manager" ? (
+              <>
+                <FeatureItem title="Managers" icon="👤" />
+                <FeatureItem title="The Given Set" icon="📘" />
+                <FeatureItem title="Functions" icon="⚙️" />
+              </>
+            ) : (
+              <>
+                <FeatureItem title="Function Providers" icon="👥" />
+                <FeatureItem title="The Given Set" icon="📘" />
+                <FeatureItem title="Functions" icon="⚙️" />
+              </>
+            )}
           </div>
         </div>
 
-        {/* Filter — mặc định Providers */}
+        {/* Filter — theo Provider hoặc Manager */}
         <div className="mt-6 bg-white/30 border border-white border-solid backdrop-blur rounded-xl p-4">
           <div className="flex flex-wrap justify-center gap-2 mb-4">
-            {DASHBOARD_HEADER_TABS.map((item) => (
+            {(activeMainTab === "manager" ? DASHBOARD_MANAGER_FILTER_TABS : DASHBOARD_HEADER_TABS).map((item) => (
               <button
                 key={item.field}
                 type="button"
                 className={filterButtonBlue}
-                onClick={() => setActiveFilterField(item.field)}
+                onClick={() => handleFilterRowClick(item.field)}
               >
                 {item.label}
               </button>

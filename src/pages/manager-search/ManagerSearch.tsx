@@ -71,6 +71,14 @@ function ManagerSearch() {
           : queryParams.browse
         : [];
 
+      const sortFromQuery = queryParams.sort_by;
+      const sortByStr =
+        typeof sortFromQuery === "string"
+          ? sortFromQuery
+          : Array.isArray(sortFromQuery)
+            ? sortFromQuery[0]
+            : "";
+
       const mergedDataRequest: IDataRequestGetList = {
         ...baseDataRequestGetList,
         q: (queryParams.q as string) || "",
@@ -79,6 +87,10 @@ function ManagerSearch() {
         rating: (queryParams.rating as string) || "",
         given_set: (queryParams.given_set as string) || "",
         near_city: (queryParams.near_city as string) || "",
+        ...(sortByStr &&
+        ["name", "expertise", "functions", "problems", "providers", "description", "all"].includes(sortByStr)
+          ? { sort_by: sortByStr as IDataRequestGetList["sort_by"] }
+          : {}),
       };
 
       setDataRequest(mergedDataRequest);

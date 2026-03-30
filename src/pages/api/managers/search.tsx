@@ -91,11 +91,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       page: typeof page === "string" ? parseInt(page, 10) || 1 : 1,
       limit: typeof limit === "string" ? parseInt(limit, 10) || 20 : 20,
       
-      // Sorting (UI: functions, problems, providers, description, all)
+      // Sorting (UI: name/managers, expertise, functions, problems, providers, description, all)
       sort_by: (() => {
         const v = Array.isArray(sort_by) ? sort_by[0] : sort_by;
-        return typeof v === "string" && ['name', 'rating', 'created_at', 'distance', 'functions', 'problems', 'providers', 'description', 'all'].includes(v)
-          ? v as 'name' | 'rating' | 'created_at' | 'distance' | 'functions' | 'problems' | 'providers' | 'description' | 'all'
+        return typeof v === "string" &&
+          ["name", "rating", "created_at", "distance", "expertise", "functions", "problems", "providers", "description", "all"].includes(v)
+          ? (v as ManagerSearchParams["sort_by"])
           : "all";
       })(),
       sort_order: (() => {
