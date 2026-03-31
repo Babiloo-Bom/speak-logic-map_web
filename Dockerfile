@@ -47,6 +47,12 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Next.js standalone still requires `sharp` at runtime for next/image optimization.
+# Ensure it's present in the runtime image (alpine/musl compatible prebuild).
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --no-audit --loglevel=error sharp@0.33.2 && \
+    npm cache clean --force
+
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs

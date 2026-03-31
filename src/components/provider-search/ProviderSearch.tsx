@@ -68,9 +68,26 @@ function ProviderSearch() {
     }
   };
 
+  /** Khởi tạo state từ query (Home search / deep link) rồi fetch. */
   useEffect(() => {
-    fetchProfile(dataRequest);
-  }, []);
+    if (!router.isReady) return;
+
+    const q = firstQueryParam(router.query.q);
+    const sortByFromQuery = firstQueryParam(router.query.sortBy);
+    const sortBy =
+      sortByFromQuery && ["all", "provider", "functions", "problems", "description"].includes(sortByFromQuery)
+        ? sortByFromQuery
+        : undefined;
+
+    const merged: IDataRequestGetList = {
+      ...baseDataRequestGetList,
+      q: q ?? baseDataRequestGetList.q,
+      sort_by: sortBy ?? baseDataRequestGetList.sort_by,
+    };
+
+    setDataRequest(merged);
+    fetchProfile(merged);
+  }, [router.isReady]);
 
   /** Có projectId trên URL: mở thẳng provider-rating khi có provider (PI / env server / NEXT_PUBLIC).
    *  Dùng projectId/piId trong deps — không dùng router.asPath (dễ đổi liên tục và làm cleanup hủy redirect). */
