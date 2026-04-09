@@ -56,10 +56,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       message: "Social login successful",
       accessToken,
       refreshToken,
+      // snake_case aliases for mobile clients
+      access_token: accessToken,
+      refresh_token: refreshToken,
       accessTokenExpiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
       refreshTokenExpiresIn: REFRESH_TOKEN_EXPIRES_IN_SECONDS,
+      access_token_expires_in: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
+      refresh_token_expires_in: REFRESH_TOKEN_EXPIRES_IN_SECONDS,
       accessTokenExpiresAt,
       refreshTokenExpiresAt,
+      access_token_expires_at: accessTokenExpiresAt,
+      refresh_token_expires_at: refreshTokenExpiresAt,
       user,
       profile,
       firebase: {
