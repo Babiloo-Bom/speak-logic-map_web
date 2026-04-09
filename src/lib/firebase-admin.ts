@@ -35,6 +35,14 @@ export function isFirebaseConfigured(): boolean {
   );
 }
 
+export function verifyFirebaseIdToken(idToken: string): Promise<admin.auth.DecodedIdToken> {
+  const app = getFirebaseApp();
+  if (!app) {
+    throw new Error('Firebase Admin chưa cấu hình (FIREBASE_SERVICE_ACCOUNT_JSON hoặc GOOGLE_APPLICATION_CREDENTIALS)');
+  }
+  return admin.auth().verifyIdToken(idToken);
+}
+
 /** Lấy tất cả FCM token từ DB (không trùng, token hợp lệ). */
 export async function getAllFcmTokens(): Promise<string[]> {
   const client = await pool.connect();
