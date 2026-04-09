@@ -16,16 +16,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Get refresh token from cookie or body
+    // Get refresh token from cookie or body (support both camelCase and snake_case)
     const refreshToken = req.cookies.refreshToken || req.body?.refreshToken || req.body?.refresh_token;
 
     if (!refreshToken) {
       return res.status(401).json({ error: "Refresh token not provided" });
     }
 
-    // Verify refresh token
+    // Verify refresh token signature/expiry
     const payload = verifyRefreshToken(refreshToken);
-
     if (!payload) {
       return res.status(401).json({ error: "Invalid refresh token" });
     }
@@ -36,38 +35,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Invalid refresh token" });
     }
 
-    // Find user
     const user = await findUserById(payload.userId);
-    
     if (!user || user.status !== "active") {
       return res.status(401).json({ error: "User not found or inactive" });
     }
 
-    // Invalidate old refresh token
+    // Rotate refresh token
     await invalidateRefreshToken(refreshToken);
-
-    // Generate new tokens
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
+    await storeRefreshToken(user.id, newRefreshToken);
 
-    // Compute expiresAt for client-side display
     const now = Date.now();
     const accessTokenExpiresAt = new Date(now + ACCESS_TOKEN_EXPIRES_IN_SECONDS * 1000).toISOString();
     const refreshTokenExpiresAt = new Date(now + REFRESH_TOKEN_EXPIRES_IN_SECONDS * 1000).toISOString();
 
-    // Store new refresh token
-    await storeRefreshToken(user.id, newRefreshToken);
-
-    // Set new refresh token as httpOnly cookie
     res.setHeader("Set-Cookie", [
       `refreshToken=${newRefreshToken}; HttpOnly; Path=/; Max-Age=${REFRESH_TOKEN_EXPIRES_IN_SECONDS}; SameSite=Strict${
         process.env.NODE_ENV === "production" ? "; Secure" : ""
       }`,
     ]);
 
-    res.status(200).json({
+    return res.status(200).json({
       accessToken,
       refreshToken: newRefreshToken,
-      // snake_case aliases for mobile clients
       access_token: accessToken,
       refresh_token: newRefreshToken,
       accessTokenExpiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
@@ -86,9 +76,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
   } catch (error) {
-    console.error("Token refresh error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Refresh-token error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
-
 
