@@ -4,6 +4,7 @@ import Head from "next/head";
 import ManagersList from "./managers/ManagersList";
 import ProvidersList from "./providers/ProvidersList";
 import NotificationsPanel from "./NotificationsPanel";
+import AccountTypeManager from "./users/AccountTypeManager";
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("managers");
@@ -18,6 +19,11 @@ const AdminDashboard: React.FC = () => {
       key: "providers",
       label: "Providers",
       children: <ProvidersList />,
+    },
+    {
+      key: "account-type",
+      label: "Account Type",
+      children: <AccountTypeManager />,
     },
     {
       key: "notifications",
