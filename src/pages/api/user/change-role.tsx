@@ -5,7 +5,13 @@ interface ChangeRoleRequest {
   role: string;
 }
 
-const VALID_ROLES = ['user', 'admin', 'moderator', 'premium', 'provider'];
+/**
+ * Self-service account type switching:
+ * - default after register: user
+ * - user can switch between user/manager/provider from profile
+ * - user MUST NOT be able to self-escalate to admin (or other privileged roles)
+ */
+const VALID_SELF_SERVICE_ROLES = ['user', 'manager', 'provider'] as const;
 
 async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   if (req.method !== 'PUT') {
@@ -16,14 +22,19 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     const user = req.user!;
     const { role }: ChangeRoleRequest = req.body;
 
-    if (!role || !VALID_ROLES.includes(role)) {
+    if (!role || !(VALID_SELF_SERVICE_ROLES as readonly string[]).includes(role)) {
       return res.status(400).json({ 
-        error: 'Invalid role. Valid roles are: ' + VALID_ROLES.join(', ') 
+        error: 'Invalid role. Valid roles are: ' + VALID_SELF_SERVICE_ROLES.join(', ') 
       });
     }
 
-    // For demo purposes, allow users to change their own role
-    // In production, this would typically require admin privileges
+    // Block privileged accounts from downgrading/upgrading via this endpoint.
+    // Admin role changes should be handled in admin-only APIs.
+    if (user.role === 'admin') {
+      return res.status(403).json({ error: 'Admin role cannot be changed from profile' });
+    }
+
+    // Self-service: change own account type
     await updateUserRole(user.id, role);
 
     res.status(200).json({

@@ -14,7 +14,7 @@ type UserInfo = {
   fullName?: string | null;
 };
 
-const VALID_ROLES = ["user", "admin", "moderator", "premium", "provider"] as const;
+const VALID_ROLES = ["user", "manager", "provider", "admin", "moderator", "premium"] as const;
 
 const AccountTypeManager: React.FC = () => {
   const [form] = Form.useForm();

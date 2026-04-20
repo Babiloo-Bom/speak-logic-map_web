@@ -1,7 +1,7 @@
 import type { NextApiResponse } from "next";
 import { AuthenticatedRequest, requireAuth, updateUserRole } from "@/lib/auth";
 
-const VALID_ROLES = ["user", "admin", "moderator", "premium", "provider"] as const;
+const VALID_ROLES = ["user", "manager", "provider", "admin", "moderator", "premium"] as const;
 type ValidRole = (typeof VALID_ROLES)[number];
 
 type Body = {

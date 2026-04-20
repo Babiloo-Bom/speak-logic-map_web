@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -62,6 +62,13 @@ const ProfilePage: React.FC = () => {
 
   const [existingAvatarUrl, setExistingAvatarUrl] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState(false);
+
+  const accountTypeLabel = useMemo(() => {
+    const role = user?.role || "user";
+    if (role === "manager") return "Manager";
+    if (role === "provider") return "Provider";
+    return "User";
+  }, [user?.role]);
 
   useEffect(() => {
     fetchProfile();
@@ -161,6 +168,44 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleChangeAccountType = async (newRole: "user" | "manager" | "provider") => {
+    try {
+      setError("");
+      setSuccess("");
+      const token = getAuthToken();
+      if (!token) {
+        setError("No authentication token found");
+        return;
+      }
+      const response = await fetch("/api/user/change-role", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ role: newRole }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || "Failed to change account type");
+        return;
+      }
+      setUser((prev) => (prev ? { ...prev, role: newRole } : prev));
+      try {
+        const raw = localStorage.getItem("user");
+        const u = raw ? JSON.parse(raw) : null;
+        if (u && typeof u === "object") {
+          localStorage.setItem("user", JSON.stringify({ ...u, role: newRole }));
+        }
+      } catch {
+        // ignore localStorage parse errors
+      }
+      setSuccess(`Account type updated to ${newRole}`);
+    } catch (e) {
+      setError("Network error. Please try again.");
+    }
+  };
+
   const handleSaveTitle = async () => {
     setIsEditingTitle(false);
     if (titleValue !== formData.title) {
@@ -211,6 +256,11 @@ const ProfilePage: React.FC = () => {
       <section className="bg-[#FCFCFC] py-16">
         <div className="container max-w-5xl mx-auto flex flex-col items-center">
           <h2 className="text-3xl font-semibold mb-6">User Profile</h2>
+          {user ? (
+            <div className="mb-4 text-sm text-gray-600">
+              Account type: <span className="font-semibold text-gray-900">{accountTypeLabel}</span>
+            </div>
+          ) : null}
           <div className="flex flex-col items-center">
             {resolvedAvatarUrl && !avatarError ? (
               <img
@@ -252,6 +302,47 @@ const ProfilePage: React.FC = () => {
           <div className="w-full border border-solid border-[#D0DAEE] rounded-lg px-4 sm:px-8 md:px-16 lg:px-24 py-6 bg-white">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <div className="flex flex-col gap-6">
+                <div>
+                  <p className="font-bold">User type:</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleChangeAccountType("user")}
+                      className={`px-4 py-2 rounded-full border transition-colors ${
+                        user?.role === "user"
+                          ? "bg-[#324899] border-[#324899] text-white"
+                          : "border-[#324899] text-[#324899] hover:bg-[#324899] hover:text-white"
+                      }`}
+                    >
+                      User
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleChangeAccountType("manager")}
+                      className={`px-4 py-2 rounded-full border transition-colors ${
+                        user?.role === "manager"
+                          ? "bg-[#324899] border-[#324899] text-white"
+                          : "border-[#324899] text-[#324899] hover:bg-[#324899] hover:text-white"
+                      }`}
+                    >
+                      Manager
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleChangeAccountType("provider")}
+                      className={`px-4 py-2 rounded-full border transition-colors ${
+                        user?.role === "provider"
+                          ? "bg-[#324899] border-[#324899] text-white"
+                          : "border-[#324899] text-[#324899] hover:bg-[#324899] hover:text-white"
+                      }`}
+                    >
+                      Provider
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Mặc định khi đăng ký là <strong>User</strong>. Bạn có thể tự chuyển sang Manager/Provider trong profile.
+                  </p>
+                </div>
                 <div>
                   <p className="font-bold">Title:</p>
                   {isEditingTitle ? (
@@ -324,6 +415,12 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
             </div>
+            {error ? (
+              <div className="mt-4 text-red-600 text-sm">{error}</div>
+            ) : null}
+            {success ? (
+              <div className="mt-4 text-green-700 text-sm">{success}</div>
+            ) : null}
           </div>
         </div>
       </section>
