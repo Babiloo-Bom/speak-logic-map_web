@@ -190,7 +190,7 @@ const ProfilePage: React.FC = () => {
         setError(data.error || "Failed to change account type");
         return;
       }
-      setUser((prev) => (prev ? { ...prev, role: newRole } : prev));
+      setUser((prev: User | null) => (prev ? { ...prev, role: newRole } : prev));
       try {
         const raw = localStorage.getItem("user");
         const u = raw ? JSON.parse(raw) : null;
@@ -201,6 +201,10 @@ const ProfilePage: React.FC = () => {
         // ignore localStorage parse errors
       }
       setSuccess(`Account type updated to ${newRole}`);
+      const redirectTo = data?.profile?.redirectTo;
+      if (typeof redirectTo === "string" && redirectTo.startsWith("/")) {
+        router.push(redirectTo);
+      }
     } catch (e) {
       setError("Network error. Please try again.");
     }

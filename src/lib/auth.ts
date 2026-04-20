@@ -153,6 +153,140 @@ export const updateUserRole = async (id: number, role: string): Promise<void> =>
   }
 };
 
+function buildDisplayNameForAccount(params: {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+}): string {
+  const f = (params.firstName || "").trim();
+  const l = (params.lastName || "").trim();
+  const full = `${f} ${l}`.trim();
+  if (full) return full;
+  const fallback = String(params.email || "").trim();
+  if (!fallback) return "Unnamed";
+  return fallback.split("@")[0] || fallback;
+}
+
+function buildNearCityFromProfileLocation(location?: string): string | null {
+  const raw = typeof location === "string" ? location.trim() : "";
+  if (!raw) return null;
+  // Keep it simple: store the whole location string as near_city (column is VARCHAR(120))
+  const maxLen = 120;
+  return raw.length > maxLen ? raw.slice(0, maxLen) : raw;
+}
+
+/**
+ * Ensure a manager profile row exists for the given user.
+ * Idempotent: if already exists, returns existing manager id.
+ */
+export const ensureManagerForUser = async (userId: number): Promise<number> => {
+  const client = await pool.connect();
+  try {
+    const existing = await client.query<{ id: number }>(
+      "SELECT id FROM managers WHERE user_id = $1 LIMIT 1",
+      [userId]
+    );
+    if (existing.rows[0]?.id) return Number(existing.rows[0].id);
+
+    const user = await findUserById(userId);
+    if (!user) throw new Error("User not found");
+    const profile = await getUserProfile(userId);
+
+    const name = buildDisplayNameForAccount({
+      email: user.email,
+      firstName: profile?.first_name,
+      lastName: profile?.last_name,
+    });
+    const nearCity = buildNearCityFromProfileLocation(profile?.location);
+
+    const created = await client.query<{ id: number }>(
+      `INSERT INTO managers (user_id, name, status, near_city, is_given_set, location_by)
+       VALUES ($1, $2, 'active', $3, $4, $5)
+       RETURNING id`,
+      [userId, name, nearCity, false, false]
+    );
+    const managerId = Number(created.rows[0].id);
+
+    // Auto-link default function based on profiles.function (best-effort)
+    const desiredFunction = (profile?.function || "").trim();
+    if (desiredFunction) {
+      const func = await client.query<{ id: number }>(
+        `SELECT id FROM functions WHERE name ILIKE $1 ORDER BY id ASC LIMIT 1`,
+        [desiredFunction]
+      );
+      const functionId = func.rows[0]?.id;
+      if (functionId) {
+        await client.query(
+          `INSERT INTO manager_functions (manager_id, function_id)
+           VALUES ($1, $2)
+           ON CONFLICT DO NOTHING`,
+          [managerId, functionId]
+        );
+      }
+    }
+
+    return managerId;
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * Ensure a provider profile row exists for the given user.
+ * Idempotent: if already exists, returns existing provider id.
+ */
+export const ensureProviderForUser = async (userId: number): Promise<number> => {
+  const client = await pool.connect();
+  try {
+    const existing = await client.query<{ id: number }>(
+      "SELECT id FROM providers WHERE user_id = $1 LIMIT 1",
+      [userId]
+    );
+    if (existing.rows[0]?.id) return Number(existing.rows[0].id);
+
+    const user = await findUserById(userId);
+    if (!user) throw new Error("User not found");
+    const profile = await getUserProfile(userId);
+
+    const name = buildDisplayNameForAccount({
+      email: user.email,
+      firstName: profile?.first_name,
+      lastName: profile?.last_name,
+    });
+    const nearCity = buildNearCityFromProfileLocation(profile?.location);
+
+    const created = await client.query<{ id: number }>(
+      `INSERT INTO providers (user_id, name, status, near_city, is_applicable, location_by)
+       VALUES ($1, $2, 'active', $3, $4, $5)
+       RETURNING id`,
+      [userId, name, nearCity, true, false]
+    );
+    const providerId = Number(created.rows[0].id);
+
+    // Auto-link default function based on profiles.function (best-effort)
+    const desiredFunction = (profile?.function || "").trim();
+    if (desiredFunction) {
+      const func = await client.query<{ id: number }>(
+        `SELECT id FROM functions WHERE name ILIKE $1 ORDER BY id ASC LIMIT 1`,
+        [desiredFunction]
+      );
+      const functionId = func.rows[0]?.id;
+      if (functionId) {
+        await client.query(
+          `INSERT INTO provider_functions (provider_id, function_id)
+           VALUES ($1, $2)
+           ON CONFLICT DO NOTHING`,
+          [providerId, functionId]
+        );
+      }
+    }
+
+    return providerId;
+  } finally {
+    client.release();
+  }
+};
+
 export const updateUserPassword = async (id: number, newPassword: string): Promise<void> => {
   const client = await pool.connect();
 

@@ -1,5 +1,5 @@
 import type { NextApiResponse } from 'next';
-import { AuthenticatedRequest, requireAuth, updateUserRole } from '@/lib/auth';
+import { AuthenticatedRequest, ensureManagerForUser, ensureProviderForUser, requireAuth, updateUserRole } from '@/lib/auth';
 
 interface ChangeRoleRequest {
   role: string;
@@ -37,9 +37,20 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     // Self-service: change own account type
     await updateUserRole(user.id, role);
 
-    res.status(200).json({
+    // Create/init corresponding profile record when switching type
+    let createdProfile: { type: 'manager' | 'provider'; id: number; redirectTo: string } | null = null;
+    if (role === 'manager') {
+      const id = await ensureManagerForUser(user.id);
+      createdProfile = { type: 'manager', id, redirectTo: '/manager-profile' };
+    } else if (role === 'provider') {
+      const id = await ensureProviderForUser(user.id);
+      createdProfile = { type: 'provider', id, redirectTo: '/provider-profile' };
+    }
+
+    return res.status(200).json({
       message: 'Role updated successfully',
       newRole: role,
+      profile: createdProfile,
     });
   } catch (error) {
     console.error('Change role error:', error);
