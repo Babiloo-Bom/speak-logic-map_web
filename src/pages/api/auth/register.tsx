@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {createUser, generateRandomToken, createVerificationToken, createOrUpdateProfile} from '@/lib/auth';
+import {createUser, generateRandomCode, generateRandomToken, createVerificationToken, createOrUpdateProfile} from '@/lib/auth';
 import emailService from '@/lib/email';
 
 interface RegisterRequest {
@@ -36,13 +36,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Create user
     const user = await createUser(email.toLowerCase(), password);
 
-    // Generate verification token
+    // Link token (web) + OTP code (mobile)
     const verificationToken = generateRandomToken();
+    const verificationCode = generateRandomCode();
     await createVerificationToken(user.id, verificationToken, 'email_verification');
+    await createVerificationToken(user.id, verificationCode, 'email_verification_code');
 
-    // Send verification email
+    // Send verification email (link + code)
     try {
-      await emailService.sendVerificationEmail(email, verificationToken);
+      await emailService.sendVerificationEmail(email, verificationToken, verificationCode);
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError);
       // Don't fail registration if email fails

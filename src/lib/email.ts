@@ -39,8 +39,16 @@ class EmailService {
     }
   }
 
-  async sendVerificationEmail(email: string, token: string): Promise<void> {
+  async sendVerificationEmail(email: string, token: string, code?: string): Promise<void> {
     const verificationUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/verify?token=${token}`;
+    const codeSection = code
+      ? `
+            <div class="code-section">
+              <p style="margin: 0 0 8px; color: #8E8E93;">Or enter this verification code in the app:</p>
+              <div class="verification-code">${code}</div>
+            </div>
+      `
+      : '';
 
     const html = `
       <!DOCTYPE html>
@@ -147,7 +155,7 @@ class EmailService {
             </p>
 
             <a href="${verificationUrl}" class="button">Verify Email Address</a>
-
+            ${codeSection}
             <div class="security-note">
               <strong>Security Notice:</strong> If you didn't create an account with Function Provider, please ignore this email.
             </div>

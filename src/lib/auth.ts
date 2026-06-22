@@ -506,12 +506,22 @@ export const removeCodeUserToken = async (user_id: number): Promise<number | nul
 
     if (result.rows[0]) {
       // Delete the token after successful validation
-      await client.query("DELETE FROM user_tokens WHERE user_id = $1", [user_id]);
+      await client.query("DELETE FROM user_tokens WHERE user_id = $1 AND token_type = $2", [user_id, "verify_password"]);
 
       return result.rows[0].user_id;
     }
 
     return null;
+  } finally {
+    client.release();
+  }
+};
+
+export const removeUserTokensByType = async (userId: number, tokenType: string): Promise<void> => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("DELETE FROM user_tokens WHERE user_id = $1 AND token_type = $2", [userId, tokenType]);
   } finally {
     client.release();
   }

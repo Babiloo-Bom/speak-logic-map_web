@@ -57,9 +57,7 @@ const VerifyEmailForm: React.FC = () => {
     setResendLoading(true);
 
     try {
-      // For this demo, we'll use the forgot password endpoint
-      // In a real app, you'd have a separate resend verification endpoint
-      const response = await fetch('/api/auth/forgot-password', {
+      const response = await fetch('/api/auth/resend-verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
