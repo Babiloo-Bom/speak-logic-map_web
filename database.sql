@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 CREATE TABLE IF NOT EXISTS user_tokens (
   token VARCHAR(512) PRIMARY KEY,
   user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
-  token_type VARCHAR(20),  -- email_verify, password_reset, verify_password
+  token_type VARCHAR(20),  -- email_verification, email_verify_code, password_reset, verify_password
   expires_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Account cannot be verified" });
     }
 
-    const userId = await validateVerificationToken(String(code).trim(), "email_verification_code");
+    const userId = await validateVerificationToken(String(code).trim(), "email_verify_code");
     if (!userId || userId !== user.id) {
       return res.status(400).json({ error: "Invalid or expired code" });
     }

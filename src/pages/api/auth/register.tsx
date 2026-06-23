@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {createUser, generateRandomCode, generateRandomToken, createVerificationToken, createOrUpdateProfile} from '@/lib/auth';
+import {createUser, findUserByEmail, generateRandomCode, generateRandomToken, createVerificationToken, createOrUpdateProfile} from '@/lib/auth';
 import emailService from '@/lib/email';
 
 interface RegisterRequest {
@@ -34,13 +34,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Create user
-    const user = await createUser(email.toLowerCase(), password);
+    const normalizedEmail = email.toLowerCase().trim();
+    const existingUser = await findUserByEmail(normalizedEmail);
+    if (existingUser) {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
+
+    const user = await createUser(normalizedEmail, password);
 
     // Link token (web) + OTP code (mobile)
     const verificationToken = generateRandomToken();
     const verificationCode = generateRandomCode();
     await createVerificationToken(user.id, verificationToken, 'email_verification');
-    await createVerificationToken(user.id, verificationCode, 'email_verification_code');
+    await createVerificationToken(user.id, verificationCode, 'email_verify_code');
 
     // Send verification email (link + code)
     try {

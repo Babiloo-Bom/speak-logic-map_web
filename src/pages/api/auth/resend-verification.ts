@@ -35,12 +35,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     await removeUserTokensByType(user.id, "email_verification");
-    await removeUserTokensByType(user.id, "email_verification_code");
+    await removeUserTokensByType(user.id, "email_verify_code");
 
     const verificationToken = generateRandomToken();
     const verificationCode = generateRandomCode();
     await createVerificationToken(user.id, verificationToken, "email_verification");
-    await createVerificationToken(user.id, verificationCode, "email_verification_code");
+    await createVerificationToken(user.id, verificationCode, "email_verify_code");
 
     try {
       await emailService.sendVerificationEmail(user.email, verificationToken, verificationCode);

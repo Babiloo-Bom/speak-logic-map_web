@@ -51,7 +51,7 @@ export const initDatabase = async () => {
       CREATE TABLE IF NOT EXISTS user_tokens (
         token VARCHAR(512) PRIMARY KEY,
         user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
-        token_type VARCHAR(20),
+        token_type VARCHAR(32),
         expires_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
